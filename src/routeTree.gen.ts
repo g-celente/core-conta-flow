@@ -12,10 +12,27 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AlcadasRouteImport } from './routes/alcadas'
 import { Route as AprovacoesRouteImport } from './routes/aprovacoes'
+import { Route as AuditoriaRouteImport } from './routes/auditoria'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as BaixaPagamentoRouteImport } from './routes/baixa-pagamento'
 import { Route as CentrosDeCustoRouteImport } from './routes/centros-de-custo'
+import { Route as ComissoesRouteImport } from './routes/comissoes'
 import { Route as ConciliacaoRouteImport } from './routes/conciliacao'
+import { Route as ConfiguracoesRouteImport } from './routes/configuracoes'
+import { Route as ContasAPagarRouteImport } from './routes/contas-a-pagar'
+import { Route as ContasAReceberRouteImport } from './routes/contas-a-receber'
 import { Route as ExportacoesRouteImport } from './routes/exportacoes'
 import { Route as ImportarExtratoRouteImport } from './routes/importar-extrato'
+import { Route as NotificacoesRouteImport } from './routes/notificacoes'
+import { Route as OnboardingRouteImport } from './routes/onboarding'
+import { Route as ParceirosRouteImport } from './routes/parceiros'
+import { Route as PlanoDeContasRouteImport } from './routes/plano-de-contas'
+import { Route as RateioRouteImport } from './routes/rateio'
+import { Route as RelatoriosRouteImport } from './routes/relatorios'
+import { Route as InstanciacaoIndexRouteImport } from './routes/instanciacao/index'
+import { Route as InstanciacaoResumoRouteImport } from './routes/instanciacao/resumo'
+import { Route as IntegracoesIndexRouteImport } from './routes/integracoes/index'
+import { Route as IntegracoesAdaptadorRouteImport } from './routes/integracoes/adaptador'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -32,14 +49,49 @@ const AprovacoesRoute = AprovacoesRouteImport.update({
   path: '/aprovacoes',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuditoriaRoute = AuditoriaRouteImport.update({
+  id: '/auditoria',
+  path: '/auditoria',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BaixaPagamentoRoute = BaixaPagamentoRouteImport.update({
+  id: '/baixa-pagamento',
+  path: '/baixa-pagamento',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CentrosDeCustoRoute = CentrosDeCustoRouteImport.update({
   id: '/centros-de-custo',
   path: '/centros-de-custo',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ComissoesRoute = ComissoesRouteImport.update({
+  id: '/comissoes',
+  path: '/comissoes',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ConciliacaoRoute = ConciliacaoRouteImport.update({
   id: '/conciliacao',
   path: '/conciliacao',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConfiguracoesRoute = ConfiguracoesRouteImport.update({
+  id: '/configuracoes',
+  path: '/configuracoes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContasAPagarRoute = ContasAPagarRouteImport.update({
+  id: '/contas-a-pagar',
+  path: '/contas-a-pagar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContasAReceberRoute = ContasAReceberRouteImport.update({
+  id: '/contas-a-receber',
+  path: '/contas-a-receber',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ExportacoesRoute = ExportacoesRouteImport.update({
@@ -52,34 +104,135 @@ const ImportarExtratoRoute = ImportarExtratoRouteImport.update({
   path: '/importar-extrato',
   getParentRoute: () => rootRouteImport,
 } as any)
+const NotificacoesRoute = NotificacoesRouteImport.update({
+  id: '/notificacoes',
+  path: '/notificacoes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OnboardingRoute = OnboardingRouteImport.update({
+  id: '/onboarding',
+  path: '/onboarding',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ParceirosRoute = ParceirosRouteImport.update({
+  id: '/parceiros',
+  path: '/parceiros',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PlanoDeContasRoute = PlanoDeContasRouteImport.update({
+  id: '/plano-de-contas',
+  path: '/plano-de-contas',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RateioRoute = RateioRouteImport.update({
+  id: '/rateio',
+  path: '/rateio',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RelatoriosRoute = RelatoriosRouteImport.update({
+  id: '/relatorios',
+  path: '/relatorios',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InstanciacaoIndexRoute = InstanciacaoIndexRouteImport.update({
+  id: '/instanciacao/',
+  path: '/instanciacao/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InstanciacaoResumoRoute = InstanciacaoResumoRouteImport.update({
+  id: '/instanciacao/resumo',
+  path: '/instanciacao/resumo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const IntegracoesIndexRoute = IntegracoesIndexRouteImport.update({
+  id: '/integracoes/',
+  path: '/integracoes/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const IntegracoesAdaptadorRoute = IntegracoesAdaptadorRouteImport.update({
+  id: '/integracoes/adaptador',
+  path: '/integracoes/adaptador',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/alcadas': typeof AlcadasRoute
   '/aprovacoes': typeof AprovacoesRoute
+  '/auditoria': typeof AuditoriaRoute
+  '/auth': typeof AuthRoute
+  '/baixa-pagamento': typeof BaixaPagamentoRoute
   '/centros-de-custo': typeof CentrosDeCustoRoute
+  '/comissoes': typeof ComissoesRoute
   '/conciliacao': typeof ConciliacaoRoute
+  '/configuracoes': typeof ConfiguracoesRoute
+  '/contas-a-pagar': typeof ContasAPagarRoute
+  '/contas-a-receber': typeof ContasAReceberRoute
   '/exportacoes': typeof ExportacoesRoute
   '/importar-extrato': typeof ImportarExtratoRoute
+  '/notificacoes': typeof NotificacoesRoute
+  '/onboarding': typeof OnboardingRoute
+  '/parceiros': typeof ParceirosRoute
+  '/plano-de-contas': typeof PlanoDeContasRoute
+  '/rateio': typeof RateioRoute
+  '/relatorios': typeof RelatoriosRoute
+  '/instanciacao/resumo': typeof InstanciacaoResumoRoute
+  '/integracoes/adaptador': typeof IntegracoesAdaptadorRoute
+  '/instanciacao/': typeof InstanciacaoIndexRoute
+  '/integracoes/': typeof IntegracoesIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/alcadas': typeof AlcadasRoute
   '/aprovacoes': typeof AprovacoesRoute
+  '/auditoria': typeof AuditoriaRoute
+  '/auth': typeof AuthRoute
+  '/baixa-pagamento': typeof BaixaPagamentoRoute
   '/centros-de-custo': typeof CentrosDeCustoRoute
+  '/comissoes': typeof ComissoesRoute
   '/conciliacao': typeof ConciliacaoRoute
+  '/configuracoes': typeof ConfiguracoesRoute
+  '/contas-a-pagar': typeof ContasAPagarRoute
+  '/contas-a-receber': typeof ContasAReceberRoute
   '/exportacoes': typeof ExportacoesRoute
   '/importar-extrato': typeof ImportarExtratoRoute
+  '/notificacoes': typeof NotificacoesRoute
+  '/onboarding': typeof OnboardingRoute
+  '/parceiros': typeof ParceirosRoute
+  '/plano-de-contas': typeof PlanoDeContasRoute
+  '/rateio': typeof RateioRoute
+  '/relatorios': typeof RelatoriosRoute
+  '/instanciacao/resumo': typeof InstanciacaoResumoRoute
+  '/integracoes/adaptador': typeof IntegracoesAdaptadorRoute
+  '/instanciacao': typeof InstanciacaoIndexRoute
+  '/integracoes': typeof IntegracoesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/alcadas': typeof AlcadasRoute
   '/aprovacoes': typeof AprovacoesRoute
+  '/auditoria': typeof AuditoriaRoute
+  '/auth': typeof AuthRoute
+  '/baixa-pagamento': typeof BaixaPagamentoRoute
   '/centros-de-custo': typeof CentrosDeCustoRoute
+  '/comissoes': typeof ComissoesRoute
   '/conciliacao': typeof ConciliacaoRoute
+  '/configuracoes': typeof ConfiguracoesRoute
+  '/contas-a-pagar': typeof ContasAPagarRoute
+  '/contas-a-receber': typeof ContasAReceberRoute
   '/exportacoes': typeof ExportacoesRoute
   '/importar-extrato': typeof ImportarExtratoRoute
+  '/notificacoes': typeof NotificacoesRoute
+  '/onboarding': typeof OnboardingRoute
+  '/parceiros': typeof ParceirosRoute
+  '/plano-de-contas': typeof PlanoDeContasRoute
+  '/rateio': typeof RateioRoute
+  '/relatorios': typeof RelatoriosRoute
+  '/instanciacao/resumo': typeof InstanciacaoResumoRoute
+  '/integracoes/adaptador': typeof IntegracoesAdaptadorRoute
+  '/instanciacao/': typeof InstanciacaoIndexRoute
+  '/integracoes/': typeof IntegracoesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -87,38 +240,106 @@ export interface FileRouteTypes {
     | '/'
     | '/alcadas'
     | '/aprovacoes'
+    | '/auditoria'
+    | '/auth'
+    | '/baixa-pagamento'
     | '/centros-de-custo'
+    | '/comissoes'
     | '/conciliacao'
+    | '/configuracoes'
+    | '/contas-a-pagar'
+    | '/contas-a-receber'
     | '/exportacoes'
     | '/importar-extrato'
+    | '/notificacoes'
+    | '/onboarding'
+    | '/parceiros'
+    | '/plano-de-contas'
+    | '/rateio'
+    | '/relatorios'
+    | '/instanciacao/resumo'
+    | '/integracoes/adaptador'
+    | '/instanciacao/'
+    | '/integracoes/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/alcadas'
     | '/aprovacoes'
+    | '/auditoria'
+    | '/auth'
+    | '/baixa-pagamento'
     | '/centros-de-custo'
+    | '/comissoes'
     | '/conciliacao'
+    | '/configuracoes'
+    | '/contas-a-pagar'
+    | '/contas-a-receber'
     | '/exportacoes'
     | '/importar-extrato'
+    | '/notificacoes'
+    | '/onboarding'
+    | '/parceiros'
+    | '/plano-de-contas'
+    | '/rateio'
+    | '/relatorios'
+    | '/instanciacao/resumo'
+    | '/integracoes/adaptador'
+    | '/instanciacao'
+    | '/integracoes'
   id:
     | '__root__'
     | '/'
     | '/alcadas'
     | '/aprovacoes'
+    | '/auditoria'
+    | '/auth'
+    | '/baixa-pagamento'
     | '/centros-de-custo'
+    | '/comissoes'
     | '/conciliacao'
+    | '/configuracoes'
+    | '/contas-a-pagar'
+    | '/contas-a-receber'
     | '/exportacoes'
     | '/importar-extrato'
+    | '/notificacoes'
+    | '/onboarding'
+    | '/parceiros'
+    | '/plano-de-contas'
+    | '/rateio'
+    | '/relatorios'
+    | '/instanciacao/resumo'
+    | '/integracoes/adaptador'
+    | '/instanciacao/'
+    | '/integracoes/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AlcadasRoute: typeof AlcadasRoute
   AprovacoesRoute: typeof AprovacoesRoute
+  AuditoriaRoute: typeof AuditoriaRoute
+  AuthRoute: typeof AuthRoute
+  BaixaPagamentoRoute: typeof BaixaPagamentoRoute
   CentrosDeCustoRoute: typeof CentrosDeCustoRoute
+  ComissoesRoute: typeof ComissoesRoute
   ConciliacaoRoute: typeof ConciliacaoRoute
+  ConfiguracoesRoute: typeof ConfiguracoesRoute
+  ContasAPagarRoute: typeof ContasAPagarRoute
+  ContasAReceberRoute: typeof ContasAReceberRoute
   ExportacoesRoute: typeof ExportacoesRoute
   ImportarExtratoRoute: typeof ImportarExtratoRoute
+  NotificacoesRoute: typeof NotificacoesRoute
+  OnboardingRoute: typeof OnboardingRoute
+  ParceirosRoute: typeof ParceirosRoute
+  PlanoDeContasRoute: typeof PlanoDeContasRoute
+  RateioRoute: typeof RateioRoute
+  RelatoriosRoute: typeof RelatoriosRoute
+  InstanciacaoResumoRoute: typeof InstanciacaoResumoRoute
+  IntegracoesAdaptadorRoute: typeof IntegracoesAdaptadorRoute
+  InstanciacaoIndexRoute: typeof InstanciacaoIndexRoute
+  IntegracoesIndexRoute: typeof IntegracoesIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -144,6 +365,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AprovacoesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/auditoria': {
+      id: '/auditoria'
+      path: '/auditoria'
+      fullPath: '/auditoria'
+      preLoaderRoute: typeof AuditoriaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/baixa-pagamento': {
+      id: '/baixa-pagamento'
+      path: '/baixa-pagamento'
+      fullPath: '/baixa-pagamento'
+      preLoaderRoute: typeof BaixaPagamentoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/centros-de-custo': {
       id: '/centros-de-custo'
       path: '/centros-de-custo'
@@ -151,11 +393,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CentrosDeCustoRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/comissoes': {
+      id: '/comissoes'
+      path: '/comissoes'
+      fullPath: '/comissoes'
+      preLoaderRoute: typeof ComissoesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/conciliacao': {
       id: '/conciliacao'
       path: '/conciliacao'
       fullPath: '/conciliacao'
       preLoaderRoute: typeof ConciliacaoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/configuracoes': {
+      id: '/configuracoes'
+      path: '/configuracoes'
+      fullPath: '/configuracoes'
+      preLoaderRoute: typeof ConfiguracoesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contas-a-pagar': {
+      id: '/contas-a-pagar'
+      path: '/contas-a-pagar'
+      fullPath: '/contas-a-pagar'
+      preLoaderRoute: typeof ContasAPagarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contas-a-receber': {
+      id: '/contas-a-receber'
+      path: '/contas-a-receber'
+      fullPath: '/contas-a-receber'
+      preLoaderRoute: typeof ContasAReceberRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/exportacoes': {
@@ -172,6 +442,76 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ImportarExtratoRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/notificacoes': {
+      id: '/notificacoes'
+      path: '/notificacoes'
+      fullPath: '/notificacoes'
+      preLoaderRoute: typeof NotificacoesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/onboarding': {
+      id: '/onboarding'
+      path: '/onboarding'
+      fullPath: '/onboarding'
+      preLoaderRoute: typeof OnboardingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/parceiros': {
+      id: '/parceiros'
+      path: '/parceiros'
+      fullPath: '/parceiros'
+      preLoaderRoute: typeof ParceirosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/plano-de-contas': {
+      id: '/plano-de-contas'
+      path: '/plano-de-contas'
+      fullPath: '/plano-de-contas'
+      preLoaderRoute: typeof PlanoDeContasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/rateio': {
+      id: '/rateio'
+      path: '/rateio'
+      fullPath: '/rateio'
+      preLoaderRoute: typeof RateioRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/relatorios': {
+      id: '/relatorios'
+      path: '/relatorios'
+      fullPath: '/relatorios'
+      preLoaderRoute: typeof RelatoriosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/instanciacao/': {
+      id: '/instanciacao/'
+      path: '/instanciacao'
+      fullPath: '/instanciacao/'
+      preLoaderRoute: typeof InstanciacaoIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/instanciacao/resumo': {
+      id: '/instanciacao/resumo'
+      path: '/instanciacao/resumo'
+      fullPath: '/instanciacao/resumo'
+      preLoaderRoute: typeof InstanciacaoResumoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/integracoes/': {
+      id: '/integracoes/'
+      path: '/integracoes'
+      fullPath: '/integracoes/'
+      preLoaderRoute: typeof IntegracoesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/integracoes/adaptador': {
+      id: '/integracoes/adaptador'
+      path: '/integracoes/adaptador'
+      fullPath: '/integracoes/adaptador'
+      preLoaderRoute: typeof IntegracoesAdaptadorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -179,10 +519,27 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AlcadasRoute: AlcadasRoute,
   AprovacoesRoute: AprovacoesRoute,
+  AuditoriaRoute: AuditoriaRoute,
+  AuthRoute: AuthRoute,
+  BaixaPagamentoRoute: BaixaPagamentoRoute,
   CentrosDeCustoRoute: CentrosDeCustoRoute,
+  ComissoesRoute: ComissoesRoute,
   ConciliacaoRoute: ConciliacaoRoute,
+  ConfiguracoesRoute: ConfiguracoesRoute,
+  ContasAPagarRoute: ContasAPagarRoute,
+  ContasAReceberRoute: ContasAReceberRoute,
   ExportacoesRoute: ExportacoesRoute,
   ImportarExtratoRoute: ImportarExtratoRoute,
+  NotificacoesRoute: NotificacoesRoute,
+  OnboardingRoute: OnboardingRoute,
+  ParceirosRoute: ParceirosRoute,
+  PlanoDeContasRoute: PlanoDeContasRoute,
+  RateioRoute: RateioRoute,
+  RelatoriosRoute: RelatoriosRoute,
+  InstanciacaoResumoRoute: InstanciacaoResumoRoute,
+  IntegracoesAdaptadorRoute: IntegracoesAdaptadorRoute,
+  InstanciacaoIndexRoute: InstanciacaoIndexRoute,
+  IntegracoesIndexRoute: IntegracoesIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
