@@ -1,182 +1,256 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { Download } from "lucide-react";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/app/PageHeader";
 import { StatusBadge } from "@/components/app/StatusBadge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { useFeatures } from "@/components/app/FeaturesContext";
+import { usePerfil } from "@/components/app/PerfilContext";
+import { useAuditoria } from "@/components/app/AuditoriaContext";
+import { useEmpresa } from "@/components/app/EmpresaContext";
 
 export const Route = createFileRoute("/exportacoes")({
   head: () => ({
     meta: [
-      { title: "Exportar dados e relatórios — FinCore" },
+      { title: "Exportar dados — FinCore ERP" },
       {
         name: "description",
-        content: "Gere exportações em PDF, XLSX ou CSV no layout do sistema ou da contabilidade.",
+        content:
+          "Gere arquivos de títulos, extratos e balancetes nos formatos aceitos pela contabilidade.",
       },
-      { property: "og:title", content: "Exportar dados e relatórios — FinCore" },
-      { property: "og:description", content: "Exportações contábeis com histórico de downloads." },
+      { property: "og:title", content: "Exportar dados — FinCore ERP" },
+      { property: "og:description", content: "Fila de exportações com histórico da sessão." },
     ],
   }),
   component: Exportacoes,
 });
 
-type Exp = {
+type Pacote = {
   id: string;
-  periodo: string;
-  formato: string;
-  layout: string;
-  gerado: string;
-  status: "Concluída" | "Processando";
-  arquivo: string;
+  nome: string;
+  descricao: string;
+  icone: string;
+  formatos: string[];
+  requer?: "conciliacao" | "centro_custo" | "portal_contador" | "multiempresa";
 };
 
-const historicoInicial: Exp[] = [
-  { id: "e1", periodo: "01/05/2026 a 31/05/2026", formato: "XLSX", layout: "Escritório contábil", gerado: "01/06/2026 08:42", status: "Concluída", arquivo: "fincore-maio-2026.xlsx" },
-  { id: "e2", periodo: "01/04/2026 a 30/04/2026", formato: "PDF", layout: "Padrão do sistema", gerado: "02/05/2026 09:15", status: "Concluída", arquivo: "fincore-abril-2026.pdf" },
-  { id: "e3", periodo: "01/01/2026 a 31/03/2026", formato: "CSV", layout: "Escritório contábil", gerado: "05/04/2026 17:03", status: "Concluída", arquivo: "fincore-1tri-2026.csv" },
+const PACOTES: Pacote[] = [
+  {
+    id: "titulos",
+    nome: "Títulos a pagar e a receber",
+    descricao: "Todos os títulos do período com status, parceiro, categoria e valores.",
+    icone: "receipt_long",
+    formatos: ["CSV", "XLSX"],
+  },
+  {
+    id: "extrato",
+    nome: "Extrato conciliado",
+    descricao: "Linhas do extrato com o título conciliado correspondente.",
+    icone: "account_balance",
+    formatos: ["CSV", "OFX"],
+    requer: "conciliacao",
+  },
+  {
+    id: "rateio",
+    nome: "Rateio por centro de custo",
+    descricao: "Distribuição do valor de cada título entre os centros de custo.",
+    icone: "call_split",
+    formatos: ["CSV", "XLSX"],
+    requer: "centro_custo",
+  },
+  {
+    id: "balancete",
+    nome: "Balancete contábil",
+    descricao: "Saldos por conta do plano de contas no padrão exigido pela contabilidade.",
+    icone: "menu_book",
+    formatos: ["TXT", "XLSX"],
+    requer: "portal_contador",
+  },
+  {
+    id: "consolidado",
+    nome: "Consolidado do grupo",
+    descricao: "Somatório de todas as empresas sob a mesma conta raiz.",
+    icone: "domain",
+    formatos: ["XLSX"],
+    requer: "multiempresa",
+  },
+  {
+    id: "auditoria",
+    nome: "Trilha de auditoria",
+    descricao: "Log de operações da sessão com usuário, data e detalhe.",
+    icone: "history_edu",
+    formatos: ["CSV"],
+  },
 ];
 
-function Exportacoes() {
-  const [historico, setHistorico] = useState(historicoInicial);
-  const [inicio, setInicio] = useState("2026-06-01");
-  const [fim, setFim] = useState("2026-06-30");
-  const [formato, setFormato] = useState("XLSX");
-  const [layout, setLayout] = useState("Padrão do sistema");
+type Job = { id: string; pacote: string; formato: string; hora: string; status: "Concluído" };
 
-  const gerar = () => {
-    const fmt = (d: string) => d.split("-").reverse().join("/");
-    setHistorico((h) => [
-      {
-        id: `e${Date.now()}`,
-        periodo: `${fmt(inicio)} a ${fmt(fim)}`,
-        formato,
-        layout,
-        gerado: "03/09/2026 12:39",
-        status: "Processando",
-        arquivo: `fincore-export.${formato.toLowerCase()}`,
-      },
-      ...h,
-    ]);
-    toast.success("Exportação enfileirada. Você será notificado ao concluir.");
+function Exportacoes() {
+  const { has, config } = useFeatures();
+  const { perfil } = usePerfil();
+  const { registrar } = useAuditoria();
+  const { nomeAtual, consolidado } = useEmpresa();
+
+  const [jobs, setJobs] = useState<Job[]>([]);
+  const [processando, setProcessando] = useState<string | null>(null);
+
+  const disponiveis = PACOTES.filter((p) => (p.requer ? has(p.requer) : true));
+  const bloqueados = PACOTES.filter((p) => p.requer && !has(p.requer));
+
+  const exportar = (p: Pacote, formato: string) => {
+    setProcessando(p.id);
+    registrar({
+      tipo: "crud",
+      entidade: "Exportação",
+      operacao: "Gerar arquivo",
+      detalhe: `${p.nome} em ${formato}`,
+      usuario: perfil.usuario,
+      empresa: nomeAtual,
+    });
+    window.setTimeout(() => {
+      setProcessando(null);
+      setJobs((l) => [
+        {
+          id: `job-${Date.now()}`,
+          pacote: p.nome,
+          formato,
+          hora: new Date().toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }),
+          status: "Concluído",
+        },
+        ...l,
+      ]);
+      toast.success(`${p.nome} exportado`, {
+        description: `Arquivo ${formato} pronto para download.`,
+      });
+    }, 900);
   };
 
   return (
     <>
       <PageHeader
-        titulo="Exportar dados e relatórios"
-        descricao="Gere arquivos para a contabilidade ou para análise interna."
+        titulo="Exportar dados"
+        descricao={`Escopo: ${consolidado && has("multiempresa") ? "todas as empresas do grupo" : nomeAtual} · perfil de produto ${config.perfilProduto}.`}
+        variabilidade={[
+          {
+            o_que: "O pacote Extrato conciliado exige o módulo de conciliação bancária.",
+            por: "feature conciliacao",
+            pv: "PV6",
+          },
+          {
+            o_que: "O pacote Rateio por centro de custo exige a feature centro_custo.",
+            por: "feature centro_custo",
+            pv: "PV7",
+          },
+          {
+            o_que: "O Balancete contábil no layout da contabilidade exige portal do contador.",
+            por: "feature portal_contador",
+            pv: "PV4",
+          },
+          {
+            o_que:
+              "O Consolidado do grupo exige multiempresa; o formato do extrato segue o adaptador.",
+            por: "features multiempresa e adaptador",
+            pv: "PV7 / PV2",
+          },
+        ]}
+        acoes={
+          <StatusBadge tone="info">
+            {disponiveis.length} de {PACOTES.length} pacotes disponíveis
+          </StatusBadge>
+        }
       />
 
-      <Card className="shadow-card">
-        <CardHeader>
-          <CardTitle className="text-base">Nova exportação</CardTitle>
-        </CardHeader>
-        <CardContent className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          <div className="space-y-1.5">
-            <Label htmlFor="inicio">Data inicial</Label>
-            <Input id="inicio" type="date" value={inicio} onChange={(e) => setInicio(e.target.value)} />
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="fim">Data final</Label>
-            <Input id="fim" type="date" value={fim} onChange={(e) => setFim(e.target.value)} />
-          </div>
-          <div className="space-y-1.5">
-            <Label>Formato</Label>
-            <Select value={formato} onValueChange={setFormato}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="PDF">PDF</SelectItem>
-                <SelectItem value="XLSX">XLSX</SelectItem>
-                <SelectItem value="CSV">CSV</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-1.5">
-            <Label>Layout</Label>
-            <Select value={layout} onValueChange={setLayout}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Padrão do sistema">Padrão do sistema</SelectItem>
-                <SelectItem value="Escritório contábil">Layout do escritório de contabilidade</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="xl:col-span-4">
-            <Button onClick={gerar}>Gerar exportação</Button>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card className="mt-4 shadow-card">
-        <CardHeader>
-          <CardTitle className="text-base">Últimas exportações</CardTitle>
-        </CardHeader>
-        <CardContent className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Período</TableHead>
-                <TableHead>Formato</TableHead>
-                <TableHead>Layout</TableHead>
-                <TableHead>Gerado em</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Arquivo</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {historico.map((h) => (
-                <TableRow key={h.id}>
-                  <TableCell className="num text-sm">{h.periodo}</TableCell>
-                  <TableCell>
-                    <StatusBadge tone="neutral">{h.formato}</StatusBadge>
-                  </TableCell>
-                  <TableCell className="text-sm">{h.layout}</TableCell>
-                  <TableCell className="num text-sm">{h.gerado}</TableCell>
-                  <TableCell>
-                    <StatusBadge tone={h.status === "Concluída" ? "success" : "warning"}>
-                      {h.status}
-                    </StatusBadge>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="gap-1.5"
-                      disabled={h.status !== "Concluída"}
-                      onClick={() => toast.success(`Baixando ${h.arquivo}`)}
-                    >
-                      <Download className="size-4" /> Baixar
-                    </Button>
-                  </TableCell>
-                </TableRow>
+      <div className="grid grid-cols-1 gap-md lg:grid-cols-2 xl:grid-cols-3">
+        {disponiveis.map((p) => (
+          <div
+            key={p.id}
+            className="flex flex-col gap-sm rounded-xl border border-outline-variant bg-surface-container-lowest p-md shadow-sm"
+          >
+            <span className="flex size-10 items-center justify-center rounded-lg bg-primary-container text-on-primary-container">
+              <span className="material-symbols-outlined">{p.icone}</span>
+            </span>
+            <h3 className="font-label-md text-label-md text-primary">{p.nome}</h3>
+            <p className="font-body-sm text-body-sm text-on-surface-variant">{p.descricao}</p>
+            <div className="mt-auto flex flex-wrap gap-2 pt-2">
+              {p.formatos.map((f) => (
+                <button
+                  key={f}
+                  type="button"
+                  disabled={processando === p.id}
+                  onClick={() => exportar(p, f)}
+                  className="flex items-center gap-1.5 rounded-lg border border-outline-variant px-3 py-1.5 font-label-md text-label-md text-primary transition-colors hover:bg-surface-container disabled:opacity-50"
+                >
+                  <span className="material-symbols-outlined text-[16px]">
+                    {processando === p.id ? "progress_activity" : "download"}
+                  </span>
+                  {f}
+                </button>
               ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+            </div>
+            {p.requer ? (
+              <span className="inline-flex w-fit rounded-full bg-secondary/10 px-2 py-0.5 font-label-md text-[10px] text-secondary">
+                requer {p.requer}
+              </span>
+            ) : null}
+          </div>
+        ))}
+
+        {bloqueados.map((p) => (
+          <div
+            key={p.id}
+            className="flex flex-col gap-sm rounded-xl border border-dashed border-outline-variant p-md opacity-60"
+          >
+            <span className="flex size-10 items-center justify-center rounded-lg bg-surface-container text-outline">
+              <span className="material-symbols-outlined">lock</span>
+            </span>
+            <h3 className="font-label-md text-label-md text-on-surface-variant">{p.nome}</h3>
+            <p className="font-body-sm text-body-sm text-on-surface-variant">
+              Não contratado neste tenant — depende da feature{" "}
+              <code className="font-data-mono">{p.requer}</code>.
+            </p>
+          </div>
+        ))}
+      </div>
+
+      {/* Histórico */}
+      <div className="mt-lg overflow-hidden rounded-xl border border-outline-variant bg-surface-container-lowest shadow-sm">
+        <h3 className="border-b border-outline-variant bg-surface px-md py-3 font-headline-sm text-headline-sm text-primary">
+          Exportações desta sessão
+        </h3>
+        {jobs.length === 0 ? (
+          <p className="p-md font-body-md text-body-md text-on-surface-variant">
+            Nenhuma exportação gerada ainda. Escolha um pacote acima.
+          </p>
+        ) : (
+          <table className="w-full border-collapse text-left">
+            <thead className="border-b border-outline-variant bg-surface-container-low">
+              <tr>
+                <th className="w-24 p-3 font-label-md text-label-md text-on-surface-variant">
+                  Hora
+                </th>
+                <th className="p-3 font-label-md text-label-md text-on-surface-variant">Pacote</th>
+                <th className="w-28 p-3 font-label-md text-label-md text-on-surface-variant">
+                  Formato
+                </th>
+                <th className="w-32 p-3 text-right font-label-md text-label-md text-on-surface-variant">
+                  Status
+                </th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-outline-variant font-body-sm text-body-sm">
+              {jobs.map((j) => (
+                <tr key={j.id} className="hover:bg-surface-container-low">
+                  <td className="p-3 font-data-mono text-on-surface-variant">{j.hora}</td>
+                  <td className="p-3 text-on-surface">{j.pacote}</td>
+                  <td className="p-3 font-data-mono text-on-surface-variant">{j.formato}</td>
+                  <td className="p-3 text-right">
+                    <StatusBadge tone="ok">{j.status}</StatusBadge>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
     </>
   );
 }
