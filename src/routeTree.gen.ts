@@ -10,33 +10,53 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ConciliacaoRouteImport } from './routes/conciliacao'
+import { Route as ImportarExtratoRouteImport } from './routes/importar-extrato'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ConciliacaoRoute = ConciliacaoRouteImport.update({
+  id: '/conciliacao',
+  path: '/conciliacao',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ImportarExtratoRoute = ImportarExtratoRouteImport.update({
+  id: '/importar-extrato',
+  path: '/importar-extrato',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/conciliacao': typeof ConciliacaoRoute
+  '/importar-extrato': typeof ImportarExtratoRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/conciliacao': typeof ConciliacaoRoute
+  '/importar-extrato': typeof ImportarExtratoRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/conciliacao': typeof ConciliacaoRoute
+  '/importar-extrato': typeof ImportarExtratoRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/' | '/conciliacao' | '/importar-extrato'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/conciliacao' | '/importar-extrato'
+  id: '__root__' | '/' | '/conciliacao' | '/importar-extrato'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ConciliacaoRoute: typeof ConciliacaoRoute
+  ImportarExtratoRoute: typeof ImportarExtratoRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +68,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/conciliacao': {
+      id: '/conciliacao'
+      path: '/conciliacao'
+      fullPath: '/conciliacao'
+      preLoaderRoute: typeof ConciliacaoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/importar-extrato': {
+      id: '/importar-extrato'
+      path: '/importar-extrato'
+      fullPath: '/importar-extrato'
+      preLoaderRoute: typeof ImportarExtratoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ConciliacaoRoute: ConciliacaoRoute,
+  ImportarExtratoRoute: ImportarExtratoRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
