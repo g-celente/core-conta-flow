@@ -10,7 +10,11 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AlcadasRouteImport } from './routes/alcadas'
+import { Route as AprovacoesRouteImport } from './routes/aprovacoes'
+import { Route as CentrosDeCustoRouteImport } from './routes/centros-de-custo'
 import { Route as ConciliacaoRouteImport } from './routes/conciliacao'
+import { Route as ExportacoesRouteImport } from './routes/exportacoes'
 import { Route as ImportarExtratoRouteImport } from './routes/importar-extrato'
 
 const IndexRoute = IndexRouteImport.update({
@@ -18,9 +22,29 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AlcadasRoute = AlcadasRouteImport.update({
+  id: '/alcadas',
+  path: '/alcadas',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AprovacoesRoute = AprovacoesRouteImport.update({
+  id: '/aprovacoes',
+  path: '/aprovacoes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CentrosDeCustoRoute = CentrosDeCustoRouteImport.update({
+  id: '/centros-de-custo',
+  path: '/centros-de-custo',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ConciliacaoRoute = ConciliacaoRouteImport.update({
   id: '/conciliacao',
   path: '/conciliacao',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ExportacoesRoute = ExportacoesRouteImport.update({
+  id: '/exportacoes',
+  path: '/exportacoes',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ImportarExtratoRoute = ImportarExtratoRouteImport.update({
@@ -31,31 +55,69 @@ const ImportarExtratoRoute = ImportarExtratoRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/alcadas': typeof AlcadasRoute
+  '/aprovacoes': typeof AprovacoesRoute
+  '/centros-de-custo': typeof CentrosDeCustoRoute
   '/conciliacao': typeof ConciliacaoRoute
+  '/exportacoes': typeof ExportacoesRoute
   '/importar-extrato': typeof ImportarExtratoRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/alcadas': typeof AlcadasRoute
+  '/aprovacoes': typeof AprovacoesRoute
+  '/centros-de-custo': typeof CentrosDeCustoRoute
   '/conciliacao': typeof ConciliacaoRoute
+  '/exportacoes': typeof ExportacoesRoute
   '/importar-extrato': typeof ImportarExtratoRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/alcadas': typeof AlcadasRoute
+  '/aprovacoes': typeof AprovacoesRoute
+  '/centros-de-custo': typeof CentrosDeCustoRoute
   '/conciliacao': typeof ConciliacaoRoute
+  '/exportacoes': typeof ExportacoesRoute
   '/importar-extrato': typeof ImportarExtratoRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/conciliacao' | '/importar-extrato'
+  fullPaths:
+    | '/'
+    | '/alcadas'
+    | '/aprovacoes'
+    | '/centros-de-custo'
+    | '/conciliacao'
+    | '/exportacoes'
+    | '/importar-extrato'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/conciliacao' | '/importar-extrato'
-  id: '__root__' | '/' | '/conciliacao' | '/importar-extrato'
+  to:
+    | '/'
+    | '/alcadas'
+    | '/aprovacoes'
+    | '/centros-de-custo'
+    | '/conciliacao'
+    | '/exportacoes'
+    | '/importar-extrato'
+  id:
+    | '__root__'
+    | '/'
+    | '/alcadas'
+    | '/aprovacoes'
+    | '/centros-de-custo'
+    | '/conciliacao'
+    | '/exportacoes'
+    | '/importar-extrato'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AlcadasRoute: typeof AlcadasRoute
+  AprovacoesRoute: typeof AprovacoesRoute
+  CentrosDeCustoRoute: typeof CentrosDeCustoRoute
   ConciliacaoRoute: typeof ConciliacaoRoute
+  ExportacoesRoute: typeof ExportacoesRoute
   ImportarExtratoRoute: typeof ImportarExtratoRoute
 }
 
@@ -68,11 +130,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/alcadas': {
+      id: '/alcadas'
+      path: '/alcadas'
+      fullPath: '/alcadas'
+      preLoaderRoute: typeof AlcadasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/aprovacoes': {
+      id: '/aprovacoes'
+      path: '/aprovacoes'
+      fullPath: '/aprovacoes'
+      preLoaderRoute: typeof AprovacoesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/centros-de-custo': {
+      id: '/centros-de-custo'
+      path: '/centros-de-custo'
+      fullPath: '/centros-de-custo'
+      preLoaderRoute: typeof CentrosDeCustoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/conciliacao': {
       id: '/conciliacao'
       path: '/conciliacao'
       fullPath: '/conciliacao'
       preLoaderRoute: typeof ConciliacaoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/exportacoes': {
+      id: '/exportacoes'
+      path: '/exportacoes'
+      fullPath: '/exportacoes'
+      preLoaderRoute: typeof ExportacoesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/importar-extrato': {
@@ -87,7 +177,11 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AlcadasRoute: AlcadasRoute,
+  AprovacoesRoute: AprovacoesRoute,
+  CentrosDeCustoRoute: CentrosDeCustoRoute,
   ConciliacaoRoute: ConciliacaoRoute,
+  ExportacoesRoute: ExportacoesRoute,
   ImportarExtratoRoute: ImportarExtratoRoute,
 }
 export const routeTree = rootRouteImport
