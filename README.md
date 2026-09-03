@@ -11,7 +11,7 @@ conforme as _features_ contratadas pelo tenant e o perfil de acesso do usuário.
 
 - **Publicado em:** https://core-conta-flow.lovable.app
 - **Stack:** TanStack Start 1.168 + TanStack Router 1.170, React 19, Tailwind CSS 4,
-  shadcn/ui (Radix), lucide-react, Material Symbols Outlined, sonner.
+  shadcn/ui (Radix), lucide-react, sonner.
 
 ---
 
@@ -217,15 +217,16 @@ O módulo de comissões (`/comissoes`) é a **função exclusiva de um cliente**
 
 ### Design system
 
-`src/styles.css` traz os tokens Material 3 do FinCore (cores `primary`/`secondary`/
-`surface-container-*`, escalas `display-lg`/`headline-md`/`label-md`/`body-*`/
-`data-mono`, espaçamentos `xs`/`sm`/`md`/`gutter`/`lg`/`margin`/`xl`), com Inter,
-JetBrains Mono e Material Symbols Outlined.
+O visual é o do **core-conta-flow** (P2): `src/styles.css` define os tokens
+shadcn/ui em oklch (`--primary`, `--sidebar`, `--success`, `--warning`,
+`--destructive`, `--shadow-card`), com **Manrope** para texto e **IBM Plex Mono**
+para números (utilitário `.num`, com `font-variant-numeric: tabular-nums`).
 
-> **Cuidado ao editar `styles.css`:** os tokens de espaçamento nomeados (`--spacing-md`,
-> `--spacing-lg`…, usados por `p-md` e `gap-lg`) sombreiam o namespace de container do
-> Tailwind — sem a correção no fim do arquivo, `max-w-md` valeria 16px em vez de 28rem
-> e os primitivos do shadcn (Dialog, Sheet) colapsariam.
+As telas são montadas com os primitivos do shadcn (`Card`, `Table`, `Button`,
+`Input`, `Select`, `Sheet`, `Dialog`, `Popover`, `Switch`) e ícones do
+**lucide-react**. O shell é a sidebar escura de 256 px com grupos de menu e
+barra de acento no item ativo, e a topbar com seletor de empresa, selo do perfil
+de produto e seletor de perfil de acesso.
 
 ---
 

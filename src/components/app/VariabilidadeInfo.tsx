@@ -1,3 +1,4 @@
+import { Info } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 export type LinhaVariabilidade = {
@@ -25,30 +26,27 @@ export function VariabilidadeInfo({
       <PopoverTrigger asChild>
         <button
           aria-label={`O que varia na tela ${tela}`}
-          className="flex size-7 shrink-0 items-center justify-center rounded-full text-outline transition-colors hover:bg-surface-container hover:text-secondary"
+          className="grid size-7 shrink-0 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
         >
-          <span className="material-symbols-outlined text-[20px]">info</span>
+          <Info className="size-4" />
         </button>
       </PopoverTrigger>
-      <PopoverContent
-        align="start"
-        className="w-[22rem] border-outline-variant bg-surface-container-lowest p-0"
-      >
-        <div className="border-b border-outline-variant bg-surface px-4 py-3">
-          <p className="font-label-md text-label-md text-primary">O que varia nesta tela</p>
-          <p className="mt-0.5 font-body-sm text-body-sm text-on-surface-variant">
+      <PopoverContent align="start" className="w-[22rem] p-0">
+        <div className="border-b border-border bg-muted/40 px-4 py-3">
+          <p className="text-sm font-semibold text-foreground">O que varia nesta tela</p>
+          <p className="mt-0.5 text-xs text-muted-foreground">
             Variabilidade aplicada a <strong>{tela}</strong>.
           </p>
         </div>
-        <ul className="flex flex-col divide-y divide-outline-variant">
+        <ul className="flex flex-col divide-y divide-border">
           {linhas.map((l) => (
-            <li key={l.o_que} className="flex flex-col gap-1 px-4 py-3">
-              <span className="font-body-md text-body-md text-on-surface">{l.o_que}</span>
+            <li key={l.o_que} className="flex flex-col gap-1.5 px-4 py-3">
+              <span className="text-sm text-foreground">{l.o_que}</span>
               <span className="flex flex-wrap items-center gap-2">
-                <span className="rounded bg-surface-container px-1.5 py-0.5 font-data-mono text-[11px] text-on-surface-variant">
+                <span className="num rounded bg-muted px-1.5 py-0.5 text-[0.7rem] text-muted-foreground">
                   {l.por}
                 </span>
-                <span className="rounded-full bg-secondary/10 px-2 py-0.5 font-label-md text-[11px] text-secondary">
+                <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[0.7rem] font-semibold text-primary">
                   {l.pv}
                 </span>
               </span>

@@ -1,22 +1,36 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
+import { Bell, Mail, Save, Send, Smartphone, SmartphoneNfc } from "lucide-react";
 import { PageHeader } from "@/components/app/PageHeader";
 import { StatusBadge } from "@/components/app/StatusBadge";
 import { useFeatures } from "@/components/app/FeaturesContext";
 import { usePerfil } from "@/components/app/PerfilContext";
 import { useAuditoria } from "@/components/app/AuditoriaContext";
 import { useEmpresa } from "@/components/app/EmpresaContext";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 export const Route = createFileRoute("/notificacoes")({
   head: () => ({
     meta: [
-      { title: "Notificações — FinCore ERP" },
+      { title: "Notificações — FinCore" },
       {
         name: "description",
         content: "Preferências de canal e antecedência de aviso de vencimento e aprovação.",
       },
-      { property: "og:title", content: "Notificações — FinCore ERP" },
+      { property: "og:title", content: "Notificações — FinCore" },
       {
         property: "og:description",
         content: "Configure e-mail, in-app e push por tipo de evento.",
@@ -78,10 +92,10 @@ const EVENTOS: Evento[] = [
   },
 ];
 
-const CANAIS: { id: Canal; nome: string; icone: string; requer?: "notificacoes_push" }[] = [
-  { id: "email", nome: "E-mail", icone: "mail" },
-  { id: "inapp", nome: "In-app", icone: "notifications" },
-  { id: "push", nome: "Push", icone: "phone_iphone", requer: "notificacoes_push" },
+const CANAIS: { id: Canal; nome: string; icone: typeof Mail; requer?: "notificacoes_push" }[] = [
+  { id: "email", nome: "E-mail", icone: Mail },
+  { id: "inapp", nome: "In-app", icone: Bell },
+  { id: "push", nome: "Push", icone: Smartphone, requer: "notificacoes_push" },
 ];
 
 function Notificacoes() {
@@ -103,10 +117,7 @@ function Notificacoes() {
   const [resumoDiario, setResumoDiario] = useState(true);
 
   const alternar = (eventoId: string, canal: Canal) =>
-    setPrefs((p) => ({
-      ...p,
-      [eventoId]: { ...p[eventoId]!, [canal]: !p[eventoId]![canal] },
-    }));
+    setPrefs((p) => ({ ...p, [eventoId]: { ...p[eventoId]!, [canal]: !p[eventoId]![canal] } }));
 
   const salvar = () => {
     const ativos = eventos.reduce(
@@ -151,25 +162,20 @@ function Notificacoes() {
           leitura ? (
             <StatusBadge tone="info">Somente leitura</StatusBadge>
           ) : (
-            <button
-              type="button"
-              onClick={salvar}
-              className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 font-label-md text-label-md text-on-primary shadow-sm transition-colors hover:bg-primary-container"
-            >
-              <span className="material-symbols-outlined text-[18px]">save</span>
-              Salvar preferências
-            </button>
+            <Button onClick={salvar} className="gap-1.5">
+              <Save className="size-4" /> Salvar preferências
+            </Button>
           )
         }
       />
 
       {!has("notificacoes_push") ? (
-        <div className="mb-md flex items-start gap-3 rounded-lg border border-outline-variant bg-surface-container p-4">
-          <span className="material-symbols-outlined text-on-surface-variant">mobile_off</span>
-          <p className="font-body-md text-body-md text-on-surface-variant">
+        <div className="mb-4 flex items-start gap-3 rounded-lg border border-border bg-muted/50 p-4">
+          <SmartphoneNfc className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+          <p className="text-sm text-muted-foreground">
             O canal <strong>Push</strong> não está contratado neste tenant (PV5). Ative a feature{" "}
-            <code className="font-data-mono">notificacoes_push</code> em{" "}
-            <Link to="/configuracoes" className="text-secondary underline decoration-dotted">
+            <code className="num">notificacoes_push</code> em{" "}
+            <Link to="/configuracoes" className="text-primary underline decoration-dotted">
               Features do tenant
             </Link>{" "}
             para exibir a coluna.
@@ -177,159 +183,137 @@ function Notificacoes() {
         </div>
       ) : null}
 
-      {/* Matriz evento × canal */}
-      <div className="mb-lg overflow-hidden rounded-xl border border-outline-variant bg-surface-container-lowest shadow-sm">
-        <div className="border-b border-outline-variant bg-surface px-md py-3">
-          <h3 className="font-headline-sm text-headline-sm text-primary">Canais por evento</h3>
-          <p className="mt-1 font-body-sm text-body-sm text-on-surface-variant">
+      <Card className="mb-6 shadow-card">
+        <CardHeader>
+          <CardTitle className="text-base">Canais por evento</CardTitle>
+          <p className="text-sm text-muted-foreground">
             {eventos.length} eventos disponíveis · {canais.length} canais contratados.
           </p>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[36rem] border-collapse text-left">
-            <thead className="border-b border-outline-variant bg-surface-container-low">
-              <tr>
-                <th className="p-3 font-label-md text-label-md text-on-surface-variant">Evento</th>
-                {canais.map((c) => (
-                  <th
-                    key={c.id}
-                    className="w-28 p-3 text-center font-label-md text-label-md text-on-surface-variant"
-                  >
-                    <span className="flex flex-col items-center gap-1">
-                      <span className="material-symbols-outlined text-[18px]">{c.icone}</span>
-                      {c.nome}
-                    </span>
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-outline-variant">
+        </CardHeader>
+        <CardContent className="overflow-x-auto">
+          <Table className="min-w-[36rem]">
+            <TableHeader>
+              <TableRow>
+                <TableHead>Evento</TableHead>
+                {canais.map((c) => {
+                  const Icone = c.icone;
+                  return (
+                    <TableHead key={c.id} className="w-28 text-center">
+                      <span className="flex flex-col items-center gap-1">
+                        <Icone className="size-4" />
+                        {c.nome}
+                      </span>
+                    </TableHead>
+                  );
+                })}
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {eventos.map((e) => (
-                <tr key={e.id} className="hover:bg-surface-container-low">
-                  <td className="p-3">
-                    <span className="flex flex-wrap items-center gap-2 font-label-md text-label-md text-on-surface">
+                <TableRow key={e.id}>
+                  <TableCell>
+                    <span className="flex flex-wrap items-center gap-2 text-sm font-medium">
                       {e.nome}
                       {e.requer ? (
-                        <code className="rounded bg-surface-container px-1.5 py-0.5 font-data-mono text-[10px] text-on-surface-variant">
+                        <code className="num rounded bg-muted px-1.5 py-0.5 text-[0.65rem] text-muted-foreground">
                           {e.requer}
                         </code>
                       ) : null}
                     </span>
-                    <span className="mt-0.5 block font-body-sm text-body-sm text-on-surface-variant">
+                    <span className="mt-0.5 block text-xs text-muted-foreground">
                       {e.descricao}
                     </span>
-                  </td>
+                  </TableCell>
                   {canais.map((c) => (
-                    <td key={c.id} className="p-3 text-center">
-                      <label className="relative inline-flex cursor-pointer items-center">
-                        <input
-                          type="checkbox"
-                          className="peer sr-only"
-                          disabled={leitura}
-                          checked={prefs[e.id]?.[c.id] ?? false}
-                          onChange={() => alternar(e.id, c.id)}
-                        />
-                        <span className="h-6 w-11 rounded-full bg-surface-variant transition-colors after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-outline-variant after:bg-white after:transition-all after:content-[''] peer-checked:bg-secondary peer-checked:after:translate-x-full peer-disabled:opacity-50" />
-                      </label>
-                    </td>
+                    <TableCell key={c.id} className="text-center">
+                      <Switch
+                        disabled={leitura}
+                        checked={prefs[e.id]?.[c.id] ?? false}
+                        onCheckedChange={() => alternar(e.id, c.id)}
+                      />
+                    </TableCell>
                   ))}
-                </tr>
+                </TableRow>
               ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
 
-      {/* Regras de envio */}
-      <div className="grid grid-cols-1 gap-md lg:grid-cols-3">
-        <div className="rounded-xl border border-outline-variant bg-surface-container-lowest p-md shadow-sm">
-          <label
-            htmlFor="n-ant"
-            className="mb-1.5 block font-label-md text-label-md text-on-surface-variant"
-          >
-            Antecedência do aviso de vencimento
-          </label>
-          <div className="flex items-center gap-3">
-            <input
-              id="n-ant"
-              type="range"
-              min={1}
-              max={15}
-              disabled={leitura}
-              value={antecedencia}
-              onChange={(e) => setAntecedencia(Number(e.target.value))}
-              className="flex-1 accent-[var(--color-secondary)]"
-            />
-            <span className="w-20 shrink-0 font-data-mono text-data-mono text-on-surface">
-              {antecedencia} dia{antecedencia === 1 ? "" : "s"}
-            </span>
-          </div>
-          <p className="mt-2 font-body-sm text-body-sm text-on-surface-variant">
-            Títulos que vencem em até {antecedencia} dia{antecedencia === 1 ? "" : "s"} geram aviso.
-          </p>
-        </div>
-
-        <div className="rounded-xl border border-outline-variant bg-surface-container-lowest p-md shadow-sm">
-          <label
-            htmlFor="n-hora"
-            className="mb-1.5 block font-label-md text-label-md text-on-surface-variant"
-          >
-            Horário de envio
-          </label>
-          <input
-            id="n-hora"
-            type="time"
-            disabled={leitura}
-            value={horario}
-            onChange={(e) => setHorario(e.target.value)}
-            className="w-full rounded-lg border border-outline-variant bg-surface px-3 py-2 font-data-mono text-data-mono focus:border-secondary focus:outline-none focus:ring-1 focus:ring-secondary disabled:opacity-60"
-          />
-          <p className="mt-2 font-body-sm text-body-sm text-on-surface-variant">
-            Horário de Brasília. Avisos críticos são enviados imediatamente.
-          </p>
-        </div>
-
-        <div className="rounded-xl border border-outline-variant bg-surface-container-lowest p-md shadow-sm">
-          <p className="mb-1.5 font-label-md text-label-md text-on-surface-variant">
-            Resumo diário consolidado
-          </p>
-          <label className="flex cursor-pointer items-center justify-between gap-3">
-            <span className="font-body-md text-body-md text-on-surface">
-              Agrupar todos os avisos do dia em um único e-mail
-            </span>
-            <span className="relative inline-flex shrink-0 items-center">
+      <div className="grid gap-4 lg:grid-cols-3">
+        <Card className="shadow-card">
+          <CardContent className="space-y-2 pt-6">
+            <Label htmlFor="n-ant">Antecedência do aviso de vencimento</Label>
+            <div className="flex items-center gap-3">
               <input
-                type="checkbox"
-                className="peer sr-only"
+                id="n-ant"
+                type="range"
+                min={1}
+                max={15}
                 disabled={leitura}
-                checked={resumoDiario}
-                onChange={(e) => setResumoDiario(e.target.checked)}
+                value={antecedencia}
+                onChange={(e) => setAntecedencia(Number(e.target.value))}
+                className="flex-1 accent-[var(--primary)]"
               />
-              <span className="h-6 w-11 rounded-full bg-surface-variant transition-colors after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-outline-variant after:bg-white after:transition-all after:content-[''] peer-checked:bg-secondary peer-checked:after:translate-x-full peer-disabled:opacity-50" />
-            </span>
-          </label>
-          <p className="mt-2 font-body-sm text-body-sm text-on-surface-variant">
-            {resumoDiario
-              ? "Um e-mail por dia com todos os eventos."
-              : "Um e-mail por evento, no momento em que ocorre."}
-          </p>
-        </div>
+              <span className="num w-20 shrink-0 text-sm">
+                {antecedencia} dia{antecedencia === 1 ? "" : "s"}
+              </span>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Títulos que vencem em até {antecedencia} dia{antecedencia === 1 ? "" : "s"} geram
+              aviso.
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card className="shadow-card">
+          <CardContent className="space-y-2 pt-6">
+            <Label htmlFor="n-hora">Horário de envio</Label>
+            <Input
+              id="n-hora"
+              type="time"
+              className="num"
+              disabled={leitura}
+              value={horario}
+              onChange={(e) => setHorario(e.target.value)}
+            />
+            <p className="text-xs text-muted-foreground">
+              Horário de Brasília. Avisos críticos são enviados imediatamente.
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card className="shadow-card">
+          <CardContent className="space-y-2 pt-6">
+            <Label>Resumo diário consolidado</Label>
+            <div className="flex items-center justify-between gap-3">
+              <span className="text-sm text-muted-foreground">
+                Agrupar todos os avisos do dia em um único e-mail
+              </span>
+              <Switch disabled={leitura} checked={resumoDiario} onCheckedChange={setResumoDiario} />
+            </div>
+            <p className="text-xs text-muted-foreground">
+              {resumoDiario
+                ? "Um e-mail por dia com todos os eventos."
+                : "Um e-mail por evento, no momento em que ocorre."}
+            </p>
+          </CardContent>
+        </Card>
       </div>
 
       {!leitura ? (
-        <div className="mt-md flex justify-end">
-          <button
-            type="button"
+        <div className="mt-4 flex justify-end">
+          <Button
+            variant="outline"
+            className="gap-1.5"
             onClick={() =>
               toast.info("Notificação de teste enviada", {
                 description: `Canais ativos: ${canais.map((c) => c.nome).join(", ")}.`,
               })
             }
-            className="flex items-center gap-2 rounded-lg border border-outline-variant px-4 py-2 font-label-md text-label-md text-primary transition-colors hover:bg-surface-container"
           >
-            <span className="material-symbols-outlined text-[18px]">send</span>
-            Enviar notificação de teste
-          </button>
+            <Send className="size-4" /> Enviar notificação de teste
+          </Button>
         </div>
       ) : null}
     </>

@@ -1,6 +1,7 @@
 import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { toast } from "sonner";
+import { Ban, Sparkles } from "lucide-react";
 import { PageHeader } from "@/components/app/PageHeader";
 import { StatusBadge } from "@/components/app/StatusBadge";
 import { useFeatures } from "@/components/app/FeaturesContext";
@@ -8,19 +9,20 @@ import { usePerfil } from "@/components/app/PerfilContext";
 import { useAuditoria } from "@/components/app/AuditoriaContext";
 import { useEmpresa } from "@/components/app/EmpresaContext";
 import { useDados } from "@/components/app/DadosContext";
+import { Card, CardContent } from "@/components/ui/card";
 import { TelaComissoes } from "@/modules/comissoes/TelaComissoes";
 import type { PortaNucleo } from "@/modules/comissoes/tipos";
 
 export const Route = createFileRoute("/comissoes")({
   head: () => ({
     meta: [
-      { title: "Comissões sobre recebimentos — FinCore ERP" },
+      { title: "Comissões sobre recebimentos — FinCore" },
       {
         name: "description",
         content:
           "Módulo exclusivo: cálculo e aprovação de comissões sobre títulos recebidos no mês.",
       },
-      { property: "og:title", content: "Comissões sobre recebimentos — FinCore ERP" },
+      { property: "og:title", content: "Comissões sobre recebimentos — FinCore" },
       {
         property: "og:description",
         content: "Extensão contratada por um único cliente, isolada do núcleo do produto.",
@@ -58,15 +60,15 @@ function ComissoesRoute() {
 
   if (!contratado) {
     return (
-      <div className="flex items-start gap-3 rounded-xl border border-outline-variant bg-surface-container-lowest p-md shadow-sm">
-        <span className="material-symbols-outlined text-error">block</span>
-        <div>
-          <p className="font-label-md text-label-md text-primary">Módulo não contratado</p>
-          <p className="mt-1 font-body-md text-body-md text-on-surface-variant">
-            Redirecionando para o dashboard...
-          </p>
-        </div>
-      </div>
+      <Card className="shadow-card">
+        <CardContent className="flex items-start gap-3 pt-6">
+          <Ban className="mt-0.5 size-5 shrink-0 text-destructive" />
+          <div>
+            <p className="text-sm font-semibold">Módulo não contratado</p>
+            <p className="mt-1 text-sm text-muted-foreground">Redirecionando para o dashboard...</p>
+          </div>
+        </CardContent>
+      </Card>
     );
   }
 
@@ -113,8 +115,8 @@ function ComissoesRoute() {
           },
         ]}
         selo={
-          <StatusBadge tone="critico" className="gap-1.5">
-            <span className="material-symbols-outlined text-[14px]">workspace_premium</span>
+          <StatusBadge tone="danger">
+            <Sparkles className="size-3" />
             Módulo exclusivo
           </StatusBadge>
         }

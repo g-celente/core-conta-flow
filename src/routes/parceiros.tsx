@@ -1,12 +1,46 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
+import {
+  ArrowLeftRight,
+  Ban,
+  BadgeCheck,
+  History,
+  Info,
+  Pencil,
+  Plus,
+  RotateCcw,
+  Save,
+  Search,
+  Store,
+  TriangleAlert,
+  User,
+} from "lucide-react";
 import { PageHeader } from "@/components/app/PageHeader";
 import { StatusBadge } from "@/components/app/StatusBadge";
 import { usePerfil } from "@/components/app/PerfilContext";
 import { useAuditoria } from "@/components/app/AuditoriaContext";
 import { useEmpresa } from "@/components/app/EmpresaContext";
 import { useDados, type NovoParceiro } from "@/components/app/DadosContext";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import {
   Sheet,
   SheetContent,
@@ -23,16 +57,17 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { baseCnpj, brl, cnpjSugeridos, type Parceiro, type TipoParceiro } from "@/lib/mock-data";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/parceiros")({
   head: () => ({
     meta: [
-      { title: "Clientes e fornecedores — FinCore ERP" },
+      { title: "Clientes e fornecedores — FinCore" },
       {
         name: "description",
         content: "Cadastro de clientes e fornecedores com histórico de alterações e inativação.",
       },
-      { property: "og:title", content: "Clientes e fornecedores — FinCore ERP" },
+      { property: "og:title", content: "Clientes e fornecedores — FinCore" },
       {
         property: "og:description",
         content: "Criar, listar, editar e inativar parceiros com validação de títulos em aberto.",
@@ -44,22 +79,10 @@ export const Route = createFileRoute("/parceiros")({
 
 const TIPOS: TipoParceiro[] = ["Cliente", "Fornecedor", "Ambos"];
 
-const inputCls =
-  "w-full rounded-lg border border-outline-variant bg-surface px-3 py-2 font-body-md text-body-md focus:border-secondary focus:outline-none focus:ring-1 focus:ring-secondary";
-const monoCls =
-  "w-full rounded-lg border border-outline-variant bg-surface px-3 py-2 font-data-mono text-data-mono focus:border-secondary focus:outline-none focus:ring-1 focus:ring-secondary";
-const labelCls = "mb-1.5 block font-label-md text-label-md text-on-surface-variant";
-
-const iconePorTipo: Record<TipoParceiro, string> = {
-  Cliente: "person",
-  Fornecedor: "store",
-  Ambos: "swap_horiz",
-};
-
-const corPorTipo: Record<TipoParceiro, string> = {
-  Cliente: "bg-primary-fixed/40 text-on-primary-fixed-variant",
-  Fornecedor: "bg-surface-container text-surface-tint",
-  Ambos: "bg-tertiary-fixed/50 text-on-tertiary-fixed-variant",
+const iconePorTipo: Record<TipoParceiro, typeof User> = {
+  Cliente: User,
+  Fornecedor: Store,
+  Ambos: ArrowLeftRight,
 };
 
 const formVazio = (): NovoParceiro => ({
@@ -249,166 +272,136 @@ function Parceiros() {
           leitura ? (
             <StatusBadge tone="info">Somente leitura</StatusBadge>
           ) : (
-            <button
-              type="button"
-              onClick={abrirNovo}
-              className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 font-label-md text-label-md text-on-primary shadow-sm transition-colors hover:bg-primary-container"
-            >
-              <span className="material-symbols-outlined text-[18px]">add</span>
-              Novo cadastro
-            </button>
+            <Button onClick={abrirNovo} className="gap-1.5">
+              <Plus className="size-4" /> Novo cadastro
+            </Button>
           )
         }
       />
 
-      {/* Filtros */}
-      <div className="mb-md flex flex-col items-center justify-between gap-4 rounded-xl border border-outline-variant bg-surface-container-lowest p-md shadow-sm lg:flex-row">
-        <div className="relative w-full lg:w-96">
-          <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[20px] text-outline">
-            search
-          </span>
-          <input
-            className="w-full rounded-lg border border-outline-variant bg-surface py-2 pl-10 pr-4 font-body-md text-body-md text-on-surface transition-all placeholder:text-outline/70 focus:border-secondary focus:outline-none focus:ring-1 focus:ring-secondary"
-            placeholder="Buscar por nome, documento ou cidade..."
-            value={busca}
-            onChange={(e) => setBusca(e.target.value)}
-          />
-        </div>
-
-        <div className="flex w-full flex-wrap items-center gap-3 lg:w-auto">
-          <div className="flex w-full rounded-lg bg-surface-container p-1 sm:w-auto">
-            {(["Ambos", "Clientes", "Fornecedores"] as const).map((t) => (
-              <button
-                key={t}
-                type="button"
-                onClick={() => setAba(t)}
-                className={`flex-1 rounded-md px-4 py-1.5 font-label-md text-label-md transition-all sm:flex-none sm:px-6 ${
-                  aba === t
-                    ? "bg-surface-container-lowest text-primary shadow-sm"
-                    : "text-on-surface-variant hover:text-primary"
-                }`}
-              >
-                {t}
-              </button>
-            ))}
-          </div>
-          <label className="flex cursor-pointer items-center gap-2 whitespace-nowrap font-label-md text-label-md text-on-surface-variant">
-            <input
-              type="checkbox"
-              checked={soAtivos}
-              onChange={(e) => setSoAtivos(e.target.checked)}
-              className="size-4 rounded-sm accent-[var(--color-secondary)]"
+      <Card className="mb-4 shadow-card">
+        <CardContent className="flex flex-col items-center justify-between gap-4 pt-6 lg:flex-row">
+          <div className="relative w-full lg:w-96">
+            <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              className="pl-9"
+              placeholder="Buscar por nome, documento ou cidade..."
+              value={busca}
+              onChange={(e) => setBusca(e.target.value)}
             />
-            Só ativos
-          </label>
-        </div>
-      </div>
+          </div>
 
-      {/* Tabela */}
-      <div className="overflow-hidden rounded-xl border border-outline-variant bg-surface-container-lowest shadow-sm">
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[48rem] border-collapse whitespace-nowrap text-left">
-            <thead className="border-b border-outline-variant bg-surface-container-low">
-              <tr>
-                <th className="w-48 px-4 py-3 font-label-md text-label-md text-on-surface-variant">
-                  Documento
-                </th>
-                <th className="px-4 py-3 font-label-md text-label-md text-on-surface-variant">
-                  Nome fantasia
-                </th>
-                <th className="px-4 py-3 font-label-md text-label-md text-on-surface-variant">
-                  Tipo
-                </th>
-                <th className="px-4 py-3 text-right font-label-md text-label-md text-on-surface-variant">
-                  Total em aberto
-                </th>
-                <th className="px-4 py-3 text-center font-label-md text-label-md text-on-surface-variant">
-                  Status
-                </th>
-                <th className="px-4 py-3 text-right font-label-md text-label-md text-on-surface-variant">
-                  Ações
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-surface-container-high">
+          <div className="flex w-full flex-wrap items-center gap-3 lg:w-auto">
+            <div className="flex w-full rounded-lg bg-muted p-1 sm:w-auto">
+              {(["Ambos", "Clientes", "Fornecedores"] as const).map((t) => (
+                <button
+                  key={t}
+                  type="button"
+                  onClick={() => setAba(t)}
+                  className={cn(
+                    "flex-1 rounded-md px-4 py-1.5 text-sm font-medium transition-all sm:flex-none sm:px-5",
+                    aba === t
+                      ? "bg-card text-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground",
+                  )}
+                >
+                  {t}
+                </button>
+              ))}
+            </div>
+            <label className="flex cursor-pointer items-center gap-2 whitespace-nowrap text-sm text-muted-foreground">
+              <input
+                type="checkbox"
+                checked={soAtivos}
+                onChange={(e) => setSoAtivos(e.target.checked)}
+                className="size-4 rounded accent-[var(--primary)]"
+              />
+              Só ativos
+            </label>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className="shadow-card">
+        <CardContent className="overflow-x-auto pt-6">
+          <Table className="min-w-[48rem]">
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-48">Documento</TableHead>
+                <TableHead>Nome fantasia</TableHead>
+                <TableHead>Tipo</TableHead>
+                <TableHead className="text-right">Total em aberto</TableHead>
+                <TableHead className="text-center">Status</TableHead>
+                <TableHead className="text-right">Ações</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {lista.map((p) => {
                 const aberto = emAbertoDoParceiro(p.id);
+                const Icone = iconePorTipo[p.tipo];
                 return (
-                  <tr
-                    key={p.id}
-                    className={`transition-colors hover:bg-surface-container-low/50 ${
-                      p.ativo ? "" : "bg-surface-container-low/30"
-                    }`}
-                  >
-                    <td
-                      className={`px-4 py-3 font-data-mono text-data-mono ${p.ativo ? "text-on-surface" : "text-outline"}`}
-                    >
-                      {p.documento}
-                    </td>
-                    <td className="px-4 py-3">
-                      <span
-                        className={`block font-body-md text-body-md font-medium ${p.ativo ? "text-primary" : "text-outline"}`}
-                      >
-                        {p.nomeFantasia}
-                      </span>
-                      <span className="block max-w-[22rem] truncate font-body-sm text-body-sm text-on-surface-variant">
+                  <TableRow key={p.id} className={cn(!p.ativo && "opacity-60")}>
+                    <TableCell className="num text-sm">{p.documento}</TableCell>
+                    <TableCell>
+                      <span className="block font-medium">{p.nomeFantasia}</span>
+                      <span className="block max-w-[22rem] truncate text-xs text-muted-foreground">
                         {p.razaoSocial} · {p.cidade}/{p.uf}
                       </span>
-                    </td>
-                    <td className="px-4 py-3">
-                      <span
-                        className={`inline-flex items-center gap-1.5 rounded-md px-2 py-1 font-label-md text-body-sm ${corPorTipo[p.tipo]} ${p.ativo ? "" : "opacity-60"}`}
-                      >
-                        <span className="material-symbols-outlined text-[14px]">
-                          {iconePorTipo[p.tipo]}
-                        </span>
+                    </TableCell>
+                    <TableCell>
+                      <span className="inline-flex items-center gap-1.5 rounded-md bg-muted px-2 py-1 text-xs font-medium text-muted-foreground">
+                        <Icone className="size-3.5" />
                         {p.tipo}
                       </span>
-                    </td>
-                    <td
-                      className={`px-4 py-3 text-right font-data-mono text-data-mono font-medium ${
-                        aberto > 0 ? "text-error" : "text-outline"
-                      }`}
+                    </TableCell>
+                    <TableCell
+                      className={cn(
+                        "num text-right font-medium",
+                        aberto > 0 ? "text-destructive" : "text-muted-foreground",
+                      )}
                     >
                       {brl(aberto)}
-                    </td>
-                    <td className="px-4 py-3 text-center">
+                    </TableCell>
+                    <TableCell className="text-center">
                       {p.ativo ? (
                         aberto > 0 ? (
-                          <StatusBadge tone="erro">Com pendência</StatusBadge>
+                          <StatusBadge tone="danger">Com pendência</StatusBadge>
                         ) : (
-                          <StatusBadge tone="ok">Ativo</StatusBadge>
+                          <StatusBadge tone="success">Ativo</StatusBadge>
                         )
                       ) : (
-                        <StatusBadge tone="neutro">Inativo</StatusBadge>
+                        <StatusBadge tone="neutral">Inativo</StatusBadge>
                       )}
-                    </td>
-                    <td className="px-4 py-3 text-right">
+                    </TableCell>
+                    <TableCell className="text-right">
                       {leitura ? (
-                        <span className="font-body-sm text-body-sm text-outline">—</span>
+                        <span className="text-xs text-muted-foreground">—</span>
                       ) : (
                         <div className="flex justify-end gap-1">
-                          <button
-                            type="button"
+                          <Button
+                            size="icon"
+                            variant="ghost"
                             title="Editar"
                             onClick={() => abrirEdicao(p)}
-                            className="rounded p-1 text-on-surface-variant transition-colors hover:bg-surface-variant hover:text-primary"
                           >
-                            <span className="material-symbols-outlined text-[20px]">edit</span>
-                          </button>
+                            <Pencil className="size-4" />
+                          </Button>
                           {p.ativo ? (
-                            <button
-                              type="button"
+                            <Button
+                              size="icon"
+                              variant="ghost"
                               title="Inativar"
+                              className="hover:text-destructive"
                               onClick={() => setInativando(p)}
-                              className="rounded p-1 text-on-surface-variant transition-colors hover:bg-error-container hover:text-error"
                             >
-                              <span className="material-symbols-outlined text-[20px]">block</span>
-                            </button>
+                              <Ban className="size-4" />
+                            </Button>
                           ) : (
-                            <button
-                              type="button"
+                            <Button
+                              size="icon"
+                              variant="ghost"
                               title="Reativar"
+                              className="hover:text-success"
                               onClick={() => {
                                 reativarParceiro(p.id, perfil.usuario);
                                 registrar({
@@ -421,91 +414,82 @@ function Parceiros() {
                                 });
                                 toast.success(`${p.nomeFantasia} reativado`);
                               }}
-                              className="rounded p-1 text-on-surface-variant transition-colors hover:bg-secondary/10 hover:text-secondary"
                             >
-                              <span className="material-symbols-outlined text-[20px]">
-                                restart_alt
-                              </span>
-                            </button>
+                              <RotateCcw className="size-4" />
+                            </Button>
                           )}
                         </div>
                       )}
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 );
               })}
               {lista.length === 0 ? (
-                <tr>
-                  <td
+                <TableRow>
+                  <TableCell
                     colSpan={6}
-                    className="p-8 text-center font-body-md text-body-md text-on-surface-variant"
+                    className="py-10 text-center text-sm text-muted-foreground"
                   >
                     Nenhum cadastro encontrado.
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               ) : null}
-            </tbody>
-          </table>
-        </div>
+            </TableBody>
+          </Table>
 
-        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-outline-variant bg-surface-container-low p-3">
-          <span className="font-body-sm text-body-sm text-on-surface-variant">
-            Mostrando {lista.length} de {parceiros.length} registros
-          </span>
-          <span className="flex flex-col text-right">
-            <span className="font-body-sm text-[11px] uppercase tracking-wider text-on-surface-variant">
-              Total em aberto na visão
+          <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-border pt-4">
+            <span className="text-xs text-muted-foreground">
+              Mostrando {lista.length} de {parceiros.length} registros
             </span>
-            <span className="font-data-mono font-bold text-primary">{brl(totalEmAberto)}</span>
-          </span>
-        </div>
-      </div>
+            <span className="flex flex-col text-right">
+              <span className="text-[0.68rem] font-bold uppercase tracking-wide text-muted-foreground">
+                Total em aberto na visão
+              </span>
+              <span className="num font-bold">{brl(totalEmAberto)}</span>
+            </span>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Formulário */}
       <Sheet open={sheetAberto} onOpenChange={setSheetAberto}>
-        <SheetContent
-          side="right"
-          className="w-full overflow-y-auto border-outline-variant bg-surface-container-lowest sm:max-w-[36rem]"
-        >
+        <SheetContent side="right" className="w-full overflow-y-auto sm:max-w-xl">
           <SheetHeader>
-            <SheetTitle className="font-headline-sm text-headline-sm text-primary">
+            <SheetTitle>
               {editando ? `Editar ${editando.nomeFantasia}` : "Novo cadastro"}
             </SheetTitle>
-            <SheetDescription className="font-body-sm text-body-sm text-on-surface-variant">
+            <SheetDescription>
               Informe o CNPJ e use “Buscar” para preencher a razão social automaticamente.
             </SheetDescription>
           </SheetHeader>
 
-          <div className="mt-lg flex flex-col gap-md">
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <div className="sm:col-span-2">
-                <label className={labelCls} htmlFor="p-doc">
-                  CNPJ / CPF *
-                </label>
+          <div className="mt-6 flex flex-col gap-5">
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-1.5 sm:col-span-2">
+                <Label htmlFor="p-doc">CNPJ / CPF *</Label>
                 <div className="flex gap-2">
-                  <input
+                  <Input
                     id="p-doc"
-                    className={monoCls}
+                    className="num"
                     placeholder="00.000.000/0001-00"
                     value={form.documento}
                     onChange={(e) => setForm((f) => ({ ...f, documento: e.target.value }))}
                   />
-                  <button
-                    type="button"
+                  <Button
+                    variant="secondary"
+                    className="shrink-0 gap-1.5"
                     onClick={() => consultarCnpj(form.documento)}
-                    className="flex shrink-0 items-center gap-1 rounded-lg bg-secondary px-4 py-2 font-label-md text-label-md text-on-secondary transition-colors hover:bg-on-secondary-container"
                   >
-                    <span className="material-symbols-outlined text-[18px]">travel_explore</span>
-                    Buscar
-                  </button>
+                    <Search className="size-4" /> Buscar
+                  </Button>
                 </div>
                 {cnpjBuscado ? (
-                  <p className="mt-1.5 flex items-center gap-1 font-body-sm text-body-sm text-secondary">
-                    <span className="material-symbols-outlined text-[14px]">verified</span>
+                  <p className="flex items-center gap-1.5 text-xs text-success">
+                    <BadgeCheck className="size-3.5" />
                     Dados preenchidos a partir da base cadastral.
                   </p>
                 ) : (
-                  <p className="mt-1.5 font-body-sm text-body-sm text-on-surface-variant">
+                  <p className="text-xs text-muted-foreground">
                     CNPJs disponíveis na base mock:{" "}
                     {cnpjSugeridos.map((c, i) => (
                       <span key={c}>
@@ -516,7 +500,7 @@ function Parceiros() {
                             setForm((f) => ({ ...f, documento: c }));
                             consultarCnpj(c);
                           }}
-                          className="font-data-mono text-secondary underline decoration-dotted"
+                          className="num text-primary underline decoration-dotted"
                         >
                           {c}
                         </button>
@@ -526,94 +510,79 @@ function Parceiros() {
                 )}
               </div>
 
-              <div className="sm:col-span-2">
-                <label className={labelCls} htmlFor="p-razao">
-                  Razão social *
-                </label>
-                <input
+              <div className="space-y-1.5 sm:col-span-2">
+                <Label htmlFor="p-razao">Razão social *</Label>
+                <Input
                   id="p-razao"
-                  className={inputCls}
                   value={form.razaoSocial}
                   onChange={(e) => setForm((f) => ({ ...f, razaoSocial: e.target.value }))}
                 />
               </div>
 
-              <div>
-                <label className={labelCls} htmlFor="p-fantasia">
-                  Nome fantasia
-                </label>
-                <input
+              <div className="space-y-1.5">
+                <Label htmlFor="p-fantasia">Nome fantasia</Label>
+                <Input
                   id="p-fantasia"
-                  className={inputCls}
                   value={form.nomeFantasia}
                   onChange={(e) => setForm((f) => ({ ...f, nomeFantasia: e.target.value }))}
                 />
               </div>
 
-              <div>
-                <label className={labelCls} htmlFor="p-tipo">
-                  Tipo
-                </label>
-                <select
-                  id="p-tipo"
-                  className={inputCls}
+              <div className="space-y-1.5">
+                <Label htmlFor="p-tipo">Tipo</Label>
+                <Select
                   value={form.tipo}
-                  onChange={(e) => setForm((f) => ({ ...f, tipo: e.target.value as TipoParceiro }))}
+                  onValueChange={(v) => setForm((f) => ({ ...f, tipo: v as TipoParceiro }))}
                 >
-                  {TIPOS.map((t) => (
-                    <option key={t} value={t}>
-                      {t}
-                    </option>
-                  ))}
-                </select>
+                  <SelectTrigger id="p-tipo">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {TIPOS.map((t) => (
+                      <SelectItem key={t} value={t}>
+                        {t}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
-              <div>
-                <label className={labelCls} htmlFor="p-email">
-                  E-mail *
-                </label>
-                <input
+              <div className="space-y-1.5">
+                <Label htmlFor="p-email">E-mail *</Label>
+                <Input
                   id="p-email"
                   type="email"
-                  className={inputCls}
                   value={form.email}
                   onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
                 />
               </div>
 
-              <div>
-                <label className={labelCls} htmlFor="p-tel">
-                  Telefone
-                </label>
-                <input
+              <div className="space-y-1.5">
+                <Label htmlFor="p-tel">Telefone</Label>
+                <Input
                   id="p-tel"
-                  className={monoCls}
+                  className="num"
                   placeholder="(00) 0000-0000"
                   value={form.telefone}
                   onChange={(e) => setForm((f) => ({ ...f, telefone: e.target.value }))}
                 />
               </div>
 
-              <div>
-                <label className={labelCls} htmlFor="p-cidade">
-                  Cidade
-                </label>
-                <input
+              <div className="space-y-1.5">
+                <Label htmlFor="p-cidade">Cidade</Label>
+                <Input
                   id="p-cidade"
-                  className={inputCls}
                   value={form.cidade}
                   onChange={(e) => setForm((f) => ({ ...f, cidade: e.target.value }))}
                 />
               </div>
 
-              <div>
-                <label className={labelCls} htmlFor="p-uf">
-                  UF
-                </label>
-                <input
+              <div className="space-y-1.5">
+                <Label htmlFor="p-uf">UF</Label>
+                <Input
                   id="p-uf"
                   maxLength={2}
-                  className={monoCls}
+                  className="num"
                   value={form.uf}
                   onChange={(e) => setForm((f) => ({ ...f, uf: e.target.value.toUpperCase() }))}
                 />
@@ -621,83 +590,67 @@ function Parceiros() {
             </div>
 
             {editando ? (
-              <div className="rounded-lg border border-outline-variant bg-surface p-md">
-                <h3 className="mb-2 flex items-center gap-2 font-label-md text-label-md uppercase tracking-wider text-primary">
-                  <span className="material-symbols-outlined text-[18px]">history</span>
+              <div className="rounded-lg border border-border p-4">
+                <h3 className="mb-2 flex items-center gap-2 text-sm font-semibold">
+                  <History className="size-4 text-muted-foreground" />
                   Histórico de alterações
                 </h3>
                 <ul className="flex flex-col gap-1.5">
                   {editando.historico.map((h, i) => (
-                    <li key={i} className="flex flex-wrap gap-2 font-body-sm text-body-sm">
-                      <span className="shrink-0 font-data-mono text-on-surface-variant">
-                        {h.data}
-                      </span>
-                      <span className="text-on-surface">{h.descricao}</span>
-                      <span className="ml-auto shrink-0 text-outline">{h.usuario}</span>
+                    <li key={i} className="flex flex-wrap gap-2 text-xs">
+                      <span className="num shrink-0 text-muted-foreground">{h.data}</span>
+                      <span>{h.descricao}</span>
+                      <span className="ml-auto shrink-0 text-muted-foreground">{h.usuario}</span>
                     </li>
                   ))}
                 </ul>
               </div>
             ) : null}
 
-            <div className="flex justify-end gap-3 border-t border-outline-variant pt-md">
-              <button
-                type="button"
-                onClick={() => setSheetAberto(false)}
-                className="rounded-lg border border-outline px-4 py-2 font-label-md text-label-md text-on-surface transition-colors hover:bg-surface-container"
-              >
+            <div className="flex justify-end gap-2 border-t border-border pt-4">
+              <Button variant="outline" onClick={() => setSheetAberto(false)}>
                 Cancelar
-              </button>
-              <button
-                type="button"
-                disabled={!formOk}
-                onClick={salvar}
-                className="flex items-center gap-2 rounded-lg bg-secondary px-5 py-2 font-label-md text-label-md text-on-secondary shadow-sm transition-colors hover:bg-on-secondary-container disabled:cursor-not-allowed disabled:opacity-40"
-              >
-                <span className="material-symbols-outlined text-[18px]">save</span>
+              </Button>
+              <Button disabled={!formOk} onClick={salvar} className="gap-1.5">
+                <Save className="size-4" />
                 {editando ? "Salvar alterações" : "Cadastrar"}
-              </button>
+              </Button>
             </div>
           </div>
         </SheetContent>
       </Sheet>
 
-      {/* Confirmação de inativação */}
+      {/* Inativação */}
       <Dialog open={!!inativando} onOpenChange={(o) => !o && setInativando(null)}>
-        <DialogContent className="border-outline-variant bg-surface-container-lowest">
+        <DialogContent>
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-3 font-headline-sm text-headline-sm text-primary">
-              <span className="grid size-10 shrink-0 place-items-center rounded-full bg-error-container/40">
-                <span className="material-symbols-outlined text-error">warning</span>
-              </span>
+            <DialogTitle className="flex items-center gap-2">
+              <TriangleAlert className="size-5 text-destructive" />
               Inativar cadastro
             </DialogTitle>
-            <DialogDescription className="font-body-md text-body-md text-on-surface-variant">
-              Você está prestes a inativar{" "}
-              <strong className="text-primary">{inativando?.razaoSocial}</strong>.
+            <DialogDescription>
+              Você está prestes a inativar <strong>{inativando?.razaoSocial}</strong>.
             </DialogDescription>
           </DialogHeader>
 
           {bloqueio > 0 ? (
-            <div className="flex gap-3 rounded-lg border border-error/30 bg-error-container/20 p-4">
-              <span className="material-symbols-outlined text-[20px] text-error">block</span>
+            <div className="flex gap-3 rounded-lg border border-destructive/30 bg-destructive/8 p-4">
+              <Ban className="mt-0.5 size-4 shrink-0 text-destructive" />
               <div>
-                <p className="font-label-md text-label-md text-error">
+                <p className="text-sm font-semibold text-destructive">
                   Inativação bloqueada — títulos em aberto
                 </p>
-                <p className="mt-1 font-body-sm text-body-sm text-on-surface-variant">
+                <p className="mt-1 text-xs text-muted-foreground">
                   Este parceiro possui{" "}
-                  <strong className="font-data-mono text-error">{brl(bloqueio)}</strong> em títulos
-                  não liquidados. Liquide ou cancele os títulos antes de inativar o cadastro.
+                  <strong className="num text-destructive">{brl(bloqueio)}</strong> em títulos não
+                  liquidados. Liquide ou cancele os títulos antes de inativar o cadastro.
                 </p>
               </div>
             </div>
           ) : (
-            <div className="flex gap-3 rounded-lg border border-outline-variant bg-surface p-4">
-              <span className="material-symbols-outlined text-[20px] text-on-surface-variant">
-                info
-              </span>
-              <p className="font-body-sm text-body-sm text-on-surface-variant">
+            <div className="flex gap-3 rounded-lg border border-border bg-muted/50 p-4">
+              <Info className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+              <p className="text-xs text-muted-foreground">
                 O cadastro deixa de aparecer nos formulários de lançamento, mas continua visível na
                 listagem. Você poderá desfazer a ação por 10 segundos.
               </p>
@@ -705,21 +658,12 @@ function Parceiros() {
           )}
 
           <DialogFooter>
-            <button
-              type="button"
-              onClick={() => setInativando(null)}
-              className="rounded-lg border border-outline-variant px-4 py-2 font-label-md text-label-md text-on-surface transition-colors hover:bg-surface-container"
-            >
+            <Button variant="outline" onClick={() => setInativando(null)}>
               Cancelar
-            </button>
-            <button
-              type="button"
-              disabled={bloqueio > 0}
-              onClick={confirmarInativacao}
-              className="rounded-lg bg-error px-4 py-2 font-label-md text-label-md text-on-error shadow-sm transition-colors hover:bg-error/90 disabled:cursor-not-allowed disabled:opacity-40"
-            >
+            </Button>
+            <Button variant="destructive" disabled={bloqueio > 0} onClick={confirmarInativacao}>
               Sim, inativar
-            </button>
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

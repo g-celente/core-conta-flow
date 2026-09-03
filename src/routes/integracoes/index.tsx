@@ -1,22 +1,34 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
+import { Ban, Eye, EyeOff, FlaskConical, KeyRound, Link2, Sliders, ToggleLeft } from "lucide-react";
 import { PageHeader } from "@/components/app/PageHeader";
 import { StatusBadge } from "@/components/app/StatusBadge";
 import { useFeatures } from "@/components/app/FeaturesContext";
 import { usePerfil } from "@/components/app/PerfilContext";
 import { useAuditoria } from "@/components/app/AuditoriaContext";
 import { useEmpresa } from "@/components/app/EmpresaContext";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/integracoes/")({
   head: () => ({
     meta: [
-      { title: "Central de integrações — FinCore ERP" },
+      { title: "Central de integrações — FinCore" },
       {
         name: "description",
         content: "Tokens de API, ambiente de sandbox e webhooks para integrar sistemas externos.",
       },
-      { property: "og:title", content: "Central de integrações — FinCore ERP" },
+      { property: "og:title", content: "Central de integrações — FinCore" },
       { property: "og:description", content: "Gestão de credenciais da API pública do FinCore." },
     ],
   }),
@@ -72,11 +84,6 @@ const ENDPOINTS = [
   { metodo: "POST", rota: "/v1/webhooks", descricao: "Registra um webhook de eventos" },
 ];
 
-const corMetodo: Record<string, string> = {
-  GET: "bg-secondary/10 text-secondary",
-  POST: "bg-primary-fixed text-on-primary-fixed-variant",
-};
-
 function Integracoes() {
   const { has, config } = useFeatures();
   const { leitura, perfil } = usePerfil();
@@ -100,20 +107,22 @@ function Integracoes() {
             },
           ]}
         />
-        <div className="flex items-start gap-3 rounded-xl border border-outline-variant bg-surface-container-lowest p-md shadow-sm">
-          <span className="material-symbols-outlined text-on-surface-variant">toggle_off</span>
-          <div>
-            <p className="font-label-md text-label-md text-primary">API pública não contratada</p>
-            <p className="mt-1 font-body-md text-body-md text-on-surface-variant">
-              A central de integrações faz parte do perfil <strong>Corporativo</strong>. Ative a
-              feature <code className="font-data-mono">api_publica</code> em{" "}
-              <Link to="/configuracoes" className="text-secondary underline decoration-dotted">
-                Features do tenant
-              </Link>{" "}
-              (PV7).
-            </p>
-          </div>
-        </div>
+        <Card className="shadow-card">
+          <CardContent className="flex items-start gap-3 pt-6">
+            <ToggleLeft className="mt-0.5 size-5 shrink-0 text-muted-foreground" />
+            <div>
+              <p className="text-sm font-semibold">API pública não contratada</p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                A central de integrações faz parte do perfil <strong>Corporativo</strong>. Ative a
+                feature <code className="num">api_publica</code> em{" "}
+                <Link to="/configuracoes" className="text-primary underline decoration-dotted">
+                  Features do tenant
+                </Link>{" "}
+                (PV7).
+              </p>
+            </div>
+          </CardContent>
+        </Card>
       </>
     );
   }
@@ -196,94 +205,70 @@ function Integracoes() {
             <StatusBadge tone="info">Somente leitura</StatusBadge>
           ) : (
             <>
-              <button
-                type="button"
-                onClick={() => gerar("Sandbox")}
-                className="flex items-center gap-2 rounded-lg border border-outline-variant px-4 py-2 font-label-md text-label-md text-primary transition-colors hover:bg-surface-container"
-              >
-                <span className="material-symbols-outlined text-[18px]">science</span>
-                Token de sandbox
-              </button>
-              <button
-                type="button"
-                onClick={() => gerar("Produção")}
-                className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 font-label-md text-label-md text-on-primary shadow-sm transition-colors hover:bg-primary-container"
-              >
-                <span className="material-symbols-outlined text-[18px]">key</span>
-                Novo token
-              </button>
+              <Button variant="outline" className="gap-1.5" onClick={() => gerar("Sandbox")}>
+                <FlaskConical className="size-4" /> Token de sandbox
+              </Button>
+              <Button className="gap-1.5" onClick={() => gerar("Produção")}>
+                <KeyRound className="size-4" /> Novo token
+              </Button>
             </>
           )
         }
       />
 
-      <div className="mb-lg flex flex-wrap items-center gap-3 rounded-lg border border-primary-fixed-dim bg-primary-fixed/30 p-4">
-        <span className="material-symbols-outlined text-secondary">link</span>
-        <p className="flex-1 font-body-md text-body-md text-on-surface-variant">
-          Base da API:{" "}
-          <code className="rounded bg-surface-container px-1.5 py-0.5 font-data-mono text-body-sm">
-            https://api.fincore.app/v1
-          </code>{" "}
-          · autenticação por header{" "}
-          <code className="rounded bg-surface-container px-1.5 py-0.5 font-data-mono text-body-sm">
-            Authorization: Bearer &lt;token&gt;
-          </code>
-        </p>
-        <Link
-          to="/integracoes/adaptador"
-          className="flex items-center gap-1.5 rounded-lg border border-outline-variant bg-surface-container-lowest px-3 py-1.5 font-label-md text-label-md text-primary transition-colors hover:bg-surface-container"
-        >
-          <span className="material-symbols-outlined text-[16px]">tune</span>
-          Adaptador bancário: {config.adaptador}
-        </Link>
-      </div>
+      <Card className="mb-6 shadow-card">
+        <CardContent className="flex flex-wrap items-center gap-3 pt-6">
+          <Link2 className="size-4 shrink-0 text-primary" />
+          <p className="flex-1 text-sm text-muted-foreground">
+            Base da API:{" "}
+            <code className="num rounded bg-muted px-1.5 py-0.5">https://api.fincore.app/v1</code> ·
+            autenticação por header{" "}
+            <code className="num rounded bg-muted px-1.5 py-0.5">
+              Authorization: Bearer &lt;token&gt;
+            </code>
+          </p>
+          <Button asChild variant="outline" size="sm" className="gap-1.5">
+            <Link to="/integracoes/adaptador">
+              <Sliders className="size-3.5" /> Adaptador bancário: {config.adaptador}
+            </Link>
+          </Button>
+        </CardContent>
+      </Card>
 
-      {/* Tokens */}
-      <div className="mb-lg overflow-hidden rounded-xl border border-outline-variant bg-surface-container-lowest shadow-sm">
-        <h3 className="border-b border-outline-variant bg-surface px-md py-3 font-headline-sm text-headline-sm text-primary">
-          Tokens de acesso
-        </h3>
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[48rem] border-collapse text-left">
-            <thead className="border-b border-outline-variant bg-surface-container-low">
-              <tr>
-                <th className="p-3 font-label-md text-label-md text-on-surface-variant">Nome</th>
-                <th className="w-28 p-3 font-label-md text-label-md text-on-surface-variant">
-                  Ambiente
-                </th>
-                <th className="p-3 font-label-md text-label-md text-on-surface-variant">Chave</th>
-                <th className="w-28 p-3 text-center font-label-md text-label-md text-on-surface-variant">
-                  Status
-                </th>
-                <th className="w-28 p-3 text-right font-label-md text-label-md text-on-surface-variant">
-                  Ações
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-outline-variant font-body-sm text-body-sm">
+      <Card className="mb-6 shadow-card">
+        <CardHeader>
+          <CardTitle className="text-base">Tokens de acesso</CardTitle>
+        </CardHeader>
+        <CardContent className="overflow-x-auto">
+          <Table className="min-w-[48rem]">
+            <TableHeader>
+              <TableRow>
+                <TableHead>Nome</TableHead>
+                <TableHead className="w-28">Ambiente</TableHead>
+                <TableHead>Chave</TableHead>
+                <TableHead className="w-28 text-center">Status</TableHead>
+                <TableHead className="w-24 text-right">Ações</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {tokens.map((t) => {
                 const visivel = revelados.includes(t.id);
                 return (
-                  <tr
-                    key={t.id}
-                    className={`hover:bg-surface-container-low ${t.ativo ? "" : "opacity-55"}`}
-                  >
-                    <td className="p-3">
-                      <span className="block font-label-md text-label-md text-primary">
-                        {t.nome}
-                      </span>
-                      <span className="block font-data-mono text-[11px] text-on-surface-variant">
+                  <TableRow key={t.id} className={cn(!t.ativo && "opacity-55")}>
+                    <TableCell>
+                      <span className="block text-sm font-medium">{t.nome}</span>
+                      <span className="num block text-[0.7rem] text-muted-foreground">
                         {t.escopo} · criado em {t.criadoEm}
                       </span>
-                    </td>
-                    <td className="p-3">
-                      <StatusBadge tone={t.ambiente === "Sandbox" ? "atencao" : "info"}>
+                    </TableCell>
+                    <TableCell>
+                      <StatusBadge tone={t.ambiente === "Sandbox" ? "warning" : "info"}>
                         {t.ambiente}
                       </StatusBadge>
-                    </td>
-                    <td className="p-3">
+                    </TableCell>
+                    <TableCell>
                       <span className="flex items-center gap-2">
-                        <code className="font-data-mono text-on-surface">
+                        <code className="num text-sm">
                           {visivel ? t.chave : `${t.chave.slice(0, 12)}${"•".repeat(8)}`}
                         </code>
                         <button
@@ -294,76 +279,71 @@ function Integracoes() {
                               r.includes(t.id) ? r.filter((x) => x !== t.id) : [...r, t.id],
                             )
                           }
-                          className="rounded p-0.5 text-on-surface-variant hover:text-primary"
+                          className="text-muted-foreground hover:text-foreground"
                         >
-                          <span className="material-symbols-outlined text-[18px]">
-                            {visivel ? "visibility_off" : "visibility"}
-                          </span>
+                          {visivel ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
                         </button>
                       </span>
-                    </td>
-                    <td className="p-3 text-center">
-                      <StatusBadge tone={t.ativo ? "ok" : "neutro"}>
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <StatusBadge tone={t.ativo ? "success" : "neutral"}>
                         {t.ativo ? "Ativo" : "Revogado"}
                       </StatusBadge>
-                    </td>
-                    <td className="p-3 text-right">
+                    </TableCell>
+                    <TableCell className="text-right">
                       {leitura || !t.ativo ? (
-                        <span className="text-outline">—</span>
+                        <span className="text-xs text-muted-foreground">—</span>
                       ) : (
-                        <button
-                          type="button"
+                        <Button
+                          size="icon"
+                          variant="ghost"
                           title="Revogar token"
+                          className="hover:text-destructive"
                           onClick={() => revogar(t)}
-                          className="rounded p-1 text-on-surface-variant transition-colors hover:bg-error-container hover:text-error"
                         >
-                          <span className="material-symbols-outlined text-[20px]">block</span>
-                        </button>
+                          <Ban className="size-4" />
+                        </Button>
                       )}
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 );
               })}
-            </tbody>
-          </table>
-        </div>
-      </div>
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
 
-      {/* Endpoints */}
-      <div className="overflow-hidden rounded-xl border border-outline-variant bg-surface-container-lowest shadow-sm">
-        <h3 className="border-b border-outline-variant bg-surface px-md py-3 font-headline-sm text-headline-sm text-primary">
-          Endpoints disponíveis
-        </h3>
-        <ul className="flex flex-col divide-y divide-outline-variant">
+      <Card className="shadow-card">
+        <CardHeader>
+          <CardTitle className="text-base">Endpoints disponíveis</CardTitle>
+        </CardHeader>
+        <CardContent className="flex flex-col divide-y divide-border p-0">
           {ENDPOINTS.map((e) => (
-            <li key={e.rota + e.metodo} className="flex flex-wrap items-center gap-3 px-md py-3">
-              <span
-                className={`w-14 shrink-0 rounded px-2 py-0.5 text-center font-label-md text-[11px] ${corMetodo[e.metodo]}`}
+            <div key={e.rota + e.metodo} className="flex flex-wrap items-center gap-3 px-6 py-3">
+              <StatusBadge
+                tone={e.metodo === "GET" ? "success" : "info"}
+                className="w-16 justify-center"
               >
                 {e.metodo}
-              </span>
-              <code className="font-data-mono text-data-mono text-primary">{e.rota}</code>
-              <span className="font-body-sm text-body-sm text-on-surface-variant">
-                {e.descricao}
-              </span>
-            </li>
+              </StatusBadge>
+              <code className="num text-sm font-medium">{e.rota}</code>
+              <span className="text-xs text-muted-foreground">{e.descricao}</span>
+            </div>
           ))}
           {has("centro_custo") ? (
-            <li className="flex flex-wrap items-center gap-3 bg-secondary/5 px-md py-3">
-              <span
-                className={`w-14 shrink-0 rounded px-2 py-0.5 text-center font-label-md text-[11px] ${corMetodo["GET"]}`}
-              >
+            <div className="flex flex-wrap items-center gap-3 bg-primary/5 px-6 py-3">
+              <StatusBadge tone="success" className="w-16 justify-center">
                 GET
-              </span>
-              <code className="font-data-mono text-data-mono text-primary">/v1/rateios</code>
-              <span className="font-body-sm text-body-sm text-on-surface-variant">
+              </StatusBadge>
+              <code className="num text-sm font-medium">/v1/rateios</code>
+              <span className="text-xs text-muted-foreground">
                 Rateio por centro de custo — disponível porque{" "}
-                <code className="font-data-mono">centro_custo</code> está ativo (PV7)
+                <code className="num">centro_custo</code> está ativo (PV7)
               </span>
-            </li>
+            </div>
           ) : null}
-        </ul>
-      </div>
+        </CardContent>
+      </Card>
     </>
   );
 }

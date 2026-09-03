@@ -1,40 +1,38 @@
-import type { ReactNode } from "react";
+import type { ComponentType, ReactNode } from "react";
+import { Card, CardContent } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 
-/** Card de KPI no padrão do FinCore: rótulo com ícone + número em mono grande. */
+/** Card de KPI: rótulo com ícone + número tabular em destaque. */
 export function KpiCard({
   rotulo,
   valor,
-  icone,
-  corIcone = "text-on-surface-variant",
-  corValor = "text-primary",
+  icone: Icone,
+  corIcone = "text-muted-foreground",
+  corValor,
   rodape,
   destaque,
 }: {
   rotulo: string;
   valor: string;
-  icone: string;
+  icone: ComponentType<{ className?: string }>;
   corIcone?: string;
   corValor?: string;
   rodape?: ReactNode;
   destaque?: ReactNode;
 }) {
   return (
-    <div className="flex flex-col justify-between rounded-xl border border-outline-variant bg-surface-container-lowest p-md shadow-sm">
-      <div className="mb-2 flex items-center justify-between gap-2">
-        <div className="flex items-center gap-2 font-label-md text-label-md text-on-surface-variant">
-          <span className={`material-symbols-outlined text-[18px] ${corIcone}`}>{icone}</span>
-          <span className="truncate">{rotulo}</span>
+    <Card className="shadow-card">
+      <CardContent className="pt-6">
+        <div className="mb-2 flex items-start justify-between gap-2">
+          <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            <Icone className={cn("size-4 shrink-0", corIcone)} />
+            <span className="truncate">{rotulo}</span>
+          </p>
+          {destaque}
         </div>
-        {destaque}
-      </div>
-      <div
-        className={`font-data-mono text-[clamp(1.4rem,4vw,2rem)] leading-tight tracking-tight ${corValor}`}
-      >
-        {valor}
-      </div>
-      {rodape ? (
-        <div className="mt-1 font-body-sm text-body-sm text-on-surface-variant">{rodape}</div>
-      ) : null}
-    </div>
+        <p className={cn("num text-2xl font-bold", corValor)}>{valor}</p>
+        {rodape ? <p className="mt-2 text-xs text-muted-foreground">{rodape}</p> : null}
+      </CardContent>
+    </Card>
   );
 }

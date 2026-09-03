@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
+import { Check, Eye, EyeOff, Gavel, Landmark, Save, Sparkles, TriangleAlert } from "lucide-react";
 import { PageHeader } from "@/components/app/PageHeader";
 import { StatusBadge } from "@/components/app/StatusBadge";
 import {
@@ -14,17 +15,29 @@ import {
 import { usePerfil } from "@/components/app/PerfilContext";
 import { useAuditoria } from "@/components/app/AuditoriaContext";
 import { useEmpresa } from "@/components/app/EmpresaContext";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Switch } from "@/components/ui/switch";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/configuracoes")({
   head: () => ({
     meta: [
-      { title: "Features do tenant — FinCore ERP" },
+      { title: "Features do tenant — FinCore" },
       {
         name: "description",
         content:
           "Configure as funcionalidades contratadas, o adaptador bancário e o regime tributário do tenant.",
       },
-      { property: "og:title", content: "Features do tenant — FinCore ERP" },
+      { property: "og:title", content: "Features do tenant — FinCore" },
       {
         property: "og:description",
         content: "Personalização dinâmica de interface a partir das features ativas.",
@@ -198,12 +211,12 @@ const MATRIZ: { tela: string; graus: Record<PerfilProduto, Grau> }[] = [
 ];
 
 const corGrau: Record<Grau, string> = {
-  Comum: "bg-secondary/10 text-secondary",
-  "Comum+": "bg-secondary text-on-secondary",
-  Opcional: "bg-tertiary-fixed text-on-tertiary-fixed-variant",
-  Ausente: "bg-surface-variant text-outline",
-  "Somente leitura": "bg-primary-fixed text-on-primary-fixed-variant",
-  Exclusivo: "bg-error-container text-on-error-container",
+  Comum: "bg-success/12 text-success",
+  "Comum+": "bg-success text-success-foreground",
+  Opcional: "bg-warning/20 text-warning-foreground",
+  Ausente: "bg-muted text-muted-foreground",
+  "Somente leitura": "bg-primary/10 text-primary",
+  Exclusivo: "bg-destructive/10 text-destructive",
 };
 
 function Configuracoes() {
@@ -247,6 +260,43 @@ function Configuracoes() {
 
   const ativas = TODAS_FEATURES.filter((f) => has(f.id));
 
+  const efeitos = [
+    {
+      on: has("conciliacao"),
+      texto:
+        "Grupo “Conciliação” no menu (Importar extrato + Conciliação bancária) e o relatório Extrato conciliado",
+    },
+    {
+      on: has("alcada"),
+      texto: "Grupo “Aprovações” no menu; sem ele, o título salva direto como Em aberto",
+    },
+    {
+      on: has("centro_custo"),
+      texto:
+        "Grupo “Custos”, coluna Centro de custo em Contas a pagar e bloco de rateio no formulário",
+    },
+    {
+      on: has("multiempresa"),
+      texto: "Seletor de empresas no topo e a visão consolidada do grupo",
+    },
+    {
+      on: has("portal_contador"),
+      texto: "Perfil “Contador externo” no seletor de perfil e o layout de exportação contábil",
+    },
+    {
+      on: has("api_publica"),
+      texto: "Item “Central de integrações” no menu com tokens de API e sandbox",
+    },
+    {
+      on: has("notificacoes_push"),
+      texto: "Canal push nas notificações e a cobrança por push em Contas a receber",
+    },
+    {
+      on: has("mod_comissoes"),
+      texto: "Item “Comissões” no menu — módulo exclusivo da TransLog Cargas",
+    },
+  ];
+
   return (
     <>
       <PageHeader
@@ -275,30 +325,24 @@ function Configuracoes() {
         acoes={
           <>
             <StatusBadge tone="info">{ativas.length} features ativas</StatusBadge>
-            <button
-              type="button"
-              onClick={salvarPreferencias}
-              className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 font-label-md text-label-md text-on-primary shadow-sm transition-colors hover:bg-primary-container"
-            >
-              <span className="material-symbols-outlined text-[18px]">save</span>
-              Salvar preferências
-            </button>
+            <Button onClick={salvarPreferencias} className="gap-1.5">
+              <Save className="size-4" /> Salvar preferências
+            </Button>
           </>
         }
       />
 
       {consolidado ? (
-        <div className="mb-md flex items-start gap-3 rounded-lg border border-tertiary-fixed-dim bg-tertiary-fixed p-4">
-          <span className="material-symbols-outlined text-on-tertiary-fixed-variant">warning</span>
-          <p className="font-body-md text-body-md text-on-tertiary-fixed-variant">
+        <div className="mb-4 flex items-start gap-3 rounded-lg border border-warning/40 bg-warning/15 p-4">
+          <TriangleAlert className="mt-0.5 size-4 shrink-0 text-warning-foreground" />
+          <p className="text-sm text-warning-foreground">
             Você está na <strong>visão consolidada do grupo</strong>. A configuração de features é
             por tenant — selecione uma empresa específica no topo para editar as flags.
           </p>
         </div>
       ) : null}
 
-      {/* Abas */}
-      <div className="mb-lg flex border-b border-outline-variant">
+      <div className="mb-6 flex border-b border-border">
         {(
           [
             { id: "features", label: "Funcionalidades" },
@@ -309,11 +353,12 @@ function Configuracoes() {
             key={t.id}
             type="button"
             onClick={() => setAba(t.id)}
-            className={`border-b-2 px-4 py-3 font-label-md text-label-md transition-colors sm:px-6 ${
+            className={cn(
+              "border-b-2 px-4 py-3 text-sm font-medium transition-colors sm:px-6",
               aba === t.id
-                ? "border-secondary font-bold text-primary"
-                : "border-transparent text-on-surface-variant hover:border-outline-variant hover:text-primary"
-            }`}
+                ? "border-primary font-semibold text-foreground"
+                : "border-transparent text-muted-foreground hover:text-foreground",
+            )}
           >
             {t.label}
           </button>
@@ -322,14 +367,11 @@ function Configuracoes() {
 
       {aba === "features" ? (
         <>
-          {/* Banner do P1 */}
-          <div className="mb-lg flex items-start gap-4 rounded-lg border border-primary-fixed-dim bg-primary-fixed/30 p-4 shadow-sm">
-            <span className="material-symbols-outlined mt-0.5 text-secondary">auto_awesome</span>
+          <div className="mb-6 flex items-start gap-3 rounded-lg border border-primary/25 bg-primary/8 p-4">
+            <Sparkles className="mt-0.5 size-4 shrink-0 text-primary" />
             <div>
-              <h4 className="mb-1 font-label-md text-label-md text-primary">
-                Personalização Dinâmica de Interface
-              </h4>
-              <p className="font-body-md text-body-md text-on-surface-variant">
+              <h4 className="text-sm font-semibold">Personalização Dinâmica de Interface</h4>
+              <p className="mt-1 text-sm text-muted-foreground">
                 Ao desligar uma funcionalidade abaixo, a interface do FinCore ERP reage
                 instantaneamente ocultando os menus laterais, colunas de tabela, relatórios
                 específicos e blocos de formulário relacionados. Isso mantém sua área de trabalho
@@ -338,140 +380,85 @@ function Configuracoes() {
             </div>
           </div>
 
-          <div className="grid grid-cols-12 gap-lg">
-            {/* Toggles */}
-            <div className="col-span-12 flex flex-col gap-md lg:col-span-8">
-              <div className="overflow-hidden rounded-xl border border-outline-variant bg-surface-container-lowest shadow-sm">
-                <div className="border-b border-outline-variant bg-surface px-6 py-4">
-                  <h3 className="font-label-md text-label-md text-primary">Módulos do sistema</h3>
-                  <p className="mt-1 font-body-sm text-body-sm text-on-surface-variant">
+          <div className="grid items-start gap-4 lg:grid-cols-12">
+            <div className="flex flex-col gap-4 lg:col-span-8">
+              <Card className="shadow-card">
+                <CardHeader>
+                  <CardTitle className="text-base">Módulos do sistema</CardTitle>
+                  <p className="text-sm text-muted-foreground">
                     Ative ou desative grandes módulos operacionais do ERP.
                   </p>
-                </div>
-                <div className="flex flex-col divide-y divide-outline-variant">
+                </CardHeader>
+                <CardContent className="flex flex-col divide-y divide-border p-0">
                   {TODAS_FEATURES.map((f) => {
                     const ativo = has(f.id);
                     const exclusiva = f.id === "mod_comissoes";
                     return (
                       <div
                         key={f.id}
-                        className="flex items-center justify-between gap-4 px-6 py-5 transition-colors hover:bg-surface-bright"
+                        className="flex items-center justify-between gap-4 px-6 py-4 transition-colors hover:bg-muted/40"
                       >
-                        <div className="min-w-0 pr-2">
-                          <h4 className="mb-1 flex flex-wrap items-center gap-2 font-label-md text-label-md text-on-surface">
+                        <div className="min-w-0">
+                          <h4 className="mb-1 flex flex-wrap items-center gap-2 text-sm font-semibold">
                             {f.nome}
-                            <span className="rounded-full bg-secondary/10 px-2 py-0.5 font-label-md text-[10px] text-secondary">
-                              {f.pv}
-                            </span>
-                            <code className="rounded bg-surface-container px-1.5 py-0.5 font-data-mono text-[10px] text-on-surface-variant">
+                            <StatusBadge tone="info">{f.pv}</StatusBadge>
+                            <code className="num rounded bg-muted px-1.5 py-0.5 text-[0.65rem] text-muted-foreground">
                               {f.id}
                             </code>
                             {exclusiva ? (
-                              <span className="rounded-full bg-error-container px-2 py-0.5 font-label-md text-[10px] text-on-error-container">
-                                Módulo exclusivo
-                              </span>
+                              <StatusBadge tone="danger">Módulo exclusivo</StatusBadge>
                             ) : null}
                           </h4>
-                          <p className="font-body-sm text-body-sm text-on-surface-variant">
-                            {f.descricao}
-                          </p>
+                          <p className="text-xs text-muted-foreground">{f.descricao}</p>
                         </div>
-                        <label className="relative inline-flex shrink-0 cursor-pointer items-center">
-                          <input
-                            type="checkbox"
-                            className="peer sr-only"
-                            disabled={consolidado}
-                            checked={ativo}
-                            onChange={(e) => alternar(f.id, e.target.checked, f.nome, f.pv)}
-                          />
-                          <span className="h-6 w-11 rounded-full bg-surface-variant transition-colors after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-outline-variant after:bg-white after:transition-all after:content-[''] peer-checked:bg-secondary peer-checked:after:translate-x-full peer-disabled:opacity-50" />
-                        </label>
+                        <Switch
+                          className="shrink-0"
+                          disabled={consolidado}
+                          checked={ativo}
+                          onCheckedChange={(v) => alternar(f.id, v, f.nome, f.pv)}
+                        />
                       </div>
                     );
                   })}
-                </div>
-              </div>
+                </CardContent>
+              </Card>
 
-              {/* Efeitos imediatos */}
-              <div className="overflow-hidden rounded-xl border border-outline-variant bg-surface-container-lowest shadow-sm">
-                <div className="border-b border-outline-variant bg-surface px-6 py-4">
-                  <h3 className="font-label-md text-label-md text-primary">
-                    O que muda agora na interface
-                  </h3>
-                </div>
-                <ul className="flex flex-col divide-y divide-outline-variant font-body-md text-body-md">
-                  {[
-                    {
-                      on: has("conciliacao"),
-                      texto:
-                        "Grupo “Conciliação” no menu (Importar extrato + Conciliação bancária) e o relatório Extrato conciliado",
-                    },
-                    {
-                      on: has("alcada"),
-                      texto:
-                        "Grupo “Aprovações” no menu; sem ele, o título salva direto como Em aberto",
-                    },
-                    {
-                      on: has("centro_custo"),
-                      texto:
-                        "Grupo “Custos”, coluna Centro de custo em Contas a pagar e bloco de rateio no formulário",
-                    },
-                    {
-                      on: has("multiempresa"),
-                      texto: "Seletor de empresas no topo e a visão consolidada do grupo",
-                    },
-                    {
-                      on: has("portal_contador"),
-                      texto:
-                        "Perfil “Contador externo” no seletor de perfil e o layout de exportação contábil",
-                    },
-                    {
-                      on: has("api_publica"),
-                      texto: "Item “Central de integrações” no menu com tokens de API e sandbox",
-                    },
-                    {
-                      on: has("notificacoes_push"),
-                      texto:
-                        "Canal push nas preferências de notificação e a cobrança por push em Contas a receber",
-                    },
-                    {
-                      on: has("mod_comissoes"),
-                      texto: "Item “Comissões” no menu — módulo exclusivo da TransLog Cargas",
-                    },
-                  ].map((l) => (
-                    <li key={l.texto} className="flex items-start gap-3 px-6 py-3">
+              <Card className="shadow-card">
+                <CardHeader>
+                  <CardTitle className="text-base">O que muda agora na interface</CardTitle>
+                </CardHeader>
+                <CardContent className="flex flex-col divide-y divide-border p-0">
+                  {efeitos.map((l) => (
+                    <div key={l.texto} className="flex items-start gap-3 px-6 py-3">
+                      {l.on ? (
+                        <Eye className="mt-0.5 size-4 shrink-0 text-success" />
+                      ) : (
+                        <EyeOff className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+                      )}
                       <span
-                        className={`material-symbols-outlined mt-0.5 text-[18px] ${l.on ? "text-secondary" : "text-outline"}`}
+                        className={cn("text-sm", l.on ? "" : "text-muted-foreground line-through")}
                       >
-                        {l.on ? "visibility" : "visibility_off"}
-                      </span>
-                      <span className={l.on ? "text-on-surface" : "text-outline line-through"}>
                         {l.texto}
                       </span>
-                    </li>
+                    </div>
                   ))}
-                </ul>
-              </div>
+                </CardContent>
+              </Card>
             </div>
 
-            {/* Parâmetros */}
-            <div className="col-span-12 flex flex-col gap-md lg:col-span-4">
-              {/* Adaptador bancário */}
-              <div className="flex flex-col rounded-xl border border-outline-variant bg-surface-container-lowest p-6 shadow-sm">
-                <div className="mb-4 flex items-center gap-3">
-                  <span className="material-symbols-outlined text-primary">account_balance</span>
-                  <h3 className="font-headline-sm text-headline-sm text-primary">
-                    Adaptador bancário
-                  </h3>
-                  <span className="ml-auto rounded-full bg-secondary/10 px-2 py-0.5 font-label-md text-[10px] text-secondary">
-                    PV2
-                  </span>
-                </div>
-                <p className="mb-6 font-body-md text-body-md text-on-surface-variant">
-                  Formato de arquivo que o banco principal utiliza para remessa e retorno. Define o
-                  parser usado em Importar extrato.
-                </p>
-                <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-4 lg:col-span-4">
+              <Card className="shadow-card">
+                <CardHeader className="flex flex-row items-center justify-between gap-2">
+                  <CardTitle className="flex items-center gap-2 text-base">
+                    <Landmark className="size-4 text-primary" /> Adaptador bancário
+                  </CardTitle>
+                  <StatusBadge tone="info">PV2</StatusBadge>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <p className="text-sm text-muted-foreground">
+                    Formato de arquivo que o banco principal utiliza para remessa e retorno. Define
+                    o parser usado em Importar extrato.
+                  </p>
                   {ADAPTADORES.map((a) => {
                     const ativo = config.adaptador === a.id;
                     return (
@@ -491,48 +478,35 @@ function Configuracoes() {
                           });
                           toast.success(`Adaptador ${a.id} selecionado`);
                         }}
-                        className={`flex items-center justify-between gap-3 rounded-lg border p-4 text-left transition-colors disabled:opacity-50 ${
-                          ativo
-                            ? "border-secondary bg-secondary/5"
-                            : "border-outline-variant hover:bg-surface-container"
-                        }`}
+                        className={cn(
+                          "flex w-full items-center justify-between gap-3 rounded-lg border p-3 text-left transition-colors disabled:opacity-50",
+                          ativo ? "border-primary bg-primary/8" : "border-border hover:bg-muted/50",
+                        )}
                       >
                         <span className="flex flex-col">
-                          <span
-                            className={`font-label-md text-label-md ${ativo ? "text-secondary" : "text-primary"}`}
-                          >
+                          <span className={cn("text-sm font-semibold", ativo && "text-primary")}>
                             {a.nome}
                           </span>
-                          <span className="font-body-sm text-body-sm text-on-surface-variant">
-                            {a.descricao}
-                          </span>
+                          <span className="text-xs text-muted-foreground">{a.descricao}</span>
                         </span>
-                        <span
-                          className={`material-symbols-outlined shrink-0 ${ativo ? "text-secondary" : "text-outline-variant"}`}
-                        >
-                          {ativo ? "check_circle" : "radio_button_unchecked"}
-                        </span>
+                        {ativo ? <Check className="size-4 shrink-0 text-primary" /> : null}
                       </button>
                     );
                   })}
-                </div>
-              </div>
+                </CardContent>
+              </Card>
 
-              {/* Regime tributário */}
-              <div className="flex flex-col rounded-xl border border-outline-variant bg-surface-container-lowest p-6 shadow-sm">
-                <div className="mb-4 flex items-center gap-3">
-                  <span className="material-symbols-outlined text-primary">gavel</span>
-                  <h3 className="font-headline-sm text-headline-sm text-primary">
-                    Regime tributário
-                  </h3>
-                  <span className="ml-auto rounded-full bg-secondary/10 px-2 py-0.5 font-label-md text-[10px] text-secondary">
-                    PV1
-                  </span>
-                </div>
-                <p className="mb-4 font-body-md text-body-md text-on-surface-variant">
-                  Define as contas tributárias sugeridas no plano de contas e a estrutura da DRE.
-                </p>
-                <div className="flex flex-col gap-2">
+              <Card className="shadow-card">
+                <CardHeader className="flex flex-row items-center justify-between gap-2">
+                  <CardTitle className="flex items-center gap-2 text-base">
+                    <Gavel className="size-4 text-primary" /> Regime tributário
+                  </CardTitle>
+                  <StatusBadge tone="info">PV1</StatusBadge>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  <p className="text-sm text-muted-foreground">
+                    Define as contas tributárias sugeridas no plano de contas e a estrutura da DRE.
+                  </p>
                   {REGIMES.map((r) => {
                     const ativo = config.regime === r;
                     return (
@@ -554,131 +528,136 @@ function Configuracoes() {
                             description: "O plano de contas sugerido foi atualizado.",
                           });
                         }}
-                        className={`flex items-center justify-between gap-2 rounded-lg border px-4 py-2.5 text-left font-label-md text-label-md transition-colors disabled:opacity-50 ${
+                        className={cn(
+                          "flex w-full items-center justify-between gap-2 rounded-lg border px-3 py-2 text-left text-sm font-medium transition-colors disabled:opacity-50",
                           ativo
-                            ? "border-secondary bg-secondary/5 text-secondary"
-                            : "border-outline-variant text-on-surface hover:bg-surface-container"
-                        }`}
+                            ? "border-primary bg-primary/8 text-primary"
+                            : "border-border hover:bg-muted/50",
+                        )}
                       >
                         {r}
-                        {ativo ? (
-                          <span className="material-symbols-outlined text-[18px]">check</span>
-                        ) : null}
+                        {ativo ? <Check className="size-4" /> : null}
                       </button>
                     );
                   })}
-                </div>
-              </div>
+                </CardContent>
+              </Card>
 
-              {/* Resumo */}
-              <div className="rounded-xl border border-outline-variant bg-surface p-6 shadow-sm">
-                <h3 className="mb-3 font-label-md text-label-md uppercase tracking-wider text-on-surface-variant">
-                  Resumo do tenant
-                </h3>
-                <dl className="flex flex-col gap-2 font-body-sm text-body-sm">
-                  <div className="flex justify-between gap-3">
-                    <dt className="text-on-surface-variant">Perfil de produto</dt>
-                    <dd className="font-label-md text-primary">{config.perfilProduto}</dd>
-                  </div>
-                  <div className="flex justify-between gap-3">
-                    <dt className="text-on-surface-variant">Adaptador</dt>
-                    <dd className="font-data-mono text-on-surface">{config.adaptador}</dd>
-                  </div>
-                  <div className="flex justify-between gap-3">
-                    <dt className="text-on-surface-variant">Regime</dt>
-                    <dd className="text-on-surface">{config.regime}</dd>
-                  </div>
-                  <div className="flex justify-between gap-3">
-                    <dt className="text-on-surface-variant">Features ativas</dt>
-                    <dd className="font-data-mono text-on-surface">
-                      {ativas.length}/{TODAS_FEATURES.length}
-                    </dd>
-                  </div>
-                </dl>
-              </div>
+              <Card className="shadow-card">
+                <CardHeader>
+                  <CardTitle className="text-base">Resumo do tenant</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <dl className="flex flex-col gap-2 text-sm">
+                    <div className="flex justify-between gap-3">
+                      <dt className="text-muted-foreground">Perfil de produto</dt>
+                      <dd className="font-semibold">{config.perfilProduto}</dd>
+                    </div>
+                    <div className="flex justify-between gap-3">
+                      <dt className="text-muted-foreground">Adaptador</dt>
+                      <dd className="num">{config.adaptador}</dd>
+                    </div>
+                    <div className="flex justify-between gap-3">
+                      <dt className="text-muted-foreground">Regime</dt>
+                      <dd>{config.regime}</dd>
+                    </div>
+                    <div className="flex justify-between gap-3">
+                      <dt className="text-muted-foreground">Features ativas</dt>
+                      <dd className="num">
+                        {ativas.length}/{TODAS_FEATURES.length}
+                      </dd>
+                    </div>
+                  </dl>
+                </CardContent>
+              </Card>
             </div>
           </div>
         </>
       ) : null}
 
       {aba === "matriz" ? (
-        <div className="flex flex-col gap-md">
-          <div className="flex flex-wrap items-center gap-3 rounded-lg border border-outline-variant bg-surface-container-lowest p-md shadow-sm">
-            <span className="font-label-md text-label-md text-on-surface-variant">Legenda:</span>
-            {(
-              [
-                ["Comum", "presente em todas as instâncias do perfil"],
-                ["Comum+", "presente e enriquecida com blocos extras"],
-                ["Opcional", "contratável à parte"],
-                ["Ausente", "não faz parte do perfil"],
-                ["Somente leitura", "visível sem ações de escrita"],
-                ["Exclusivo", "desenvolvida para um único cliente"],
-              ] as const
-            ).map(([g, desc]) => (
-              <span key={g} className="flex items-center gap-1.5" title={desc}>
+        <div className="flex flex-col gap-4">
+          <Card className="shadow-card">
+            <CardContent className="flex flex-wrap items-center gap-3 pt-6">
+              <span className="text-sm font-semibold text-muted-foreground">Legenda:</span>
+              {(
+                [
+                  ["Comum", "presente em todas as instâncias do perfil"],
+                  ["Comum+", "presente e enriquecida com blocos extras"],
+                  ["Opcional", "contratável à parte"],
+                  ["Ausente", "não faz parte do perfil"],
+                  ["Somente leitura", "visível sem ações de escrita"],
+                  ["Exclusivo", "desenvolvida para um único cliente"],
+                ] as const
+              ).map(([g, desc]) => (
                 <span
-                  className={`rounded px-2 py-0.5 font-label-md text-[10px] ${corGrau[g as Grau]}`}
+                  key={g}
+                  title={desc}
+                  className={cn(
+                    "rounded px-2 py-0.5 text-[0.68rem] font-semibold",
+                    corGrau[g as Grau],
+                  )}
                 >
                   {g}
                 </span>
-              </span>
-            ))}
-          </div>
+              ))}
+            </CardContent>
+          </Card>
 
-          <div className="overflow-hidden rounded-xl border border-outline-variant bg-surface-container-lowest shadow-sm">
-            <div className="border-b border-outline-variant bg-surface px-md py-3">
-              <h3 className="font-headline-sm text-headline-sm text-primary">
-                Matriz Telas × Perfis de produto
-              </h3>
-              <p className="mt-1 font-body-sm text-body-sm text-on-surface-variant">
+          <Card className="shadow-card">
+            <CardHeader>
+              <CardTitle className="text-base">Matriz Telas × Perfis de produto</CardTitle>
+              <p className="text-sm text-muted-foreground">
                 Grau de presença de cada tela nos quatro perfis comerciais do FinCore. O tenant
-                atual usa o perfil{" "}
-                <strong className="text-secondary">{config.perfilProduto}</strong>.
+                atual usa o perfil <strong className="text-primary">{config.perfilProduto}</strong>.
               </p>
-            </div>
-            <div className="overflow-x-auto">
-              <table className="w-full min-w-[42rem] border-collapse text-left">
-                <thead className="border-b border-outline-variant bg-surface-container-low">
-                  <tr>
-                    <th className="p-3 font-label-md text-label-md text-on-surface-variant">
-                      Tela
-                    </th>
+            </CardHeader>
+            <CardContent className="overflow-x-auto">
+              <Table className="min-w-[42rem]">
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Tela</TableHead>
                     {PERFIS_PRODUTO.map((p) => (
-                      <th
+                      <TableHead
                         key={p}
-                        className={`p-3 text-center font-label-md text-label-md ${
-                          p === config.perfilProduto
-                            ? "bg-secondary/10 text-secondary"
-                            : "text-on-surface-variant"
-                        }`}
+                        className={cn(
+                          "text-center",
+                          p === config.perfilProduto && "bg-primary/8 text-primary",
+                        )}
                       >
                         {p}
-                      </th>
+                      </TableHead>
                     ))}
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-outline-variant">
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
                   {MATRIZ.map((l) => (
-                    <tr key={l.tela} className="hover:bg-surface-container-low">
-                      <td className="p-3 font-body-md text-body-md text-on-surface">{l.tela}</td>
+                    <TableRow key={l.tela}>
+                      <TableCell className="text-sm">{l.tela}</TableCell>
                       {PERFIS_PRODUTO.map((p) => (
-                        <td
+                        <TableCell
                           key={p}
-                          className={`p-3 text-center ${p === config.perfilProduto ? "bg-secondary/5" : ""}`}
+                          className={cn(
+                            "text-center",
+                            p === config.perfilProduto && "bg-primary/5",
+                          )}
                         >
                           <span
-                            className={`inline-flex whitespace-nowrap rounded px-2 py-0.5 font-label-md text-[10px] ${corGrau[l.graus[p]]}`}
+                            className={cn(
+                              "inline-flex whitespace-nowrap rounded px-2 py-0.5 text-[0.68rem] font-semibold",
+                              corGrau[l.graus[p]],
+                            )}
                           >
                             {l.graus[p]}
                           </span>
-                        </td>
+                        </TableCell>
                       ))}
-                    </tr>
+                    </TableRow>
                   ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
         </div>
       ) : null}
     </>

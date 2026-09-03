@@ -1,6 +1,23 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
+import {
+  Ban,
+  CheckCircle2,
+  Download,
+  EyeOff,
+  Filter,
+  Pencil,
+  Plus,
+  Repeat,
+  Save,
+  Search,
+  ShieldAlert,
+  Split,
+  Trash2,
+  TriangleAlert,
+  X,
+} from "lucide-react";
 import { PageHeader } from "@/components/app/PageHeader";
 import { StatusBadge, tomDoStatus } from "@/components/app/StatusBadge";
 import { useFeatures } from "@/components/app/FeaturesContext";
@@ -8,6 +25,25 @@ import { usePerfil } from "@/components/app/PerfilContext";
 import { useAuditoria } from "@/components/app/AuditoriaContext";
 import { useDados, type NovoTitulo } from "@/components/app/DadosContext";
 import { useEmpresa } from "@/components/app/EmpresaContext";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import {
   Sheet,
   SheetContent,
@@ -27,6 +63,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
@@ -38,16 +75,17 @@ import {
   type StatusTitulo,
   type TituloPagar,
 } from "@/lib/mock-data";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/contas-a-pagar")({
   head: () => ({
     meta: [
-      { title: "Contas a pagar — FinCore ERP" },
+      { title: "Contas a pagar — FinCore" },
       {
         name: "description",
         content: "Gerencie títulos a pagar, vencimentos, rateio por centro de custo e aprovações.",
       },
-      { property: "og:title", content: "Contas a pagar — FinCore ERP" },
+      { property: "og:title", content: "Contas a pagar — FinCore" },
       {
         property: "og:description",
         content: "Criar, listar, editar e cancelar títulos com filtros e totais.",
@@ -68,12 +106,6 @@ const STATUS: StatusTitulo[] = [
   "Atrasado",
   "Cancelado",
 ];
-
-const inputCls =
-  "w-full rounded-lg border border-outline-variant bg-surface px-3 py-2 font-body-md text-body-md focus:border-secondary focus:outline-none focus:ring-1 focus:ring-secondary";
-const monoCls =
-  "w-full rounded-lg border border-outline-variant bg-surface px-3 py-2 font-data-mono text-data-mono focus:border-secondary focus:outline-none focus:ring-1 focus:ring-secondary";
-const labelCls = "mb-1.5 block font-label-md text-label-md text-on-surface-variant";
 
 type FormTitulo = {
   documento: string;
@@ -318,218 +350,183 @@ function ContasAPagar() {
             <StatusBadge tone="info">Somente leitura</StatusBadge>
           ) : (
             <>
-              <Link
-                to="/exportacoes"
-                className="flex items-center gap-2 rounded-lg border border-outline-variant bg-surface-container px-4 py-2 font-label-md text-label-md text-on-surface transition-colors hover:bg-surface-container-high"
-              >
-                <span className="material-symbols-outlined text-[18px]">download</span>
-                Exportar
-              </Link>
-              <button
-                type="button"
-                onClick={abrirNovo}
-                className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 font-label-md text-label-md text-on-primary shadow-sm transition-colors hover:bg-primary-container"
-              >
-                <span className="material-symbols-outlined text-[18px]">add</span>
-                Nova conta
-              </button>
+              <Button asChild variant="outline" className="gap-1.5">
+                <Link to="/exportacoes">
+                  <Download className="size-4" /> Exportar
+                </Link>
+              </Button>
+              <Button onClick={abrirNovo} className="gap-1.5">
+                <Plus className="size-4" /> Nova conta
+              </Button>
             </>
           )
         }
       />
 
       {/* Filtros */}
-      <div className="mb-md flex flex-wrap items-center gap-2 rounded-xl border border-outline-variant bg-surface-container-lowest p-md shadow-sm">
-        <div className="relative w-full sm:w-64">
-          <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[18px] text-outline">
-            search
-          </span>
-          <input
-            className="w-full rounded-lg border border-outline-variant bg-surface py-1.5 pl-9 pr-3 font-body-sm text-body-sm focus:border-secondary focus:outline-none focus:ring-1 focus:ring-secondary"
-            placeholder="Buscar fornecedor ou documento..."
-            value={busca}
-            onChange={(e) => setBusca(e.target.value)}
-          />
-        </div>
+      <Card className="mb-4 shadow-card">
+        <CardContent className="flex flex-wrap items-center gap-2 pt-6">
+          <div className="relative w-full sm:w-72">
+            <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              className="pl-9"
+              placeholder="Buscar fornecedor ou documento..."
+              value={busca}
+              onChange={(e) => setBusca(e.target.value)}
+            />
+          </div>
 
-        {filtrosAtivos.map((f) => (
-          <button
-            key={f.id}
-            type="button"
-            onClick={f.limpar}
-            className="flex items-center gap-1.5 rounded-full border border-secondary/30 bg-secondary/10 px-3 py-1.5 transition-colors hover:bg-secondary/20"
-          >
-            <span className="font-label-md text-[11px] text-on-surface-variant">{f.rotulo}:</span>
-            <span className="font-label-md text-label-md text-secondary">{f.valor}</span>
-            <span className="material-symbols-outlined text-[14px] text-secondary">close</span>
-          </button>
-        ))}
-
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button className="flex items-center gap-1.5 rounded-full border border-dashed border-outline-variant px-3 py-1.5 text-on-surface-variant transition-colors hover:bg-surface-container">
-              <span className="material-symbols-outlined text-[14px]">add</span>
-              <span className="font-label-md text-label-md">Filtro</span>
+          {filtrosAtivos.map((f) => (
+            <button
+              key={f.id}
+              type="button"
+              onClick={f.limpar}
+              className="flex items-center gap-1.5 rounded-full border border-primary/25 bg-primary/10 px-3 py-1.5 text-xs font-semibold text-primary transition-colors hover:bg-primary/20"
+            >
+              <span className="font-normal text-muted-foreground">{f.rotulo}:</span>
+              {f.valor}
+              <X className="size-3" />
             </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" className="max-h-80 w-64 overflow-y-auto">
-            <p className="px-2 py-1.5 font-label-md text-[11px] uppercase tracking-wider text-on-surface-variant">
-              Status
-            </p>
-            {STATUS.map((s) => (
-              <DropdownMenuItem key={s} onSelect={() => setFiltroStatus(s)}>
-                {s}
-              </DropdownMenuItem>
-            ))}
-            <DropdownMenuSeparator />
-            <p className="px-2 py-1.5 font-label-md text-[11px] uppercase tracking-wider text-on-surface-variant">
-              Categoria
-            </p>
-            {categoriasDespesa.map((c) => (
-              <DropdownMenuItem key={c} onSelect={() => setFiltroCategoria(c)}>
-                {c}
-              </DropdownMenuItem>
-            ))}
-            {usaCentroCusto ? (
-              <>
-                <DropdownMenuSeparator />
-                <p className="px-2 py-1.5 font-label-md text-[11px] uppercase tracking-wider text-on-surface-variant">
-                  Centro de custo
-                </p>
-                {centrosDeCusto.map((c) => (
-                  <DropdownMenuItem key={c.id} onSelect={() => setFiltroCentro(c.id)}>
-                    {c.codigo} — {c.descricao}
-                  </DropdownMenuItem>
-                ))}
-              </>
-            ) : null}
-          </DropdownMenuContent>
-        </DropdownMenu>
+          ))}
 
-        <span className="ml-auto font-body-sm text-body-sm text-on-surface-variant">
-          {lista.length} de {titulos.length} títulos
-        </span>
-      </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm" className="gap-1.5 border-dashed">
+                <Filter className="size-3.5" /> Filtro
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="max-h-80 w-64 overflow-y-auto">
+              <DropdownMenuLabel>Status</DropdownMenuLabel>
+              {STATUS.map((s) => (
+                <DropdownMenuItem key={s} onSelect={() => setFiltroStatus(s)}>
+                  {s}
+                </DropdownMenuItem>
+              ))}
+              <DropdownMenuSeparator />
+              <DropdownMenuLabel>Categoria</DropdownMenuLabel>
+              {categoriasDespesa.map((c) => (
+                <DropdownMenuItem key={c} onSelect={() => setFiltroCategoria(c)}>
+                  {c}
+                </DropdownMenuItem>
+              ))}
+              {usaCentroCusto ? (
+                <>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuLabel>Centro de custo</DropdownMenuLabel>
+                  {centrosDeCusto.map((c) => (
+                    <DropdownMenuItem key={c.id} onSelect={() => setFiltroCentro(c.id)}>
+                      {c.codigo} — {c.descricao}
+                    </DropdownMenuItem>
+                  ))}
+                </>
+              ) : null}
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          <span className="ml-auto text-xs text-muted-foreground">
+            {lista.length} de {titulos.length} títulos
+          </span>
+        </CardContent>
+      </Card>
 
       {/* Tabela */}
-      <div className="flex flex-col overflow-hidden rounded-xl border border-outline-variant bg-surface-container-lowest shadow-sm">
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[52rem] border-collapse text-left">
-            <thead className="border-b border-outline-variant bg-surface-container-low">
-              <tr>
-                <th className="p-3 font-label-md text-label-md text-on-surface-variant">
-                  <span className="flex items-center gap-1">
-                    Vencimento
-                    <span className="material-symbols-outlined text-[14px]">arrow_downward</span>
-                  </span>
-                </th>
-                <th className="p-3 font-label-md text-label-md text-on-surface-variant">
-                  Fornecedor
-                </th>
-                <th className="p-3 font-label-md text-label-md text-on-surface-variant">
-                  Documento
-                </th>
-                <th className="hidden p-3 font-label-md text-label-md text-on-surface-variant lg:table-cell">
-                  Categoria
-                </th>
+      <Card className="shadow-card">
+        <CardContent className="overflow-x-auto pt-6">
+          <Table className="min-w-[52rem]">
+            <TableHeader>
+              <TableRow>
+                <TableHead>Vencimento</TableHead>
+                <TableHead>Fornecedor</TableHead>
+                <TableHead>Documento</TableHead>
+                <TableHead className="hidden lg:table-cell">Categoria</TableHead>
                 {usaCentroCusto ? (
-                  <th className="hidden p-3 font-label-md text-label-md text-on-surface-variant xl:table-cell">
-                    Centro de custo
-                  </th>
+                  <TableHead className="hidden xl:table-cell">Centro de custo</TableHead>
                 ) : null}
-                <th className="p-3 text-right font-label-md text-label-md text-on-surface-variant">
-                  Valor
-                </th>
-                <th className="p-3 font-label-md text-label-md text-on-surface-variant">Status</th>
-                <th className="p-3 text-right font-label-md text-label-md text-on-surface-variant">
-                  Ações
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-outline-variant font-body-sm text-body-sm">
+                <TableHead className="text-right">Valor</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead className="text-right">Ações</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {lista.map((t) => {
                 const atrasado = t.status === "Atrasado";
                 const cancelado = t.status === "Cancelado";
                 return (
-                  <tr
-                    key={t.id}
-                    className={`group transition-colors hover:bg-surface-container-low ${
-                      cancelado ? "opacity-55" : ""
-                    }`}
-                  >
-                    <td
-                      className={`whitespace-nowrap p-3 font-data-mono ${atrasado ? "font-semibold text-error" : "text-on-surface"}`}
+                  <TableRow key={t.id} className={cn(cancelado && "opacity-55")}>
+                    <TableCell
+                      className={cn(
+                        "num whitespace-nowrap",
+                        atrasado && "font-semibold text-destructive",
+                      )}
                     >
                       <span className="flex items-center gap-1">
-                        {atrasado ? (
-                          <span className="material-symbols-outlined text-[14px]">warning</span>
-                        ) : null}
+                        {atrasado ? <TriangleAlert className="size-3.5" /> : null}
                         {t.vencimento}
                       </span>
-                    </td>
-                    <td className="p-3 font-medium text-primary">
-                      <span className={cancelado ? "line-through" : ""}>{t.fornecedor}</span>
+                    </TableCell>
+                    <TableCell className="font-medium">
+                      <span className={cn(cancelado && "line-through")}>{t.fornecedor}</span>
                       {t.origem ? (
-                        <span className="ml-2 rounded bg-secondary/10 px-1.5 py-0.5 font-label-md text-[10px] text-secondary">
+                        <StatusBadge tone="info" className="ml-2">
                           {t.origem}
-                        </span>
+                        </StatusBadge>
                       ) : null}
-                    </td>
-                    <td className="p-3 text-on-surface-variant">
-                      <span className="font-data-mono">{t.documento}</span>
+                    </TableCell>
+                    <TableCell className="num text-sm text-muted-foreground">
+                      {t.documento}
                       {t.parcela ? (
-                        <span className="ml-1 rounded bg-surface-variant px-1 font-data-mono text-[10px] text-outline">
-                          ({t.parcela})
+                        <span className="ml-1 rounded bg-muted px-1 text-[0.65rem]">
+                          {t.parcela}
                         </span>
                       ) : null}
                       {t.recorrencia ? (
-                        <span className="ml-1 rounded bg-primary-fixed px-1 font-label-md text-[10px] text-on-primary-fixed-variant">
+                        <span className="ml-1 rounded bg-primary/10 px-1 text-[0.65rem] text-primary">
                           {t.recorrencia}
                         </span>
                       ) : null}
-                    </td>
-                    <td className="hidden p-3 text-on-surface-variant lg:table-cell">
+                    </TableCell>
+                    <TableCell className="hidden text-sm text-muted-foreground lg:table-cell">
                       {t.categoria}
-                    </td>
+                    </TableCell>
                     {usaCentroCusto ? (
-                      <td className="hidden p-3 font-data-mono text-on-surface-variant xl:table-cell">
+                      <TableCell className="num hidden text-sm text-muted-foreground xl:table-cell">
                         {centroDoTitulo(t)}
-                      </td>
+                      </TableCell>
                     ) : null}
-                    <td className="p-3 text-right font-data-mono text-data-mono">{brl(t.valor)}</td>
-                    <td className="p-3">
+                    <TableCell className="num text-right font-semibold">{brl(t.valor)}</TableCell>
+                    <TableCell>
                       <StatusBadge tone={tomDoStatus(t.status)}>{t.status}</StatusBadge>
-                    </td>
-                    <td className="p-3 text-right">
+                    </TableCell>
+                    <TableCell className="text-right">
                       {leitura ? (
-                        <span className="font-body-sm text-body-sm text-outline">—</span>
+                        <span className="text-xs text-muted-foreground">—</span>
                       ) : (
                         <div className="flex justify-end gap-1">
-                          <button
-                            type="button"
+                          <Button
+                            size="icon"
+                            variant="ghost"
                             title="Editar"
                             disabled={cancelado || t.status === "Pago"}
                             onClick={() => abrirEdicao(t)}
-                            className="rounded p-1 text-on-surface-variant transition-colors hover:bg-surface-variant hover:text-primary disabled:cursor-not-allowed disabled:opacity-30"
                           >
-                            <span className="material-symbols-outlined text-[20px]">edit</span>
-                          </button>
+                            <Pencil className="size-4" />
+                          </Button>
                           {t.status !== "Pago" ? (
-                            <Link
-                              to="/baixa-pagamento"
-                              search={{ titulo: t.id }}
-                              title="Dar baixa"
-                              className={`rounded p-1 text-on-surface-variant transition-colors hover:bg-secondary/10 hover:text-secondary ${
-                                cancelado ? "pointer-events-none opacity-30" : ""
-                              }`}
-                            >
-                              <span className="material-symbols-outlined text-[20px]">
-                                check_circle
-                              </span>
-                            </Link>
+                            cancelado ? (
+                              <Button size="icon" variant="ghost" title="Dar baixa" disabled>
+                                <CheckCircle2 className="size-4" />
+                              </Button>
+                            ) : (
+                              <Button size="icon" variant="ghost" title="Dar baixa" asChild>
+                                <Link to="/baixa-pagamento" search={{ titulo: t.id }}>
+                                  <CheckCircle2 className="size-4" />
+                                </Link>
+                              </Button>
+                            )
                           ) : null}
-                          <button
-                            type="button"
+                          <Button
+                            size="icon"
+                            variant="ghost"
                             title={
                               t.baixa
                                 ? "Não é possível cancelar: título já possui baixa"
@@ -537,232 +534,218 @@ function ContasAPagar() {
                             }
                             disabled={!!t.baixa || cancelado}
                             onClick={() => setCancelando(t)}
-                            className="rounded p-1 text-on-surface-variant transition-colors hover:bg-error-container hover:text-error disabled:cursor-not-allowed disabled:opacity-30"
+                            className="hover:text-destructive"
                           >
-                            <span className="material-symbols-outlined text-[20px]">block</span>
-                          </button>
+                            <Ban className="size-4" />
+                          </Button>
                         </div>
                       )}
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 );
               })}
               {lista.length === 0 ? (
-                <tr>
-                  <td
+                <TableRow>
+                  <TableCell
                     colSpan={usaCentroCusto ? 8 : 7}
-                    className="p-8 text-center font-body-md text-body-md text-on-surface-variant"
+                    className="py-10 text-center text-sm text-muted-foreground"
                   >
                     Nenhum título encontrado com os filtros aplicados.
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               ) : null}
-            </tbody>
-          </table>
-        </div>
+            </TableBody>
+          </Table>
 
-        {/* Rodapé com totais */}
-        <div className="flex flex-col gap-3 border-t border-outline-variant bg-surface-container-low p-4 sm:flex-row sm:items-center sm:justify-between">
-          <span className="font-body-sm text-body-sm text-on-surface-variant">
-            Exibindo {lista.length} de {titulos.length} registros
-          </span>
-          <div className="flex flex-wrap items-center gap-4 sm:gap-6">
-            <span className="flex flex-col text-right">
-              <span className="font-body-sm text-[11px] uppercase tracking-wider text-on-surface-variant">
-                Em aberto
-              </span>
-              <span className="font-data-mono font-bold text-secondary">{brl(totalAberto)}</span>
+          {/* Totais */}
+          <div className="mt-4 flex flex-col gap-3 border-t border-border pt-4 sm:flex-row sm:items-center sm:justify-between">
+            <span className="text-xs text-muted-foreground">
+              Exibindo {lista.length} de {titulos.length} registros
             </span>
-            <span className="hidden h-8 w-px bg-outline-variant sm:block" />
-            <span className="flex flex-col text-right">
-              <span className="font-body-sm text-[11px] uppercase tracking-wider text-on-surface-variant">
-                Total atrasado
+            <div className="flex flex-wrap items-center gap-5">
+              <span className="flex flex-col text-right">
+                <span className="text-[0.68rem] font-bold uppercase tracking-wide text-muted-foreground">
+                  Em aberto
+                </span>
+                <span className="num font-bold text-success">{brl(totalAberto)}</span>
               </span>
-              <span className="font-data-mono font-bold text-error">{brl(totalAtrasado)}</span>
-            </span>
-            <span className="hidden h-8 w-px bg-outline-variant sm:block" />
-            <span className="flex flex-col text-right">
-              <span className="font-body-sm text-[11px] uppercase tracking-wider text-on-surface-variant">
-                Total da visão
+              <span className="flex flex-col text-right">
+                <span className="text-[0.68rem] font-bold uppercase tracking-wide text-muted-foreground">
+                  Total atrasado
+                </span>
+                <span className="num font-bold text-destructive">{brl(totalAtrasado)}</span>
               </span>
-              <span className="font-data-mono text-body-lg font-bold text-primary">
-                {brl(totalVisao)}
+              <span className="flex flex-col text-right">
+                <span className="text-[0.68rem] font-bold uppercase tracking-wide text-muted-foreground">
+                  Total da visão
+                </span>
+                <span className="num text-lg font-bold">{brl(totalVisao)}</span>
               </span>
-            </span>
+            </div>
           </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
 
-      {/* Formulário em Sheet */}
+      {/* Formulário */}
       <Sheet open={sheetAberto} onOpenChange={setSheetAberto}>
-        <SheetContent
-          side="right"
-          className="w-full overflow-y-auto border-outline-variant bg-surface-container-lowest sm:max-w-[36rem]"
-        >
+        <SheetContent side="right" className="w-full overflow-y-auto sm:max-w-xl">
           <SheetHeader>
-            <SheetTitle className="font-headline-sm text-headline-sm text-primary">
+            <SheetTitle>
               {editando ? `Editar título ${editando.documento}` : "Nova conta a pagar"}
             </SheetTitle>
-            <SheetDescription className="font-body-sm text-body-sm text-on-surface-variant">
+            <SheetDescription>
               {usaAlcada
                 ? `Valores acima de ${brl(ALCADA)} são enviados automaticamente à fila de aprovação (PV3).`
                 : "Sem alçada configurada, o título é salvo direto como “Em aberto”."}
             </SheetDescription>
           </SheetHeader>
 
-          <div className="mt-lg flex flex-col gap-md">
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <div className="sm:col-span-2">
-                <label className={labelCls} htmlFor="f-parceiro">
-                  Fornecedor *
-                </label>
-                <select
-                  id="f-parceiro"
-                  className={inputCls}
+          <div className="mt-6 flex flex-col gap-5">
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-1.5 sm:col-span-2">
+                <Label htmlFor="f-parceiro">Fornecedor *</Label>
+                <Select
                   value={form.parceiroId}
-                  onChange={(e) => setForm((f) => ({ ...f, parceiroId: e.target.value }))}
+                  onValueChange={(v) => setForm((f) => ({ ...f, parceiroId: v }))}
                 >
-                  <option value="">Selecione o fornecedor</option>
-                  {parceiros
-                    .filter((p) => p.ativo && p.tipo !== "Cliente")
-                    .map((p) => (
-                      <option key={p.id} value={p.id}>
-                        {p.razaoSocial}
-                      </option>
-                    ))}
-                </select>
+                  <SelectTrigger id="f-parceiro">
+                    <SelectValue placeholder="Selecione o fornecedor" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {parceiros
+                      .filter((p) => p.ativo && p.tipo !== "Cliente")
+                      .map((p) => (
+                        <SelectItem key={p.id} value={p.id}>
+                          {p.razaoSocial}
+                        </SelectItem>
+                      ))}
+                  </SelectContent>
+                </Select>
               </div>
 
-              <div>
-                <label className={labelCls} htmlFor="f-doc">
-                  Documento *
-                </label>
-                <input
+              <div className="space-y-1.5">
+                <Label htmlFor="f-doc">Documento *</Label>
+                <Input
                   id="f-doc"
-                  className={monoCls}
+                  className="num"
                   placeholder="NF-00000"
                   value={form.documento}
                   onChange={(e) => setForm((f) => ({ ...f, documento: e.target.value }))}
                 />
               </div>
 
-              <div>
-                <label className={labelCls} htmlFor="f-venc">
-                  Vencimento *
-                </label>
-                <input
+              <div className="space-y-1.5">
+                <Label htmlFor="f-venc">Vencimento *</Label>
+                <Input
                   id="f-venc"
-                  className={monoCls}
+                  className="num"
                   placeholder="dd/mm/aaaa"
                   value={form.vencimento}
                   onChange={(e) => setForm((f) => ({ ...f, vencimento: e.target.value }))}
                 />
               </div>
 
-              <div>
-                <label className={labelCls} htmlFor="f-valor">
-                  Valor *
-                </label>
+              <div className="space-y-1.5">
+                <Label htmlFor="f-valor">Valor *</Label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 font-data-mono text-on-surface-variant">
+                  <span className="num pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
                     R$
                   </span>
-                  <input
+                  <Input
                     id="f-valor"
                     inputMode="decimal"
-                    className={`${monoCls} pl-10`}
+                    className="num pl-9"
                     placeholder="0,00"
                     value={form.valor}
                     onChange={(e) => setForm((f) => ({ ...f, valor: e.target.value }))}
                   />
                 </div>
                 {usaAlcada && valorNum > ALCADA ? (
-                  <p className="mt-1.5 flex items-start gap-1 font-body-sm text-body-sm text-on-tertiary-fixed-variant">
-                    <span className="material-symbols-outlined text-[14px]">how_to_reg</span>
+                  <p className="flex items-start gap-1.5 text-xs text-warning-foreground">
+                    <ShieldAlert className="mt-0.5 size-3.5 shrink-0" />
                     Acima da alçada de {brl(ALCADA)} — irá para a fila de aprovação.
                   </p>
                 ) : null}
               </div>
 
-              <div>
-                <label className={labelCls} htmlFor="f-cat">
-                  Categoria
-                </label>
-                <select
-                  id="f-cat"
-                  className={inputCls}
+              <div className="space-y-1.5">
+                <Label htmlFor="f-cat">Categoria</Label>
+                <Select
                   value={form.categoria}
-                  onChange={(e) => setForm((f) => ({ ...f, categoria: e.target.value }))}
+                  onValueChange={(v) => setForm((f) => ({ ...f, categoria: v }))}
                 >
-                  {categoriasDespesa.map((c) => (
-                    <option key={c} value={c}>
-                      {c}
-                    </option>
-                  ))}
-                </select>
+                  <SelectTrigger id="f-cat">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categoriasDespesa.map((c) => (
+                      <SelectItem key={c} value={c}>
+                        {c}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
-              <div>
-                <label className={labelCls} htmlFor="f-parc">
-                  Parcelamento
-                </label>
-                <select
-                  id="f-parc"
-                  className={inputCls}
+              <div className="space-y-1.5">
+                <Label htmlFor="f-parc">Parcelamento</Label>
+                <Select
                   value={form.parcelas}
-                  onChange={(e) => setForm((f) => ({ ...f, parcelas: e.target.value }))}
+                  onValueChange={(v) => setForm((f) => ({ ...f, parcelas: v }))}
                 >
-                  {["1", "2", "3", "6", "12", "24"].map((n) => (
-                    <option key={n} value={n}>
-                      {n === "1" ? "À vista" : `${n} parcelas mensais`}
-                    </option>
-                  ))}
-                </select>
+                  <SelectTrigger id="f-parc">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {["1", "2", "3", "6", "12", "24"].map((n) => (
+                      <SelectItem key={n} value={n}>
+                        {n === "1" ? "À vista" : `${n} parcelas mensais`}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
-              <div>
-                <label className={labelCls} htmlFor="f-rec">
-                  Recorrência
-                </label>
-                <select
-                  id="f-rec"
-                  className={inputCls}
+              <div className="space-y-1.5">
+                <Label htmlFor="f-rec">Recorrência</Label>
+                <Select
                   value={form.recorrencia}
-                  onChange={(e) => setForm((f) => ({ ...f, recorrencia: e.target.value }))}
+                  onValueChange={(v) => setForm((f) => ({ ...f, recorrencia: v }))}
                 >
-                  {["Nenhuma", "Mensal", "Bimestral", "Trimestral", "Anual"].map((r) => (
-                    <option key={r} value={r}>
-                      {r}
-                    </option>
-                  ))}
-                </select>
+                  <SelectTrigger id="f-rec">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {["Nenhuma", "Mensal", "Bimestral", "Trimestral", "Anual"].map((r) => (
+                      <SelectItem key={r} value={r}>
+                        {r}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
 
             {Number(form.parcelas) > 1 && valorNum > 0 ? (
-              <div className="flex items-start gap-2 rounded-lg border border-primary-fixed-dim bg-primary-fixed/30 p-3">
-                <span className="material-symbols-outlined text-[18px] text-primary">
-                  event_repeat
-                </span>
-                <p className="font-body-sm text-body-sm text-on-surface-variant">
+              <div className="flex items-start gap-2 rounded-lg border border-primary/25 bg-primary/8 p-3">
+                <Repeat className="mt-0.5 size-4 shrink-0 text-primary" />
+                <p className="text-xs text-muted-foreground">
                   Serão geradas <strong>{form.parcelas} parcelas</strong> de{" "}
-                  <strong className="font-data-mono">
-                    {brl(valorNum / Number(form.parcelas))}
-                  </strong>
-                  , a primeira em {form.vencimento || "dd/mm/aaaa"}.
+                  <strong className="num">{brl(valorNum / Number(form.parcelas))}</strong>, a
+                  primeira em {form.vencimento || "dd/mm/aaaa"}.
                 </p>
               </div>
             ) : null}
 
-            {/* Bloco de rateio — só com a feature centro_custo (PV7) */}
+            {/* Rateio — só com centro_custo (PV7) */}
             {usaCentroCusto ? (
-              <div className="rounded-lg border border-outline-variant bg-surface p-md">
+              <div className="rounded-lg border border-border p-4">
                 <div className="mb-3 flex items-center justify-between gap-2">
-                  <h3 className="flex items-center gap-2 font-label-md text-label-md uppercase tracking-wider text-primary">
-                    <span className="material-symbols-outlined text-[18px]">call_split</span>
+                  <h3 className="flex items-center gap-2 text-sm font-semibold">
+                    <Split className="size-4 text-primary" />
                     Rateio por centro de custo
                   </h3>
-                  <StatusBadge tone={somaRateio === 100 ? "ok" : "erro"}>
+                  <StatusBadge tone={somaRateio === 100 ? "success" : "danger"}>
                     {somaRateio}% de 100%
                   </StatusBadge>
                 </div>
@@ -770,30 +753,34 @@ function ContasAPagar() {
                 <div className="flex flex-col gap-2">
                   {form.rateio.map((r, i) => (
                     <div key={i} className="flex items-center gap-2">
-                      <select
-                        className={inputCls}
+                      <Select
                         value={r.centroId}
-                        onChange={(e) =>
+                        onValueChange={(v) =>
                           setForm((f) => ({
                             ...f,
                             rateio: f.rateio.map((x, idx) =>
-                              idx === i ? { ...x, centroId: e.target.value } : x,
+                              idx === i ? { ...x, centroId: v } : x,
                             ),
                           }))
                         }
                       >
-                        {centrosDeCusto.map((c) => (
-                          <option key={c.id} value={c.id}>
-                            {c.codigo} — {c.descricao}
-                          </option>
-                        ))}
-                      </select>
-                      <div className="relative w-28 shrink-0">
-                        <input
+                        <SelectTrigger className="min-w-0 flex-1">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {centrosDeCusto.map((c) => (
+                            <SelectItem key={c.id} value={c.id}>
+                              {c.codigo} — {c.descricao}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <div className="relative w-24 shrink-0">
+                        <Input
                           type="number"
                           min={0}
                           max={100}
-                          className={`${monoCls} pr-8`}
+                          className="num pr-7"
                           value={r.percentual}
                           onChange={(e) =>
                             setForm((f) => ({
@@ -804,134 +791,109 @@ function ContasAPagar() {
                             }))
                           }
                         />
-                        <span className="absolute right-3 top-1/2 -translate-y-1/2 font-data-mono text-on-surface-variant">
+                        <span className="num pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
                           %
                         </span>
                       </div>
-                      <span className="w-24 shrink-0 text-right font-data-mono text-body-sm text-on-surface-variant">
+                      <span className="num w-24 shrink-0 text-right text-xs text-muted-foreground">
                         {brl((valorNum * (Number(r.percentual) || 0)) / 100)}
                       </span>
-                      <button
-                        type="button"
+                      <Button
+                        size="icon"
+                        variant="ghost"
                         aria-label="Remover linha de rateio"
                         disabled={form.rateio.length === 1}
                         onClick={() =>
                           setForm((f) => ({ ...f, rateio: f.rateio.filter((_, idx) => idx !== i) }))
                         }
-                        className="rounded p-1 text-on-surface-variant transition-colors hover:bg-error-container hover:text-error disabled:opacity-30"
+                        className="shrink-0 hover:text-destructive"
                       >
-                        <span className="material-symbols-outlined text-[18px]">delete</span>
-                      </button>
+                        <Trash2 className="size-4" />
+                      </Button>
                     </div>
                   ))}
                 </div>
 
                 <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
-                  <button
-                    type="button"
-                    onClick={addLinhaRateio}
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="gap-1.5 border-dashed"
                     disabled={form.rateio.length >= centrosDeCusto.length}
-                    className="flex items-center gap-1 rounded-lg border border-dashed border-outline-variant px-3 py-1.5 font-label-md text-label-md text-on-surface-variant transition-colors hover:bg-surface-container disabled:opacity-40"
+                    onClick={addLinhaRateio}
                   >
-                    <span className="material-symbols-outlined text-[16px]">add</span>
-                    Adicionar centro
-                  </button>
+                    <Plus className="size-3.5" /> Adicionar centro
+                  </Button>
                   {somaRateio !== 100 ? (
-                    <p className="font-body-sm text-body-sm text-error">
+                    <p className="text-xs text-destructive">
                       O rateio precisa somar exatamente 100% para salvar.
                     </p>
                   ) : null}
                 </div>
               </div>
             ) : (
-              <div className="flex items-start gap-2 rounded-lg border border-outline-variant bg-surface-container p-3">
-                <span className="material-symbols-outlined text-[18px] text-on-surface-variant">
-                  visibility_off
-                </span>
-                <p className="font-body-sm text-body-sm text-on-surface-variant">
+              <div className="flex items-start gap-2 rounded-lg border border-border bg-muted/50 p-3">
+                <EyeOff className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+                <p className="text-xs text-muted-foreground">
                   O bloco de rateio por centro de custo está oculto porque a feature{" "}
-                  <code className="font-data-mono">centro_custo</code> não está contratada neste
-                  tenant (PV7).
+                  <code className="num">centro_custo</code> não está contratada neste tenant (PV7).
                 </p>
               </div>
             )}
 
             {editando ? (
-              <div className="rounded-lg border border-outline-variant bg-surface p-md">
-                <h3 className="mb-2 font-label-md text-label-md uppercase tracking-wider text-primary">
-                  Histórico de alterações
-                </h3>
+              <div className="rounded-lg border border-border p-4">
+                <h3 className="mb-2 text-sm font-semibold">Histórico de alterações</h3>
                 <ul className="flex flex-col gap-1.5">
                   {editando.historico.map((h, i) => (
-                    <li key={i} className="flex gap-2 font-body-sm text-body-sm">
-                      <span className="shrink-0 font-data-mono text-on-surface-variant">
-                        {h.data}
-                      </span>
-                      <span className="text-on-surface">{h.descricao}</span>
-                      <span className="ml-auto shrink-0 text-outline">{h.usuario}</span>
+                    <li key={i} className="flex flex-wrap gap-2 text-xs">
+                      <span className="num shrink-0 text-muted-foreground">{h.data}</span>
+                      <span>{h.descricao}</span>
+                      <span className="ml-auto shrink-0 text-muted-foreground">{h.usuario}</span>
                     </li>
                   ))}
                 </ul>
               </div>
             ) : null}
 
-            <div className="flex justify-end gap-3 border-t border-outline-variant pt-md">
-              <button
-                type="button"
-                onClick={() => setSheetAberto(false)}
-                className="rounded-lg border border-outline px-4 py-2 font-label-md text-label-md text-on-surface transition-colors hover:bg-surface-container"
-              >
+            <div className="flex justify-end gap-2 border-t border-border pt-4">
+              <Button variant="outline" onClick={() => setSheetAberto(false)}>
                 Cancelar
-              </button>
-              <button
-                type="button"
-                disabled={!formOk}
-                onClick={salvar}
-                className="flex items-center gap-2 rounded-lg bg-secondary px-5 py-2 font-label-md text-label-md text-on-secondary shadow-sm transition-colors hover:bg-on-secondary-container disabled:cursor-not-allowed disabled:opacity-40"
-              >
-                <span className="material-symbols-outlined text-[18px]">save</span>
+              </Button>
+              <Button disabled={!formOk} onClick={salvar} className="gap-1.5">
+                <Save className="size-4" />
                 {editando ? "Salvar alterações" : "Lançar título"}
-              </button>
+              </Button>
             </div>
           </div>
         </SheetContent>
       </Sheet>
 
-      {/* Confirmação de cancelamento */}
+      {/* Cancelamento */}
       <Dialog open={!!cancelando} onOpenChange={(o) => !o && setCancelando(null)}>
-        <DialogContent className="border-outline-variant bg-surface-container-lowest">
+        <DialogContent>
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-3 font-headline-sm text-headline-sm text-primary">
-              <span className="grid size-10 shrink-0 place-items-center rounded-full bg-error-container/40">
-                <span className="material-symbols-outlined text-error">warning</span>
-              </span>
+            <DialogTitle className="flex items-center gap-2">
+              <TriangleAlert className="size-5 text-destructive" />
               Cancelar título
             </DialogTitle>
-            <DialogDescription className="font-body-md text-body-md text-on-surface-variant">
+            <DialogDescription>
               {cancelando
                 ? `${cancelando.documento} · ${cancelando.fornecedor} · ${brl(cancelando.valor)}`
                 : ""}
             </DialogDescription>
           </DialogHeader>
-          <p className="font-body-md text-body-md text-on-surface-variant">
+          <p className="text-sm text-muted-foreground">
             O cancelamento é <strong>lógico</strong>: o título permanece na base com status
             “Cancelado” para fins de auditoria e não entra nos totais.
           </p>
           <DialogFooter>
-            <button
-              type="button"
-              onClick={() => setCancelando(null)}
-              className="rounded-lg border border-outline-variant px-4 py-2 font-label-md text-label-md text-on-surface transition-colors hover:bg-surface-container"
-            >
+            <Button variant="outline" onClick={() => setCancelando(null)}>
               Voltar
-            </button>
-            <button
-              type="button"
-              onClick={confirmarCancelamento}
-              className="rounded-lg bg-error px-4 py-2 font-label-md text-label-md text-on-error shadow-sm transition-colors hover:bg-error/90"
-            >
+            </Button>
+            <Button variant="destructive" onClick={confirmarCancelamento}>
               Sim, cancelar
-            </button>
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

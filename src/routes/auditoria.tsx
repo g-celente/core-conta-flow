@@ -1,32 +1,55 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
+import {
+  Download,
+  FileEdit,
+  LogIn,
+  ScrollText,
+  Search,
+  ShieldCheck,
+  ToggleRight,
+  Wand2,
+  X,
+} from "lucide-react";
 import { PageHeader } from "@/components/app/PageHeader";
 import { StatusBadge, type Tone } from "@/components/app/StatusBadge";
 import { useAuditoria, type TipoEvento } from "@/components/app/AuditoriaContext";
 import { usePerfil } from "@/components/app/PerfilContext";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/auditoria")({
   head: () => ({
     meta: [
-      { title: "Trilha de auditoria — FinCore ERP" },
+      { title: "Trilha de auditoria — FinCore" },
       {
         name: "description",
         content: "Log das operações feitas na sessão: CRUD, aprovações e mudanças de feature.",
       },
-      { property: "og:title", content: "Trilha de auditoria — FinCore ERP" },
+      { property: "og:title", content: "Trilha de auditoria — FinCore" },
       { property: "og:description", content: "Quem fez, o quê, quando e em qual empresa." },
     ],
   }),
   component: Auditoria,
 });
 
-const TIPOS: { id: TipoEvento; nome: string; icone: string; tom: Tone }[] = [
-  { id: "crud", nome: "Cadastros e títulos", icone: "edit_note", tom: "info" },
-  { id: "aprovacao", nome: "Aprovações", icone: "how_to_reg", tom: "ok" },
-  { id: "feature", nome: "Features e parâmetros", icone: "toggle_on", tom: "atencao" },
-  { id: "acesso", nome: "Acesso", icone: "login", tom: "neutro" },
-  { id: "modulo", nome: "Módulo exclusivo", icone: "workspace_premium", tom: "critico" },
+const TIPOS: { id: TipoEvento; nome: string; icone: typeof FileEdit; tom: Tone }[] = [
+  { id: "crud", nome: "Cadastros e títulos", icone: FileEdit, tom: "info" },
+  { id: "aprovacao", nome: "Aprovações", icone: ShieldCheck, tom: "success" },
+  { id: "feature", nome: "Features e parâmetros", icone: ToggleRight, tom: "warning" },
+  { id: "acesso", nome: "Acesso", icone: LogIn, tom: "neutral" },
+  { id: "modulo", nome: "Módulo exclusivo", icone: Wand2, tom: "danger" },
 ];
 
 function Auditoria() {
@@ -55,16 +78,8 @@ function Auditoria() {
   const contagem = (t: TipoEvento) => eventos.filter((e) => e.tipo === t).length;
 
   const exportar = () => {
-    const linhas = [
-      "hora;tipo;entidade;operacao;detalhe;usuario;empresa",
-      ...lista.map((e) =>
-        [e.hora, e.tipo, e.entidade, e.operacao, e.detalhe, e.usuario, e.empresa]
-          .map((c) => c.replace(/;/g, ","))
-          .join(";"),
-      ),
-    ].join("\n");
     toast.success(`${lista.length} evento(s) exportado(s)`, {
-      description: `Arquivo CSV com ${linhas.split("\n").length - 1} linhas gerado.`,
+      description: `Arquivo CSV com ${lista.length} linhas gerado.`,
     });
   };
 
@@ -93,157 +108,143 @@ function Auditoria() {
         acoes={
           <>
             <StatusBadge tone="info">{eventos.length} eventos</StatusBadge>
-            <button
-              type="button"
+            <Button
+              variant="outline"
+              className="gap-1.5"
               disabled={lista.length === 0}
               onClick={exportar}
-              className="flex items-center gap-2 rounded-lg border border-outline-variant px-4 py-2 font-label-md text-label-md text-primary transition-colors hover:bg-surface-container disabled:opacity-40"
             >
-              <span className="material-symbols-outlined text-[18px]">download</span>
-              Exportar CSV
-            </button>
+              <Download className="size-4" /> Exportar CSV
+            </Button>
           </>
         }
       />
 
-      {/* Contadores por tipo */}
-      <div className="mb-lg grid grid-cols-2 gap-md lg:grid-cols-5">
+      <div className="mb-6 grid grid-cols-2 gap-4 lg:grid-cols-5">
         {TIPOS.map((t) => {
           const qtd = contagem(t.id);
           const ativo = filtro === t.id;
+          const Icone = t.icone;
           return (
             <button
               key={t.id}
               type="button"
               onClick={() => setFiltro(ativo ? null : t.id)}
-              className={`rounded-xl border p-md text-left shadow-sm transition-all ${
-                ativo
-                  ? "border-2 border-secondary bg-secondary/5"
-                  : "border-outline-variant bg-surface-container-lowest hover:border-secondary/50"
-              }`}
+              className="text-left"
             >
-              <span className="mb-1 flex items-center gap-2 font-label-md text-label-md text-on-surface-variant">
-                <span className="material-symbols-outlined text-[18px]">{t.icone}</span>
-                <span className="truncate">{t.nome}</span>
-              </span>
-              <span className="block font-data-mono text-[clamp(1.2rem,3.5vw,1.75rem)] leading-tight text-primary">
-                {qtd}
-              </span>
+              <Card
+                className={cn(
+                  "h-full shadow-card transition-all",
+                  ativo ? "border-primary ring-1 ring-primary" : "hover:border-primary/40",
+                )}
+              >
+                <CardContent className="pt-6">
+                  <p className="mb-1 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                    <Icone className="size-4 shrink-0" />
+                    <span className="truncate">{t.nome}</span>
+                  </p>
+                  <p className="num text-xl font-bold">{qtd}</p>
+                </CardContent>
+              </Card>
             </button>
           );
         })}
       </div>
 
-      {/* Tabela */}
-      <div className="flex flex-col overflow-hidden rounded-xl border border-outline-variant bg-surface-container-lowest shadow-sm">
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-outline-variant bg-surface px-md py-3">
-          <h3 className="font-headline-sm text-headline-sm text-primary">
+      <Card className="shadow-card">
+        <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <CardTitle className="flex flex-wrap items-center gap-3 text-base">
             Eventos da sessão
             {filtro ? (
               <button
                 type="button"
                 onClick={() => setFiltro(null)}
-                className="ml-3 inline-flex items-center gap-1 rounded-full bg-secondary/10 px-2 py-0.5 font-label-md text-[11px] text-secondary"
+                className="flex items-center gap-1 rounded-full border border-primary/25 bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary"
               >
                 {TIPOS.find((t) => t.id === filtro)?.nome}
-                <span className="material-symbols-outlined text-[14px]">close</span>
+                <X className="size-3" />
               </button>
             ) : null}
-          </h3>
+          </CardTitle>
           <div className="relative w-full sm:w-72">
-            <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[18px] text-outline">
-              search
-            </span>
-            <input
-              className="w-full rounded-lg border border-outline-variant bg-surface-container-lowest py-1.5 pl-9 pr-3 font-body-sm text-body-sm focus:border-secondary focus:outline-none focus:ring-1 focus:ring-secondary"
+            <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              className="pl-9"
               placeholder="Buscar por entidade, operação ou usuário"
               value={busca}
               onChange={(e) => setBusca(e.target.value)}
             />
           </div>
-        </div>
-
-        {eventos.length === 0 ? (
-          <div className="flex flex-col items-center gap-3 p-lg text-center">
-            <span className="material-symbols-outlined text-[40px] text-outline">history_edu</span>
-            <p className="font-headline-sm text-headline-sm text-primary">
-              Nenhum evento registrado ainda
-            </p>
-            <p className="max-w-[32rem] font-body-md text-body-md text-on-surface-variant">
-              A trilha começa vazia em cada sessão. Cadastre um parceiro, lance um título, aprove um
-              pagamento ou ligue/desligue uma feature na tela de configurações — cada ação grava uma
-              linha aqui, com o usuário <strong>{perfil.usuario}</strong> e o tenant ativo.
-            </p>
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[52rem] border-collapse text-left">
-              <thead className="border-b border-outline-variant bg-surface-container-low">
-                <tr>
-                  <th className="w-24 p-3 font-label-md text-label-md text-on-surface-variant">
-                    Hora
-                  </th>
-                  <th className="w-40 p-3 font-label-md text-label-md text-on-surface-variant">
-                    Tipo
-                  </th>
-                  <th className="w-44 p-3 font-label-md text-label-md text-on-surface-variant">
-                    Entidade
-                  </th>
-                  <th className="w-36 p-3 font-label-md text-label-md text-on-surface-variant">
-                    Operação
-                  </th>
-                  <th className="p-3 font-label-md text-label-md text-on-surface-variant">
-                    Detalhe
-                  </th>
-                  <th className="w-40 p-3 font-label-md text-label-md text-on-surface-variant">
-                    Usuário
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-outline-variant font-body-sm text-body-sm">
+        </CardHeader>
+        <CardContent className="overflow-x-auto">
+          {eventos.length === 0 ? (
+            <div className="flex flex-col items-center gap-3 py-12 text-center">
+              <ScrollText className="size-10 text-muted-foreground" />
+              <p className="text-base font-semibold">Nenhum evento registrado ainda</p>
+              <p className="max-w-[32rem] text-sm text-muted-foreground">
+                A trilha começa vazia em cada sessão. Cadastre um parceiro, lance um título, aprove
+                um pagamento ou ligue/desligue uma feature na tela de configurações — cada ação
+                grava uma linha aqui, com o usuário <strong>{perfil.usuario}</strong> e o tenant
+                ativo.
+              </p>
+            </div>
+          ) : (
+            <Table className="min-w-[52rem]">
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-24">Hora</TableHead>
+                  <TableHead className="w-44">Tipo</TableHead>
+                  <TableHead className="w-44">Entidade</TableHead>
+                  <TableHead className="w-36">Operação</TableHead>
+                  <TableHead>Detalhe</TableHead>
+                  <TableHead className="w-40">Usuário</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {lista.map((e) => {
                   const tipo = TIPOS.find((t) => t.id === e.tipo);
+                  const Icone = tipo?.icone ?? FileEdit;
                   return (
-                    <tr key={e.id} className="hover:bg-surface-container-low">
-                      <td className="p-3 font-data-mono text-on-surface-variant">{e.hora}</td>
-                      <td className="p-3">
-                        <StatusBadge tone={tipo?.tom ?? "neutro"}>
-                          <span className="material-symbols-outlined text-[14px]">
-                            {tipo?.icone}
-                          </span>
+                    <TableRow key={e.id}>
+                      <TableCell className="num text-sm text-muted-foreground">{e.hora}</TableCell>
+                      <TableCell>
+                        <StatusBadge tone={tipo?.tom ?? "neutral"}>
+                          <Icone className="size-3" />
                           {tipo?.nome ?? e.tipo}
                         </StatusBadge>
-                      </td>
-                      <td className="p-3 font-label-md text-label-md text-primary">{e.entidade}</td>
-                      <td className="p-3 text-on-surface">{e.operacao}</td>
-                      <td className="p-3 text-on-surface-variant">{e.detalhe}</td>
-                      <td className="p-3">
-                        <span className="block text-on-surface">{e.usuario}</span>
-                        <span className="block truncate text-[11px] text-outline">{e.empresa}</span>
-                      </td>
-                    </tr>
+                      </TableCell>
+                      <TableCell className="text-sm font-medium">{e.entidade}</TableCell>
+                      <TableCell className="text-sm">{e.operacao}</TableCell>
+                      <TableCell className="text-sm text-muted-foreground">{e.detalhe}</TableCell>
+                      <TableCell>
+                        <span className="block text-sm">{e.usuario}</span>
+                        <span className="block truncate text-[0.7rem] text-muted-foreground">
+                          {e.empresa}
+                        </span>
+                      </TableCell>
+                    </TableRow>
                   );
                 })}
                 {lista.length === 0 ? (
-                  <tr>
-                    <td
+                  <TableRow>
+                    <TableCell
                       colSpan={6}
-                      className="p-8 text-center font-body-md text-body-md text-on-surface-variant"
+                      className="py-10 text-center text-sm text-muted-foreground"
                     >
                       Nenhum evento encontrado com os filtros aplicados.
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 ) : null}
-              </tbody>
-            </table>
-          </div>
-        )}
+              </TableBody>
+            </Table>
+          )}
 
-        <div className="border-t border-outline-variant bg-surface-container-low p-md font-body-sm text-body-sm text-on-surface-variant">
-          A trilha é mantida em memória e reinicia ao recarregar a página — no produto real seria
-          persistida com retenção de 5 anos e acesso somente leitura para todos os perfis.
-        </div>
-      </div>
+          <p className="mt-4 border-t border-border pt-4 text-xs text-muted-foreground">
+            A trilha é mantida em memória e reinicia ao recarregar a página — no produto real seria
+            persistida com retenção de 5 anos e acesso somente leitura para todos os perfis.
+          </p>
+        </CardContent>
+      </Card>
     </>
   );
 }

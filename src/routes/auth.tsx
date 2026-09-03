@@ -1,19 +1,37 @@
 import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
+import {
+  ArrowRight,
+  BadgeCheck,
+  Eye,
+  EyeOff,
+  Info,
+  KeyRound,
+  Landmark,
+  Lock,
+  Mail,
+  ShieldCheck,
+  TriangleAlert,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import { PERFIS, perfilPorEmail, usePerfil } from "@/components/app/PerfilContext";
 import { useAuditoria } from "@/components/app/AuditoriaContext";
 import { useEmpresa } from "@/components/app/EmpresaContext";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
-      { title: "Acesso ao sistema — FinCore ERP" },
+      { title: "Acesso ao sistema — FinCore" },
       {
         name: "description",
         content: "Autenticação corporativa com verificação em duas etapas no FinCore ERP.",
       },
-      { property: "og:title", content: "Acesso ao sistema — FinCore ERP" },
+      { property: "og:title", content: "Acesso ao sistema — FinCore" },
       {
         property: "og:description",
         content: "Entre com as credenciais mock e escolha o perfil de acesso.",
@@ -80,99 +98,77 @@ function AuthPage() {
     void router.navigate({ to: "/" });
   };
 
-  const recuperar = () => {
-    setEsqueci(false);
-    toast.info("Link de redefinição enviado", {
-      description: `Em um ambiente real, um e-mail seria enviado para ${email}.`,
-    });
-  };
-
-  const inputBase =
-    "w-full rounded-lg border bg-surface-container-lowest py-2.5 pl-10 font-body-md text-on-surface transition-all focus:outline-none focus:ring-2";
-
   return (
-    <div className="flex min-h-screen bg-background font-body-md text-on-background antialiased">
+    <div className="flex min-h-screen bg-background text-foreground">
       {/* Formulário */}
-      <main className="relative z-10 flex w-full flex-col items-center justify-center overflow-y-auto bg-surface-container-lowest px-6 py-12 lg:w-[48%] lg:px-16">
-        <div className="flex w-full max-w-[28rem] flex-col gap-8">
+      <main className="flex w-full flex-col justify-center overflow-y-auto bg-card px-6 py-12 lg:w-[48%] lg:px-16">
+        <div className="mx-auto flex w-full max-w-md flex-col gap-8">
           <div className="flex flex-col gap-2">
-            <div className="mb-4 flex items-center gap-2 text-primary">
-              <span className="material-symbols-outlined filled text-[32px]">account_balance</span>
-              <span className="font-headline-md text-headline-md font-bold">FinCore ERP</span>
+            <div className="mb-2 flex items-center gap-2 text-primary">
+              <span className="grid size-9 place-items-center rounded-md bg-primary text-primary-foreground">
+                <Landmark className="size-5" />
+              </span>
+              <span className="text-lg font-extrabold tracking-tight text-foreground">
+                FinCore ERP
+              </span>
             </div>
-            <h1 className="font-headline-md text-headline-md text-primary">Acesso ao sistema</h1>
-            <p className="font-body-md text-body-md text-on-surface-variant">
+            <h1 className="text-2xl font-bold sm:text-[1.7rem]">Acesso ao sistema</h1>
+            <p className="text-sm text-muted-foreground">
               Insira suas credenciais corporativas para prosseguir.
             </p>
           </div>
 
-          <div className="flex flex-col gap-6">
-            {/* Etapa 1: credenciais */}
-            <div
-              className={`relative flex flex-col gap-4 overflow-hidden rounded-xl border bg-surface p-6 shadow-sm ${
-                erro ? "border-error" : "border-outline-variant"
-              }`}
+          <div className="flex flex-col gap-5">
+            {/* Etapa 1 */}
+            <section
+              className={cn(
+                "relative flex flex-col gap-4 overflow-hidden rounded-xl border bg-background p-5 shadow-card",
+                erro ? "border-destructive/50" : "border-border",
+              )}
             >
-              {erro ? <div className="absolute left-0 top-0 h-full w-1 bg-error" /> : null}
-              <div className="mb-2 flex items-center justify-between">
-                <h2 className="font-label-md text-label-md text-on-surface">1. Credenciais</h2>
-                <span
-                  className={`material-symbols-outlined text-[20px] ${erro ? "text-error" : "text-secondary"}`}
-                >
-                  {erro ? "error" : "badge"}
-                </span>
+              {erro ? <div className="absolute inset-y-0 left-0 w-1 bg-destructive" /> : null}
+              <div className="flex items-center justify-between">
+                <h2 className="text-sm font-semibold">1. Credenciais</h2>
+                {erro ? (
+                  <TriangleAlert className="size-4 text-destructive" />
+                ) : (
+                  <BadgeCheck className="size-4 text-success" />
+                )}
               </div>
 
-              <div className="flex flex-col gap-1.5">
-                <label
-                  htmlFor="email"
-                  className="font-label-md text-label-md text-on-surface-variant"
-                >
-                  E-mail corporativo
-                </label>
+              <div className="space-y-1.5">
+                <Label htmlFor="email">E-mail corporativo</Label>
                 <div className="relative">
-                  <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">
-                    mail
-                  </span>
-                  <input
+                  <Mail className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                  <Input
                     id="email"
                     type="email"
                     autoComplete="username"
+                    className={cn("pl-9", erro && "border-destructive")}
                     value={email}
                     onChange={(e) => {
                       setEmail(e.target.value);
                       setErro(null);
                     }}
-                    className={`${inputBase} pr-4 ${
-                      erro
-                        ? "border-error focus:ring-error/20"
-                        : "border-outline-variant focus:border-secondary focus:ring-secondary/20"
-                    }`}
                   />
                 </div>
                 {perfilEncontrado ? (
-                  <p className="mt-0.5 flex items-center gap-1 font-body-sm text-body-sm text-secondary">
-                    <span className="material-symbols-outlined text-[14px]">verified</span>
+                  <p className="flex items-center gap-1.5 text-xs text-success">
+                    <BadgeCheck className="size-3.5" />
                     Perfil reconhecido: {perfilEncontrado.nome} · {perfilEncontrado.usuario}
                   </p>
                 ) : null}
               </div>
 
-              <div className="flex flex-col gap-1.5">
-                <label
-                  htmlFor="senha"
-                  className="font-label-md text-label-md text-on-surface-variant"
-                >
-                  Senha
-                </label>
+              <div className="space-y-1.5">
+                <Label htmlFor="senha">Senha</Label>
                 <div className="relative">
-                  <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">
-                    lock
-                  </span>
-                  <input
+                  <Lock className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                  <Input
                     id="senha"
                     type={verSenha ? "text" : "password"}
                     autoComplete="current-password"
+                    className={cn("pl-9 pr-9", erro && "border-destructive")}
                     value={senha}
                     onChange={(e) => {
                       setSenha(e.target.value);
@@ -181,91 +177,77 @@ function AuthPage() {
                     onKeyDown={(e) => {
                       if (e.key === "Enter") entrar();
                     }}
-                    className={`${inputBase} pr-10 ${
-                      erro
-                        ? "border-error focus:ring-error/20"
-                        : "border-outline-variant focus:border-secondary focus:ring-secondary/20"
-                    }`}
                   />
                   <button
                     type="button"
                     onClick={() => setVerSenha((v) => !v)}
                     aria-label={verSenha ? "Ocultar senha" : "Mostrar senha"}
-                    className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-outline hover:text-on-surface"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                   >
-                    {verSenha ? "visibility" : "visibility_off"}
+                    {verSenha ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
                   </button>
                 </div>
-                {erro ? (
-                  <p className="mt-1 font-body-sm text-body-sm font-medium text-error">{erro}</p>
-                ) : null}
+                {erro ? <p className="text-xs font-medium text-destructive">{erro}</p> : null}
               </div>
 
-              <div className="mt-1 flex justify-end">
+              <div className="flex justify-end">
                 <button
                   type="button"
                   onClick={() => setEsqueci((v) => !v)}
-                  className="font-label-md text-label-md text-secondary transition-colors hover:text-on-secondary-container"
+                  className="text-xs font-semibold text-primary hover:underline"
                 >
                   Esqueci minha senha
                 </button>
               </div>
 
               {esqueci ? (
-                <div className="flex flex-col gap-3 rounded-lg border border-outline-variant bg-surface-container p-3">
-                  <p className="font-body-sm text-body-sm text-on-surface-variant">
+                <div className="flex flex-col gap-3 rounded-lg border border-border bg-muted/50 p-3">
+                  <p className="text-xs text-muted-foreground">
                     Enviaremos um link de redefinição para <strong>{email}</strong>. No protótipo
                     nenhum e-mail é disparado.
                   </p>
                   <div className="flex gap-2">
-                    <button
-                      type="button"
-                      onClick={recuperar}
-                      className="rounded-lg bg-secondary px-3 py-1.5 font-label-md text-label-md text-on-secondary"
+                    <Button
+                      size="sm"
+                      onClick={() => {
+                        setEsqueci(false);
+                        toast.info("Link de redefinição enviado", {
+                          description: `Em um ambiente real, um e-mail seria enviado para ${email}.`,
+                        });
+                      }}
                     >
                       Enviar link
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setEsqueci(false)}
-                      className="rounded-lg border border-outline px-3 py-1.5 font-label-md text-label-md text-on-surface"
-                    >
+                    </Button>
+                    <Button size="sm" variant="outline" onClick={() => setEsqueci(false)}>
                       Cancelar
-                    </button>
+                    </Button>
                   </div>
                 </div>
               ) : null}
-            </div>
+            </section>
 
-            {/* Etapa 2: MFA opcional */}
-            <div className="flex flex-col gap-4 rounded-xl border border-outline-variant bg-surface-container-lowest p-6 shadow-sm">
-              <div className="mb-2 flex items-center justify-between gap-3">
-                <h2 className="font-label-md text-label-md text-on-surface">
+            {/* Etapa 2 */}
+            <section className="flex flex-col gap-4 rounded-xl border border-border bg-background p-5 shadow-card">
+              <div className="flex items-center justify-between gap-3">
+                <h2 className="flex items-center gap-2 text-sm font-semibold">
+                  <ShieldCheck className="size-4 text-primary" />
                   2. Verificação em duas etapas
                 </h2>
                 <label className="flex shrink-0 cursor-pointer items-center gap-2">
-                  <span className="font-body-sm text-body-sm text-on-surface-variant">
+                  <span className="text-xs text-muted-foreground">
                     {mfaAtivo ? "Ativado" : "Opcional"}
                   </span>
-                  <span className="relative inline-flex items-center">
-                    <input
-                      type="checkbox"
-                      className="peer sr-only"
-                      checked={mfaAtivo}
-                      onChange={(e) => setMfaAtivo(e.target.checked)}
-                    />
-                    <span className="h-6 w-11 rounded-full bg-surface-variant transition-colors after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-outline-variant after:bg-white after:transition-all after:content-[''] peer-checked:bg-secondary peer-checked:after:translate-x-full" />
-                  </span>
+                  <Switch checked={mfaAtivo} onCheckedChange={setMfaAtivo} />
                 </label>
               </div>
 
-              <p className="font-body-sm text-body-sm text-on-surface-variant">
+              <p className="text-xs text-muted-foreground">
                 Insira o código de 6 dígitos gerado pelo seu aplicativo autenticador.
               </p>
 
               <div className="flex items-center justify-between gap-1.5">
                 {codigo.map((d, i) => (
-                  <input
+                  <Input
                     key={i}
                     inputMode="numeric"
                     maxLength={1}
@@ -273,78 +255,70 @@ function AuthPage() {
                     value={d}
                     placeholder="·"
                     onChange={(e) => setDigito(i, e.target.value)}
-                    className="h-14 w-full min-w-0 rounded-lg border border-outline bg-surface text-center font-data-mono text-headline-sm text-on-surface transition-all focus:border-secondary focus:ring-2 focus:ring-secondary/20 disabled:bg-surface-container disabled:text-outline"
+                    className="num h-12 w-full min-w-0 px-0 text-center text-base"
                   />
                 ))}
               </div>
 
-              <div className="mt-2 flex items-start gap-2 rounded-lg bg-surface-container p-3">
-                <span className="material-symbols-outlined mt-0.5 text-[18px] text-on-surface-variant">
-                  info
-                </span>
-                <span className="font-body-sm text-body-sm leading-relaxed text-on-surface-variant">
+              <div className="flex items-start gap-2 rounded-lg bg-muted/60 p-3">
+                <Info className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+                <span className="text-xs leading-relaxed text-muted-foreground">
                   O MFA é <strong>obrigatório</strong> para perfis com alçada de aprovação
                   financeira superior a R$ 10.000,00. Neste protótipo qualquer código de 6 dígitos é
                   aceito.
                 </span>
               </div>
-            </div>
+            </section>
 
-            <div className="mt-2 flex flex-col gap-3">
-              <button
-                type="button"
-                onClick={entrar}
-                className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary py-3.5 font-label-md text-label-md text-on-primary shadow-sm transition-all hover:bg-primary-container"
-              >
+            <div className="flex flex-col gap-2">
+              <Button onClick={entrar} className="w-full gap-2 py-5">
                 Autenticar acesso
-                <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
-              </button>
-              <button
-                type="button"
+                <ArrowRight className="size-4" />
+              </Button>
+              <Button
+                variant="outline"
+                className="w-full py-5"
                 onClick={() =>
                   toast.info("Suporte acionado", {
                     description: "Um analista de TI entraria em contato em até 4 horas úteis.",
                   })
                 }
-                className="w-full rounded-lg border border-outline bg-transparent py-3.5 font-label-md text-label-md text-on-surface transition-all hover:bg-surface-variant"
               >
                 Solicitar suporte TI
-              </button>
+              </Button>
             </div>
           </div>
 
-          <p className="text-center font-body-sm text-body-sm text-outline">
+          <p className="text-center text-xs text-muted-foreground">
             © 2026 FinCore Sistemas. Ambiente seguro.
           </p>
         </div>
       </main>
 
-      {/* Painel de valor + acessos mock */}
-      <aside className="relative hidden w-[52%] flex-col justify-center overflow-hidden bg-primary-container px-16 lg:flex xl:px-24">
-        <div className="absolute inset-0 z-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-secondary/20 via-transparent to-transparent" />
-        <div className="relative z-10 flex max-w-2xl flex-col gap-8">
-          <div className="mb-2 h-1 w-16 rounded-full bg-secondary" />
-          <h2 className="font-display-lg text-display-lg leading-tight text-on-primary">
+      {/* Painel lateral */}
+      <aside className="relative hidden w-[52%] flex-col justify-center overflow-hidden bg-sidebar px-16 lg:flex xl:px-24">
+        <div className="relative z-10 flex max-w-2xl flex-col gap-6">
+          <div className="h-1 w-16 rounded-full bg-sidebar-primary" />
+          <h2 className="text-3xl font-extrabold leading-tight text-sidebar-accent-foreground xl:text-4xl">
             FinCore: o coração financeiro da sua PME
           </h2>
-          <p className="font-body-lg text-body-lg leading-relaxed text-inverse-primary">
+          <p className="text-base leading-relaxed text-sidebar-foreground/80">
             Gestão unificada, conciliação inteligente e controle absoluto de alçadas. Simplifique
             operações complexas com a segurança que seu negócio exige.
           </p>
 
-          <div className="relative flex flex-col gap-3 overflow-hidden rounded-2xl border border-white/10 bg-surface/5 p-6 backdrop-blur-md">
-            <div className="absolute -right-12 -top-12 size-32 rounded-full bg-secondary/20 blur-3xl" />
-            <span className="material-symbols-outlined text-[28px] text-secondary-fixed">key</span>
-            <p className="font-headline-sm text-headline-sm text-secondary-fixed">
+          <div className="mt-4 flex flex-col gap-3 rounded-2xl border border-sidebar-border bg-sidebar-accent/40 p-6">
+            <KeyRound className="size-6 text-sidebar-primary" />
+            <p className="text-lg font-bold text-sidebar-accent-foreground">
               Acessos mock do protótipo
             </p>
-            <p className="font-body-sm text-body-sm text-inverse-primary">
-              Senha única: <code className="font-data-mono text-secondary-fixed">fincore123</code>.
-              O e-mail define o perfil de acesso carregado na sessão.
+            <p className="text-sm text-sidebar-foreground/80">
+              Senha única: <code className="num text-sidebar-primary">fincore123</code>. O e-mail
+              define o perfil de acesso carregado na sessão.
             </p>
-            <ul className="mt-2 flex flex-col divide-y divide-white/10">
+            <ul className="mt-2 flex flex-col divide-y divide-sidebar-border">
               {PERFIS.map((p) => (
-                <li key={p.id} className="flex items-center justify-between gap-4 py-2">
+                <li key={p.id} className="flex items-center justify-between gap-4 py-2.5">
                   <button
                     type="button"
                     onClick={() => {
@@ -354,14 +328,14 @@ function AuthPage() {
                     }}
                     className="min-w-0 text-left"
                   >
-                    <span className="block truncate font-data-mono text-body-sm text-secondary-fixed underline decoration-dotted">
+                    <span className="num block truncate text-sm text-sidebar-primary underline decoration-dotted">
                       {p.email}
                     </span>
-                    <span className="block font-body-sm text-body-sm text-inverse-primary">
+                    <span className="block text-xs text-sidebar-foreground/70">
                       {p.nome} · {p.usuario}
                     </span>
                   </button>
-                  <span className="shrink-0 rounded-full bg-white/10 px-2 py-0.5 font-label-md text-[10px] uppercase tracking-wider text-secondary-fixed">
+                  <span className="shrink-0 rounded-full bg-sidebar-accent px-2 py-0.5 text-[0.65rem] font-bold uppercase tracking-wider text-sidebar-accent-foreground">
                     {p.somenteLeitura ? "leitura" : "escrita"}
                   </span>
                 </li>
@@ -369,7 +343,6 @@ function AuthPage() {
             </ul>
           </div>
         </div>
-        <div className="absolute bottom-0 right-0 z-0 size-96 translate-x-1/3 translate-y-1/3 rounded-tl-full bg-primary opacity-50 blur-2xl" />
       </aside>
     </div>
   );

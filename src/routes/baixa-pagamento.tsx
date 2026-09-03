@@ -1,13 +1,25 @@
 import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
+import { Building2, CheckCircle2, Info, Lock, Split, TicketCheck } from "lucide-react";
 import { PageHeader } from "@/components/app/PageHeader";
-import { StatusBadge } from "@/components/app/StatusBadge";
+import { StatusBadge, tomDoStatus } from "@/components/app/StatusBadge";
 import { usePerfil } from "@/components/app/PerfilContext";
 import { useAuditoria } from "@/components/app/AuditoriaContext";
 import { useEmpresa } from "@/components/app/EmpresaContext";
 import { useDados } from "@/components/app/DadosContext";
 import { useFeatures } from "@/components/app/FeaturesContext";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { brl, centrosDeCusto, contasBancarias } from "@/lib/mock-data";
 
 export const Route = createFileRoute("/baixa-pagamento")({
@@ -16,12 +28,12 @@ export const Route = createFileRoute("/baixa-pagamento")({
   }),
   head: () => ({
     meta: [
-      { title: "Baixa de pagamento — FinCore ERP" },
+      { title: "Baixa de pagamento — FinCore" },
       {
         name: "description",
         content: "Liquide títulos informando juros, desconto, conta de saída e forma de pagamento.",
       },
-      { property: "og:title", content: "Baixa de pagamento — FinCore ERP" },
+      { property: "og:title", content: "Baixa de pagamento — FinCore" },
       {
         property: "og:description",
         content: "Baixa total ou parcial com cálculo automático do valor devido.",
@@ -32,8 +44,6 @@ export const Route = createFileRoute("/baixa-pagamento")({
 });
 
 const FORMAS = ["PIX", "TED", "Boleto bancário", "Débito automático"];
-
-const labelCls = "mb-1 block font-label-md text-label-md text-on-surface-variant";
 
 function BaixaPagamento() {
   const router = useRouter();
@@ -98,27 +108,41 @@ function BaixaPagamento() {
     void router.navigate({ to: "/contas-a-pagar" });
   };
 
+  const variabilidade = [
+    {
+      o_que: "O rateio exibido no resumo do título só aparece com centro de custo contratado.",
+      por: "feature centro_custo",
+      pv: "PV7",
+    },
+    {
+      o_que: "A lista de contas de saída vem do cadastro bancário definido no onboarding.",
+      por: "adaptador bancário do tenant",
+      pv: "PV2",
+    },
+    {
+      o_que: "A tela é inacessível para perfis somente leitura.",
+      por: "perfil Contador externo",
+      pv: "PV4",
+    },
+  ];
+
   if (leitura) {
     return (
       <>
         <PageHeader
           titulo="Baixa de pagamento"
           descricao="Liquidação de títulos a pagar."
-          variabilidade={[
-            {
-              o_que: "A tela inteira fica indisponível para perfis somente leitura.",
-              por: "perfil Contador externo",
-              pv: "PV4",
-            },
-          ]}
+          variabilidade={variabilidade}
         />
-        <div className="flex items-start gap-3 rounded-xl border border-outline-variant bg-surface-container-lowest p-md shadow-sm">
-          <span className="material-symbols-outlined text-on-surface-variant">lock</span>
-          <p className="font-body-md text-body-md text-on-surface-variant">
-            O perfil <strong>{perfil.nome}</strong> não executa baixas. Consulte o histórico de
-            liquidações em Contas a pagar.
-          </p>
-        </div>
+        <Card className="shadow-card">
+          <CardContent className="flex items-start gap-3 pt-6">
+            <Lock className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+            <p className="text-sm text-muted-foreground">
+              O perfil <strong>{perfil.nome}</strong> não executa baixas. Consulte o histórico de
+              liquidações em Contas a pagar.
+            </p>
+          </CardContent>
+        </Card>
       </>
     );
   }
@@ -128,235 +152,192 @@ function BaixaPagamento() {
       <PageHeader
         titulo="Baixa de pagamento"
         descricao="Registre a liquidação com juros, desconto e conta de saída."
-        variabilidade={[
-          {
-            o_que:
-              "O rateio exibido no resumo do título só aparece com centro de custo contratado.",
-            por: "feature centro_custo",
-            pv: "PV7",
-          },
-          {
-            o_que: "A lista de contas de saída vem do cadastro bancário definido no onboarding.",
-            por: "adaptador bancário do tenant",
-            pv: "PV2",
-          },
-          {
-            o_que: "A tela é inacessível para perfis somente leitura.",
-            por: "perfil Contador externo",
-            pv: "PV4",
-          },
-        ]}
+        variabilidade={variabilidade}
       />
 
       {abertos.length === 0 ? (
-        <div className="flex items-start gap-3 rounded-xl border border-outline-variant bg-surface-container-lowest p-md shadow-sm">
-          <span className="material-symbols-outlined text-secondary">task_alt</span>
-          <p className="font-body-md text-body-md text-on-surface-variant">
-            Nenhum título em aberto para liquidar.
-          </p>
-        </div>
+        <Card className="shadow-card">
+          <CardContent className="flex items-start gap-3 pt-6">
+            <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-success" />
+            <p className="text-sm text-muted-foreground">Nenhum título em aberto para liquidar.</p>
+          </CardContent>
+        </Card>
       ) : (
-        <div className="flex flex-col overflow-hidden rounded-xl border border-outline-variant bg-surface-container-lowest shadow-sm">
-          {/* Seletor de título */}
-          <div className="flex flex-col gap-3 border-b border-outline-variant p-md sm:flex-row sm:items-end">
-            <div className="flex-1">
-              <label className={labelCls} htmlFor="b-titulo">
-                Título a liquidar
-              </label>
-              <select
-                id="b-titulo"
-                className="w-full rounded-lg border border-outline-variant bg-surface px-3 py-2 font-body-md text-body-md focus:border-secondary focus:outline-none focus:ring-1 focus:ring-secondary"
-                value={selecionado}
-                onChange={(e) => {
-                  setSelecionado(e.target.value);
-                  setValorPago("");
-                  setJuros("0");
-                  setDesconto("0");
-                }}
-              >
-                {abertos.map((t) => (
-                  <option key={t.id} value={t.id}>
-                    {t.documento} · {t.fornecedor} · {brl(t.valor)}
-                  </option>
-                ))}
-              </select>
-            </div>
-            {titulo ? (
-              <StatusBadge tone={titulo.status === "Atrasado" ? "erro" : "neutro"}>
-                {titulo.status} · venc. {titulo.vencimento}
-              </StatusBadge>
-            ) : null}
-          </div>
+        <div className="flex flex-col gap-4">
+          <Card className="shadow-card">
+            <CardContent className="flex flex-col gap-3 pt-6 sm:flex-row sm:items-end">
+              <div className="flex-1 space-y-1.5">
+                <Label htmlFor="b-titulo">Título a liquidar</Label>
+                <Select
+                  value={selecionado}
+                  onValueChange={(v) => {
+                    setSelecionado(v);
+                    setValorPago("");
+                    setJuros("0");
+                    setDesconto("0");
+                  }}
+                >
+                  <SelectTrigger id="b-titulo">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {abertos.map((t) => (
+                      <SelectItem key={t.id} value={t.id}>
+                        {t.documento} · {t.fornecedor} · {brl(t.valor)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              {titulo ? (
+                <StatusBadge tone={tomDoStatus(titulo.status)}>
+                  {titulo.status} · venc. {titulo.vencimento}
+                </StatusBadge>
+              ) : null}
+            </CardContent>
+          </Card>
 
           {titulo ? (
             <>
-              {/* Beneficiário */}
-              <div className="flex flex-col justify-between gap-4 border-b border-outline-variant bg-surface p-md sm:flex-row sm:items-center">
-                <div className="flex items-center gap-4">
-                  <div className="flex size-12 shrink-0 items-center justify-center rounded-full bg-primary-fixed text-primary">
-                    <span className="material-symbols-outlined filled">domain</span>
+              <Card className="shadow-card">
+                <CardContent className="flex flex-col justify-between gap-4 pt-6 sm:flex-row sm:items-center">
+                  <div className="flex items-center gap-4">
+                    <span className="grid size-12 shrink-0 place-items-center rounded-full bg-accent text-accent-foreground">
+                      <Building2 className="size-5" />
+                    </span>
+                    <div className="min-w-0">
+                      <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
+                        Beneficiário
+                      </p>
+                      <p className="text-base font-semibold">{titulo.fornecedor}</p>
+                      <p className="num text-xs text-muted-foreground">
+                        Documento {titulo.documento} · {titulo.categoria}
+                      </p>
+                    </div>
                   </div>
-                  <div className="min-w-0">
-                    <p className="font-label-md text-label-md uppercase tracking-wider text-on-surface-variant">
-                      Beneficiário
+                  <div className="text-left sm:text-right">
+                    <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
+                      Valor original
                     </p>
-                    <p className="font-body-lg text-body-lg font-semibold text-on-surface">
-                      {titulo.fornecedor}
-                    </p>
-                    <p className="font-data-mono text-body-sm text-on-surface-variant">
-                      Documento {titulo.documento} · {titulo.categoria}
-                    </p>
+                    <p className="num text-2xl font-bold">{brl(titulo.valor)}</p>
                   </div>
-                </div>
-                <div className="text-left sm:text-right">
-                  <p className="font-label-md text-label-md uppercase tracking-wider text-on-surface-variant">
-                    Valor original
-                  </p>
-                  <p className="font-data-mono text-display-lg tracking-tight text-primary">
-                    {brl(titulo.valor)}
-                  </p>
-                </div>
-              </div>
+                </CardContent>
+              </Card>
 
-              <div className="grid grid-cols-1 gap-lg p-md lg:grid-cols-12 md:p-lg">
+              <div className="grid items-start gap-4 lg:grid-cols-12">
                 {/* Acréscimos e deduções */}
-                <section className="flex flex-col gap-md lg:col-span-5">
-                  <h2 className="border-b border-outline-variant pb-2 font-label-md text-label-md uppercase tracking-wider text-primary">
-                    Acréscimos e deduções
-                  </h2>
-                  <div className="flex flex-col gap-4 rounded-lg border border-outline-variant bg-surface-container-lowest p-md shadow-sm">
-                    <div>
-                      <label className={labelCls} htmlFor="b-juros">
-                        Juros / multa (+)
-                      </label>
+                <Card className="shadow-card lg:col-span-5">
+                  <CardHeader>
+                    <CardTitle className="text-base">Acréscimos e deduções</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="space-y-1.5">
+                      <Label htmlFor="b-juros">Juros / multa (+)</Label>
                       <div className="relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 font-data-mono text-on-surface-variant">
+                        <span className="num pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
                           R$
                         </span>
-                        <input
+                        <Input
                           id="b-juros"
                           inputMode="decimal"
-                          className="w-full rounded-lg border border-outline-variant bg-surface-container-lowest py-2 pl-10 pr-3 font-data-mono text-data-mono transition-all focus:border-secondary focus:ring-1 focus:ring-secondary"
+                          className="num pl-9"
                           value={juros}
                           onChange={(e) => setJuros(e.target.value)}
                         />
                       </div>
                     </div>
-                    <div>
-                      <label className={labelCls} htmlFor="b-desc">
-                        Desconto (−)
-                      </label>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="b-desc">Desconto (−)</Label>
                       <div className="relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 font-data-mono text-on-surface-variant">
+                        <span className="num pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
                           R$
                         </span>
-                        <input
+                        <Input
                           id="b-desc"
                           inputMode="decimal"
-                          className="w-full rounded-lg border border-outline-variant bg-surface-container-lowest py-2 pl-10 pr-3 font-data-mono text-data-mono transition-all focus:border-secondary focus:ring-1 focus:ring-secondary"
+                          className="num pl-9"
                           value={desconto}
                           onChange={(e) => setDesconto(e.target.value)}
                         />
                       </div>
                     </div>
-                    <hr className="border-dashed border-outline-variant" />
-                    <div className="flex items-center justify-between gap-3 rounded bg-surface-container p-3">
-                      <span className="font-label-md text-label-md font-bold text-on-surface">
-                        Total calculado
-                      </span>
-                      <span className="font-data-mono text-data-mono font-bold text-primary">
-                        {brl(totalCalculado)}
-                      </span>
+                    <div className="flex items-center justify-between gap-3 rounded-lg bg-muted/60 p-3">
+                      <span className="text-sm font-semibold">Total calculado</span>
+                      <span className="num font-bold">{brl(totalCalculado)}</span>
                     </div>
-                  </div>
 
-                  {/* Rateio — só com centro de custo */}
-                  {has("centro_custo") ? (
-                    <div className="rounded-lg border border-outline-variant bg-surface p-md">
-                      <h3 className="mb-2 flex items-center gap-2 font-label-md text-label-md uppercase tracking-wider text-on-surface-variant">
-                        <span className="material-symbols-outlined text-[18px]">call_split</span>
-                        Rateio do título
-                      </h3>
-                      <ul className="flex flex-col gap-1.5">
-                        {titulo.rateio.map((r) => {
-                          const c = centrosDeCusto.find((x) => x.id === r.centroId);
-                          return (
-                            <li
-                              key={r.centroId}
-                              className="flex items-center justify-between gap-2 font-body-sm text-body-sm"
-                            >
-                              <span className="text-on-surface">
-                                <span className="font-data-mono text-on-surface-variant">
-                                  {c?.codigo}
-                                </span>{" "}
-                                {c?.descricao}
-                              </span>
-                              <span className="font-data-mono text-on-surface-variant">
-                                {r.percentual}% · {brl((pagoNum * r.percentual) / 100)}
-                              </span>
-                            </li>
-                          );
-                        })}
-                      </ul>
-                    </div>
-                  ) : null}
-                </section>
-
-                {/* Dados da efetivação */}
-                <section className="flex flex-col gap-md lg:col-span-7">
-                  <h2 className="border-b border-outline-variant pb-2 font-label-md text-label-md uppercase tracking-wider text-primary">
-                    Dados da efetivação
-                  </h2>
-                  <div className="rounded-lg border border-outline-variant bg-surface-container-lowest p-md shadow-sm">
-                    <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
-                      <div>
-                        <label className={labelCls} htmlFor="b-data">
-                          Data de pagamento *
-                        </label>
-                        <div className="relative">
-                          <span className="material-symbols-outlined pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[18px] text-on-surface-variant">
-                            calendar_today
-                          </span>
-                          <input
-                            id="b-data"
-                            type="date"
-                            className="w-full rounded-lg border border-outline-variant bg-surface-container-lowest py-2 pl-10 pr-3 font-body-md text-body-md transition-all focus:border-secondary focus:ring-1 focus:ring-secondary"
-                            value={data}
-                            onChange={(e) => setData(e.target.value)}
-                          />
-                        </div>
+                    {has("centro_custo") ? (
+                      <div className="rounded-lg border border-border p-3">
+                        <p className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-muted-foreground">
+                          <Split className="size-3.5" /> Rateio do título
+                        </p>
+                        <ul className="flex flex-col gap-1.5">
+                          {titulo.rateio.map((r) => {
+                            const c = centrosDeCusto.find((x) => x.id === r.centroId);
+                            return (
+                              <li
+                                key={r.centroId}
+                                className="flex items-center justify-between gap-2 text-xs"
+                              >
+                                <span>
+                                  <span className="num text-muted-foreground">{c?.codigo}</span>{" "}
+                                  {c?.descricao}
+                                </span>
+                                <span className="num text-muted-foreground">
+                                  {r.percentual}% · {brl((pagoNum * r.percentual) / 100)}
+                                </span>
+                              </li>
+                            );
+                          })}
+                        </ul>
                       </div>
+                    ) : null}
+                  </CardContent>
+                </Card>
 
-                      <div className="sm:col-span-2">
-                        <label className={labelCls} htmlFor="b-pago">
-                          Valor pago efetivamente *
-                        </label>
-                        <div className="relative rounded-lg shadow-sm">
-                          <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 font-data-mono text-[20px] font-medium text-on-surface-variant">
+                {/* Efetivação */}
+                <Card className="shadow-card lg:col-span-7">
+                  <CardHeader>
+                    <CardTitle className="text-base">Dados da efetivação</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <div className="space-y-1.5">
+                        <Label htmlFor="b-data">Data de pagamento *</Label>
+                        <Input
+                          id="b-data"
+                          type="date"
+                          className="num"
+                          value={data}
+                          onChange={(e) => setData(e.target.value)}
+                        />
+                      </div>
+                      <div className="space-y-1.5 sm:col-span-2">
+                        <Label htmlFor="b-pago">Valor pago efetivamente *</Label>
+                        <div className="relative">
+                          <span className="num pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-lg font-medium text-muted-foreground">
                             R$
                           </span>
-                          <input
+                          <Input
                             id="b-pago"
                             inputMode="decimal"
                             placeholder={totalCalculado.toFixed(2)}
-                            className="block w-full rounded-lg border-2 border-outline bg-surface-container-lowest py-4 pl-14 pr-4 font-data-mono text-[24px] font-semibold text-on-surface shadow-[inset_0_2px_4px_rgba(0,0,0,0.05)] transition-all focus:border-secondary focus:ring-2 focus:ring-secondary"
+                            className="num h-14 pl-14 text-xl font-semibold"
                             value={valorPago}
                             onChange={(e) => setValorPago(e.target.value)}
                           />
                         </div>
                         {parcial ? (
-                          <div className="mt-3 flex items-start gap-2 rounded-lg border border-tertiary-fixed-dim bg-tertiary-fixed p-3">
-                            <span className="material-symbols-outlined text-[20px] text-on-tertiary-fixed-variant">
-                              info
-                            </span>
+                          <div className="flex items-start gap-2 rounded-lg border border-warning/40 bg-warning/15 p-3">
+                            <Info className="mt-0.5 size-4 shrink-0 text-warning-foreground" />
                             <div>
-                              <p className="font-label-md text-label-md text-on-tertiary-fixed-variant">
+                              <p className="text-sm font-semibold text-warning-foreground">
                                 Pagamento parcial detectado
                               </p>
-                              <p className="mt-0.5 font-body-sm text-body-sm text-on-tertiary-fixed-variant">
+                              <p className="mt-0.5 text-xs text-warning-foreground/90">
                                 Um saldo remanescente de{" "}
-                                <strong className="font-data-mono">{brl(remanescente)}</strong> será
-                                mantido em aberto para este título.
+                                <strong className="num">{brl(remanescente)}</strong> será mantido em
+                                aberto para este título.
                               </p>
                             </div>
                           </div>
@@ -364,85 +345,58 @@ function BaixaPagamento() {
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                      <div>
-                        <label className={labelCls} htmlFor="b-conta">
-                          Conta de saída *
-                        </label>
-                        <div className="relative">
-                          <span className="material-symbols-outlined pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[18px] text-on-surface-variant">
-                            account_balance
-                          </span>
-                          <select
-                            id="b-conta"
-                            className="block w-full appearance-none rounded-lg border border-outline-variant bg-surface-container-lowest py-2 pl-10 pr-10 font-body-md text-body-md transition-all focus:border-secondary focus:ring-1 focus:ring-secondary"
-                            value={conta}
-                            onChange={(e) => setConta(e.target.value)}
-                          >
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <div className="space-y-1.5">
+                        <Label htmlFor="b-conta">Conta de saída *</Label>
+                        <Select value={conta} onValueChange={setConta}>
+                          <SelectTrigger id="b-conta">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
                             {contasBancarias.map((c) => (
-                              <option key={c} value={c}>
+                              <SelectItem key={c} value={c}>
                                 {c}
-                              </option>
+                              </SelectItem>
                             ))}
-                          </select>
-                          <span className="material-symbols-outlined pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-on-surface-variant">
-                            arrow_drop_down
-                          </span>
-                        </div>
+                          </SelectContent>
+                        </Select>
                       </div>
-
-                      <div>
-                        <label className={labelCls} htmlFor="b-forma">
-                          Forma de pagamento *
-                        </label>
-                        <div className="relative">
-                          <span className="material-symbols-outlined pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[18px] text-on-surface-variant">
-                            payments
-                          </span>
-                          <select
-                            id="b-forma"
-                            className="block w-full appearance-none rounded-lg border border-outline-variant bg-surface-container-lowest py-2 pl-10 pr-10 font-body-md text-body-md transition-all focus:border-secondary focus:ring-1 focus:ring-secondary"
-                            value={forma}
-                            onChange={(e) => setForma(e.target.value)}
-                          >
+                      <div className="space-y-1.5">
+                        <Label htmlFor="b-forma">Forma de pagamento *</Label>
+                        <Select value={forma} onValueChange={setForma}>
+                          <SelectTrigger id="b-forma">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
                             {FORMAS.map((f) => (
-                              <option key={f} value={f}>
+                              <SelectItem key={f} value={f}>
                                 {f}
-                              </option>
+                              </SelectItem>
                             ))}
-                          </select>
-                          <span className="material-symbols-outlined pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-on-surface-variant">
-                            arrow_drop_down
-                          </span>
-                        </div>
+                          </SelectContent>
+                        </Select>
                       </div>
                     </div>
-                  </div>
-                </section>
+                  </CardContent>
+                </Card>
               </div>
 
-              {/* Rodapé */}
-              <footer className="flex flex-wrap items-center justify-end gap-3 border-t border-outline-variant bg-surface-container-low px-md py-4 md:px-lg">
-                <span className="mr-auto hidden font-body-sm text-body-sm text-on-surface-variant sm:block">
-                  Ações de baixa são irreversíveis após confirmação.
-                </span>
-                <button
-                  type="button"
-                  onClick={() => void router.navigate({ to: "/contas-a-pagar" })}
-                  className="rounded-lg border border-primary px-6 py-2 font-label-md text-label-md text-primary transition-colors hover:bg-surface-container"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="button"
-                  disabled={pagoNum <= 0}
-                  onClick={confirmar}
-                  className="flex items-center gap-2 rounded-lg bg-secondary px-6 py-2 font-label-md text-label-md text-on-secondary shadow-sm transition-colors hover:bg-on-secondary-container disabled:cursor-not-allowed disabled:opacity-40"
-                >
-                  <span className="material-symbols-outlined text-[18px]">check_circle</span>
-                  Confirmar baixa
-                </button>
-              </footer>
+              <Card className="shadow-card">
+                <CardContent className="flex flex-wrap items-center justify-end gap-3 pt-6">
+                  <span className="mr-auto hidden text-xs text-muted-foreground sm:block">
+                    Ações de baixa são irreversíveis após confirmação.
+                  </span>
+                  <Button
+                    variant="outline"
+                    onClick={() => void router.navigate({ to: "/contas-a-pagar" })}
+                  >
+                    Cancelar
+                  </Button>
+                  <Button disabled={pagoNum <= 0} onClick={confirmar} className="gap-1.5">
+                    <TicketCheck className="size-4" /> Confirmar baixa
+                  </Button>
+                </CardContent>
+              </Card>
             </>
           ) : null}
         </div>

@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { AlertCircle, CheckCircle2, Plus, Save, ToggleLeft, Trash2 } from "lucide-react";
 import { PageHeader } from "@/components/app/PageHeader";
 import { StatusBadge } from "@/components/app/StatusBadge";
 import { useFeatures } from "@/components/app/FeaturesContext";
@@ -8,17 +9,29 @@ import { usePerfil } from "@/components/app/PerfilContext";
 import { useAuditoria } from "@/components/app/AuditoriaContext";
 import { useEmpresa } from "@/components/app/EmpresaContext";
 import { useDados } from "@/components/app/DadosContext";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { brl, centrosDeCusto, type RateioLinha } from "@/lib/mock-data";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/rateio")({
   head: () => ({
     meta: [
-      { title: "Rateio de título — FinCore ERP" },
+      { title: "Rateio de título — FinCore" },
       {
         name: "description",
         content: "Distribua o valor de um título entre centros de custo validando a soma de 100%.",
       },
-      { property: "og:title", content: "Rateio de título — FinCore ERP" },
+      { property: "og:title", content: "Rateio de título — FinCore" },
       { property: "og:description", content: "Rateio por centro de custo com validação de 100%." },
     ],
   }),
@@ -55,21 +68,21 @@ function Rateio() {
             },
           ]}
         />
-        <div className="flex items-start gap-3 rounded-xl border border-outline-variant bg-surface-container-lowest p-md shadow-sm">
-          <span className="material-symbols-outlined text-on-surface-variant">toggle_off</span>
-          <div>
-            <p className="font-label-md text-label-md text-primary">
-              Centro de custo não contratado
-            </p>
-            <p className="mt-1 font-body-md text-body-md text-on-surface-variant">
-              Ative a feature <code className="font-data-mono">centro_custo</code> em{" "}
-              <Link to="/configuracoes" className="text-secondary underline decoration-dotted">
-                Features do tenant
-              </Link>{" "}
-              (PV7) para ratear títulos.
-            </p>
-          </div>
-        </div>
+        <Card className="shadow-card">
+          <CardContent className="flex items-start gap-3 pt-6">
+            <ToggleLeft className="mt-0.5 size-5 shrink-0 text-muted-foreground" />
+            <div>
+              <p className="text-sm font-semibold">Centro de custo não contratado</p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Ative a feature <code className="num">centro_custo</code> em{" "}
+                <Link to="/configuracoes" className="text-primary underline decoration-dotted">
+                  Features do tenant
+                </Link>{" "}
+                (PV7) para ratear títulos.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
       </>
     );
   }
@@ -140,87 +153,78 @@ function Rateio() {
             pv: "PV4",
           },
         ]}
-        acoes={<StatusBadge tone={ok ? "ok" : "erro"}>Soma atual: {soma}% de 100%</StatusBadge>}
+        acoes={
+          <StatusBadge tone={ok ? "success" : "danger"}>Soma atual: {soma}% de 100%</StatusBadge>
+        }
       />
 
       {elegiveis.length === 0 ? (
-        <div className="rounded-xl border border-outline-variant bg-surface-container-lowest p-md shadow-sm">
-          <p className="font-body-md text-body-md text-on-surface-variant">
-            Nenhum título disponível para rateio.
-          </p>
-        </div>
+        <Card className="shadow-card">
+          <CardContent className="pt-6">
+            <p className="text-sm text-muted-foreground">Nenhum título disponível para rateio.</p>
+          </CardContent>
+        </Card>
       ) : (
-        <div className="grid grid-cols-1 gap-lg xl:grid-cols-3">
-          {/* Título */}
-          <div className="flex flex-col gap-md xl:col-span-1">
-            <div className="rounded-xl border border-outline-variant bg-surface-container-lowest p-md shadow-sm">
-              <label
-                htmlFor="r-titulo"
-                className="mb-1.5 block font-label-md text-label-md text-on-surface-variant"
-              >
-                Título a ratear
-              </label>
-              <select
-                id="r-titulo"
-                value={tituloId}
-                onChange={(e) => setTituloId(e.target.value)}
-                className="w-full rounded-lg border border-outline-variant bg-surface px-3 py-2 font-body-md text-body-md focus:border-secondary focus:outline-none focus:ring-1 focus:ring-secondary"
-              >
-                {elegiveis.map((t) => (
-                  <option key={t.id} value={t.id}>
-                    {t.documento} · {brl(t.valor)}
-                  </option>
-                ))}
-              </select>
-            </div>
+        <div className="grid items-start gap-4 xl:grid-cols-3">
+          <div className="flex flex-col gap-4">
+            <Card className="shadow-card">
+              <CardContent className="space-y-1.5 pt-6">
+                <Label htmlFor="r-titulo">Título a ratear</Label>
+                <Select value={tituloId} onValueChange={setTituloId}>
+                  <SelectTrigger id="r-titulo">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {elegiveis.map((t) => (
+                      <SelectItem key={t.id} value={t.id}>
+                        {t.documento} · {brl(t.valor)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </CardContent>
+            </Card>
 
             {titulo ? (
-              <div className="rounded-xl border border-outline-variant bg-surface-container-lowest p-md shadow-sm">
-                <p className="font-label-md text-label-md uppercase tracking-wider text-on-surface-variant">
-                  Título selecionado
-                </p>
-                <p className="mt-1 font-body-lg text-body-lg font-semibold text-primary">
-                  {titulo.fornecedor}
-                </p>
-                <p className="font-data-mono text-body-sm text-on-surface-variant">
-                  {titulo.documento} · venc. {titulo.vencimento}
-                </p>
-                <p className="mt-3 font-data-mono text-display-lg leading-tight text-primary">
-                  {brl(titulo.valor)}
-                </p>
-                <p className="mt-1 font-body-sm text-body-sm text-on-surface-variant">
-                  {titulo.categoria} · {titulo.status}
-                </p>
-              </div>
+              <Card className="shadow-card">
+                <CardContent className="pt-6">
+                  <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
+                    Título selecionado
+                  </p>
+                  <p className="mt-1 font-semibold">{titulo.fornecedor}</p>
+                  <p className="num text-xs text-muted-foreground">
+                    {titulo.documento} · venc. {titulo.vencimento}
+                  </p>
+                  <p className="num mt-3 text-2xl font-bold">{brl(titulo.valor)}</p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    {titulo.categoria} · {titulo.status}
+                  </p>
+                </CardContent>
+              </Card>
             ) : null}
 
-            <div className="flex flex-col gap-2 rounded-xl border border-outline-variant bg-surface p-md">
-              <p className="font-label-md text-label-md text-on-surface-variant">Atalhos</p>
-              <button
-                type="button"
-                onClick={distribuirIgualmente}
-                className="rounded-lg border border-outline-variant px-3 py-2 text-left font-label-md text-label-md text-primary transition-colors hover:bg-surface-container"
-              >
-                Distribuir igualmente entre as linhas
-              </button>
-              <button
-                type="button"
-                onClick={usarPadrao}
-                className="rounded-lg border border-outline-variant px-3 py-2 text-left font-label-md text-label-md text-primary transition-colors hover:bg-surface-container"
-              >
-                Usar o rateio padrão dos centros
-              </button>
-            </div>
+            <Card className="shadow-card">
+              <CardHeader>
+                <CardTitle className="text-base">Atalhos</CardTitle>
+              </CardHeader>
+              <CardContent className="flex flex-col gap-2">
+                <Button variant="outline" className="justify-start" onClick={distribuirIgualmente}>
+                  Distribuir igualmente entre as linhas
+                </Button>
+                <Button variant="outline" className="justify-start" onClick={usarPadrao}>
+                  Usar o rateio padrão dos centros
+                </Button>
+              </CardContent>
+            </Card>
           </div>
 
-          {/* Linhas */}
-          <div className="flex flex-col overflow-hidden rounded-xl border border-outline-variant bg-surface-container-lowest shadow-sm xl:col-span-2">
-            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-outline-variant bg-surface px-md py-3">
-              <h3 className="font-headline-sm text-headline-sm text-primary">
-                Distribuição por centro de custo
-              </h3>
-              <button
-                type="button"
+          <Card className="shadow-card xl:col-span-2">
+            <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-3">
+              <CardTitle className="text-base">Distribuição por centro de custo</CardTitle>
+              <Button
+                size="sm"
+                variant="outline"
+                className="gap-1.5 border-dashed"
                 disabled={linhas.length >= centrosDeCusto.length}
                 onClick={() =>
                   setLinhas((l) => [
@@ -233,53 +237,39 @@ function Rateio() {
                     },
                   ])
                 }
-                className="flex items-center gap-1 rounded-lg border border-dashed border-outline-variant px-3 py-1.5 font-label-md text-label-md text-on-surface-variant transition-colors hover:bg-surface-container disabled:opacity-40"
               >
-                <span className="material-symbols-outlined text-[16px]">add</span>
-                Adicionar centro
-              </button>
-            </div>
-
-            <div className="flex flex-col divide-y divide-outline-variant">
-              {linhas.map((l, i) => {
-                const centro = centrosDeCusto.find((c) => c.id === l.centroId);
-                return (
-                  <div key={i} className="flex flex-wrap items-center gap-3 p-md">
-                    <select
-                      value={l.centroId}
-                      onChange={(e) =>
-                        setLinhas((s) =>
-                          s.map((x, idx) => (idx === i ? { ...x, centroId: e.target.value } : x)),
-                        )
-                      }
-                      className="min-w-0 flex-1 rounded-lg border border-outline-variant bg-surface px-3 py-2 font-body-md text-body-md focus:border-secondary focus:outline-none focus:ring-1 focus:ring-secondary"
-                    >
-                      {centrosDeCusto.map((c) => (
-                        <option key={c.id} value={c.id}>
-                          {c.codigo} — {c.descricao}
-                        </option>
-                      ))}
-                    </select>
-
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="range"
-                        min={0}
-                        max={100}
-                        value={l.percentual}
-                        onChange={(e) =>
+                <Plus className="size-3.5" /> Adicionar centro
+              </Button>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex flex-col divide-y divide-border">
+                {linhas.map((l, i) => {
+                  const centro = centrosDeCusto.find((c) => c.id === l.centroId);
+                  return (
+                    <div key={i} className="flex flex-wrap items-center gap-3 py-3">
+                      <Select
+                        value={l.centroId}
+                        onValueChange={(v) =>
                           setLinhas((s) =>
-                            s.map((x, idx) =>
-                              idx === i ? { ...x, percentual: Number(e.target.value) } : x,
-                            ),
+                            s.map((x, idx) => (idx === i ? { ...x, centroId: v } : x)),
                           )
                         }
-                        className="w-24 accent-[var(--color-secondary)] sm:w-32"
-                        aria-label={`Percentual de ${centro?.descricao ?? ""}`}
-                      />
-                      <div className="relative w-24">
+                      >
+                        <SelectTrigger className="min-w-0 flex-1">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {centrosDeCusto.map((c) => (
+                            <SelectItem key={c.id} value={c.id}>
+                              {c.codigo} — {c.descricao}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+
+                      <div className="flex items-center gap-2">
                         <input
-                          type="number"
+                          type="range"
                           min={0}
                           max={100}
                           value={l.percentual}
@@ -290,86 +280,94 @@ function Rateio() {
                               ),
                             )
                           }
-                          className="w-full rounded-lg border border-outline-variant bg-surface px-3 py-2 pr-7 font-data-mono text-data-mono focus:border-secondary focus:outline-none focus:ring-1 focus:ring-secondary"
+                          className="w-24 accent-[var(--primary)] sm:w-32"
+                          aria-label={`Percentual de ${centro?.descricao ?? ""}`}
                         />
-                        <span className="absolute right-2.5 top-1/2 -translate-y-1/2 font-data-mono text-on-surface-variant">
-                          %
-                        </span>
+                        <div className="relative w-24">
+                          <Input
+                            type="number"
+                            min={0}
+                            max={100}
+                            className="num pr-7"
+                            value={l.percentual}
+                            onChange={(e) =>
+                              setLinhas((s) =>
+                                s.map((x, idx) =>
+                                  idx === i ? { ...x, percentual: Number(e.target.value) } : x,
+                                ),
+                              )
+                            }
+                          />
+                          <span className="num pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+                            %
+                          </span>
+                        </div>
                       </div>
+
+                      <span className="num w-28 text-right text-sm">
+                        {brl((valor * (Number(l.percentual) || 0)) / 100)}
+                      </span>
+
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        aria-label="Remover linha"
+                        disabled={linhas.length === 1}
+                        className="hover:text-destructive"
+                        onClick={() => setLinhas((s) => s.filter((_, idx) => idx !== i))}
+                      >
+                        <Trash2 className="size-4" />
+                      </Button>
                     </div>
-
-                    <span className="w-28 text-right font-data-mono text-data-mono text-on-surface">
-                      {brl((valor * (Number(l.percentual) || 0)) / 100)}
-                    </span>
-
-                    <button
-                      type="button"
-                      aria-label="Remover linha"
-                      disabled={linhas.length === 1}
-                      onClick={() => setLinhas((s) => s.filter((_, idx) => idx !== i))}
-                      className="rounded p-1 text-on-surface-variant transition-colors hover:bg-error-container hover:text-error disabled:opacity-30"
-                    >
-                      <span className="material-symbols-outlined text-[20px]">delete</span>
-                    </button>
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* Barra de validação */}
-            <div className="border-t border-outline-variant bg-surface-container-low p-md">
-              <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-                <span className="font-label-md text-label-md text-on-surface-variant">
-                  Validação da soma
-                </span>
-                <span
-                  className={`font-data-mono text-data-mono font-bold ${ok ? "text-secondary" : "text-error"}`}
-                >
-                  {soma}% · {brl((valor * soma) / 100)} de {brl(valor)}
-                </span>
+                  );
+                })}
               </div>
-              <div className="h-2.5 overflow-hidden rounded-full bg-surface-variant">
-                <div
-                  className={`h-full rounded-full transition-all ${ok ? "bg-secondary" : soma > 100 ? "bg-error" : "bg-tertiary-fixed-dim"}`}
-                  style={{ width: `${Math.min(soma, 100)}%` }}
-                />
+
+              <div className="rounded-lg border border-border bg-muted/40 p-4">
+                <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+                  <span className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
+                    Validação da soma
+                  </span>
+                  <span className={cn("num font-bold", ok ? "text-success" : "text-destructive")}>
+                    {soma}% · {brl((valor * soma) / 100)} de {brl(valor)}
+                  </span>
+                </div>
+                <div className="h-2.5 overflow-hidden rounded-full bg-muted">
+                  <div
+                    className={cn(
+                      "h-full rounded-full transition-all",
+                      ok ? "bg-success" : soma > 100 ? "bg-destructive" : "bg-warning",
+                    )}
+                    style={{ width: `${Math.min(soma, 100)}%` }}
+                  />
+                </div>
+                {ok ? (
+                  <p className="mt-2 flex items-center gap-1.5 text-xs text-success">
+                    <CheckCircle2 className="size-3.5" />
+                    Soma válida — o rateio pode ser salvo.
+                  </p>
+                ) : (
+                  <p className="mt-2 flex items-center gap-1.5 text-xs text-destructive">
+                    <AlertCircle className="size-3.5" />
+                    {soma > 100
+                      ? `Reduza ${soma - 100}% para fechar em 100%.`
+                      : `Faltam ${100 - soma}% para fechar em 100%.`}
+                  </p>
+                )}
               </div>
-              {!ok ? (
-                <p className="mt-2 flex items-center gap-1 font-body-sm text-body-sm text-error">
-                  <span className="material-symbols-outlined text-[14px]">error</span>
-                  {soma > 100
-                    ? `Reduza ${soma - 100}% para fechar em 100%.`
-                    : `Faltam ${100 - soma}% para fechar em 100%.`}
-                </p>
-              ) : (
-                <p className="mt-2 flex items-center gap-1 font-body-sm text-body-sm text-secondary">
-                  <span className="material-symbols-outlined text-[14px]">check_circle</span>
-                  Soma válida — o rateio pode ser salvo.
-                </p>
+
+              {leitura ? null : (
+                <div className="flex justify-end gap-2 border-t border-border pt-4">
+                  <Button variant="outline" onClick={() => setLinhas(titulo?.rateio ?? [])}>
+                    Descartar alterações
+                  </Button>
+                  <Button disabled={!ok} onClick={salvar} className="gap-1.5">
+                    <Save className="size-4" /> Salvar rateio
+                  </Button>
+                </div>
               )}
-            </div>
-
-            {leitura ? null : (
-              <div className="flex justify-end gap-3 border-t border-outline-variant p-md">
-                <button
-                  type="button"
-                  onClick={() => setLinhas(titulo?.rateio ?? [])}
-                  className="rounded-lg border border-outline px-4 py-2 font-label-md text-label-md text-on-surface transition-colors hover:bg-surface-container"
-                >
-                  Descartar alterações
-                </button>
-                <button
-                  type="button"
-                  disabled={!ok}
-                  onClick={salvar}
-                  className="flex items-center gap-2 rounded-lg bg-secondary px-5 py-2 font-label-md text-label-md text-on-secondary shadow-sm transition-colors hover:bg-on-secondary-container disabled:cursor-not-allowed disabled:opacity-40"
-                >
-                  <span className="material-symbols-outlined text-[18px]">save</span>
-                  Salvar rateio
-                </button>
-              </div>
-            )}
-          </div>
+            </CardContent>
+          </Card>
         </div>
       )}
     </>

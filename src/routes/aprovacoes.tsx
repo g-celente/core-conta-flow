@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
+import { CheckCircle2, CreditCard, FileCheck2, ShieldCheck, ToggleLeft, Undo2 } from "lucide-react";
 import { PageHeader } from "@/components/app/PageHeader";
 import { StatusBadge, tomDoStatus } from "@/components/app/StatusBadge";
 import { KpiCard } from "@/components/app/KpiCard";
@@ -9,6 +10,10 @@ import { useFeatures } from "@/components/app/FeaturesContext";
 import { useAuditoria } from "@/components/app/AuditoriaContext";
 import { useEmpresa } from "@/components/app/EmpresaContext";
 import { useDados } from "@/components/app/DadosContext";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog,
   DialogContent,
@@ -18,16 +23,17 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { brl, centrosDeCusto, type TituloPagar } from "@/lib/mock-data";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/aprovacoes")({
   head: () => ({
     meta: [
-      { title: "Fila de aprovação — FinCore ERP" },
+      { title: "Fila de aprovação — FinCore" },
       {
         name: "description",
         content: "Títulos acima da alçada do operador aguardando aprovação ou devolução.",
       },
-      { property: "og:title", content: "Fila de aprovação — FinCore ERP" },
+      { property: "og:title", content: "Fila de aprovação — FinCore" },
       { property: "og:description", content: "Aprove ou devolva títulos com justificativa." },
     ],
   }),
@@ -66,22 +72,22 @@ function Aprovacoes() {
             },
           ]}
         />
-        <div className="flex items-start gap-3 rounded-xl border border-outline-variant bg-surface-container-lowest p-md shadow-sm">
-          <span className="material-symbols-outlined text-on-surface-variant">toggle_off</span>
-          <div>
-            <p className="font-label-md text-label-md text-primary">
-              Aprovação por alçada não contratada
-            </p>
-            <p className="mt-1 font-body-md text-body-md text-on-surface-variant">
-              Neste tenant os títulos são salvos direto como “Em aberto”. Ative a feature{" "}
-              <code className="font-data-mono">alcada</code> em{" "}
-              <Link to="/configuracoes" className="text-secondary underline decoration-dotted">
-                Features do tenant
-              </Link>{" "}
-              (PV3) para habilitar a fila.
-            </p>
-          </div>
-        </div>
+        <Card className="shadow-card">
+          <CardContent className="flex items-start gap-3 pt-6">
+            <ToggleLeft className="mt-0.5 size-5 shrink-0 text-muted-foreground" />
+            <div>
+              <p className="text-sm font-semibold">Aprovação por alçada não contratada</p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Neste tenant os títulos são salvos direto como “Em aberto”. Ative a feature{" "}
+                <code className="num">alcada</code> em{" "}
+                <Link to="/configuracoes" className="text-primary underline decoration-dotted">
+                  Features do tenant
+                </Link>{" "}
+                (PV3) para habilitar a fila.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
       </>
     );
   }
@@ -137,30 +143,31 @@ function Aprovacoes() {
           },
           {
             o_que: "Os botões Aprovar e Devolver ficam ocultos para o perfil somente leitura.",
-            por: "perfis Aprovador e Contador externo",
+            por: "perfil Contador externo",
             pv: "PV4",
           },
         ]}
         acoes={
           <>
-            <StatusBadge tone="atencao">{pendentes.length} aguardando</StatusBadge>
+            <StatusBadge tone="warning">{pendentes.length} aguardando</StatusBadge>
             <StatusBadge tone="info">Total {brl(total)}</StatusBadge>
           </>
         }
       />
 
-      <div className="mb-lg grid grid-cols-1 gap-md sm:grid-cols-3">
+      <div className="mb-6 grid gap-4 sm:grid-cols-3">
         <KpiCard
           rotulo={`Total pendente (${pendentes.length})`}
-          icone="fact_check"
-          corIcone="text-secondary"
-          corValor="text-secondary"
+          icone={FileCheck2}
+          corIcone="text-primary"
+          corValor="text-primary"
           valor={brl(total)}
           rodape={`Alçada do perfil ${perfil.nome}: ${brl(ALCADA)}`}
         />
         <KpiCard
           rotulo="Aprovados na sessão"
-          icone="task_alt"
+          icone={CheckCircle2}
+          corIcone="text-success"
           valor={String(
             titulos.filter((t) => t.historico.some((h) => h.descricao.includes("Aprovado"))).length,
           )}
@@ -168,8 +175,8 @@ function Aprovacoes() {
         />
         <KpiCard
           rotulo="Devolvidos na sessão"
-          icone="undo"
-          corIcone="text-error"
+          icone={Undo2}
+          corIcone="text-destructive"
           valor={String(
             titulos.filter((t) => t.historico.some((h) => h.descricao.startsWith("Devolvido")))
               .length,
@@ -178,20 +185,22 @@ function Aprovacoes() {
         />
       </div>
 
-      <div className="grid grid-cols-1 gap-lg xl:grid-cols-5">
+      <div className="grid items-start gap-4 xl:grid-cols-5">
         {/* Fila */}
-        <div className="flex flex-col gap-md xl:col-span-2">
-          <h3 className="font-label-md text-label-md uppercase tracking-wider text-on-surface-variant">
+        <div className="flex flex-col gap-3 xl:col-span-2">
+          <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
             Fila de aprovação
-          </h3>
+          </p>
           {pendentes.length === 0 ? (
-            <div className="flex items-start gap-3 rounded-xl border border-outline-variant bg-surface-container-lowest p-md shadow-sm">
-              <span className="material-symbols-outlined text-secondary">task_alt</span>
-              <p className="font-body-md text-body-md text-on-surface-variant">
-                Nenhum título aguardando aprovação. Lance um título acima de {brl(ALCADA)} em Contas
-                a pagar para ver a fila em ação.
-              </p>
-            </div>
+            <Card className="shadow-card">
+              <CardContent className="flex items-start gap-3 pt-6">
+                <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-success" />
+                <p className="text-sm text-muted-foreground">
+                  Nenhum título aguardando aprovação. Lance um título acima de {brl(ALCADA)} em
+                  Contas a pagar para ver a fila em ação.
+                </p>
+              </CardContent>
+            </Card>
           ) : (
             pendentes.map((t) => {
               const ativo = detalhe?.id === t.id;
@@ -200,37 +209,32 @@ function Aprovacoes() {
                   key={t.id}
                   type="button"
                   onClick={() => setSelecionado(t.id)}
-                  className={`rounded-xl border p-md text-left shadow-sm transition-all ${
-                    ativo
-                      ? "border-2 border-secondary bg-secondary/5"
-                      : "border-outline-variant bg-surface-container-lowest hover:border-secondary/50"
-                  }`}
+                  className="text-left"
                 >
-                  <div className="mb-2 flex items-center justify-between gap-2">
-                    <span className="rounded bg-surface-variant px-2 py-0.5 font-data-mono text-[11px] text-on-surface-variant">
-                      {t.documento}
-                    </span>
-                    <StatusBadge tone={tomDoStatus(t.status)}>{t.status}</StatusBadge>
-                  </div>
-                  <h4 className="mb-1 font-body-lg text-body-lg font-semibold text-on-background">
-                    {t.fornecedor}
-                  </h4>
-                  <p className="mb-3 font-body-sm text-body-sm text-on-surface-variant">
-                    {t.categoria}
-                  </p>
-                  <div className="flex items-end justify-between gap-3">
-                    <span className="flex flex-col">
-                      <span className="font-body-sm text-body-sm text-on-surface-variant">
-                        Vencimento
-                      </span>
-                      <span className="font-data-mono text-data-mono text-on-surface">
-                        {t.vencimento}
-                      </span>
-                    </span>
-                    <span className="font-data-mono text-body-lg font-bold text-primary">
-                      {brl(t.valor)}
-                    </span>
-                  </div>
+                  <Card
+                    className={cn(
+                      "shadow-card transition-all",
+                      ativo ? "border-primary ring-1 ring-primary" : "hover:border-primary/40",
+                    )}
+                  >
+                    <CardContent className="pt-6">
+                      <div className="mb-2 flex items-center justify-between gap-2">
+                        <span className="num rounded bg-muted px-2 py-0.5 text-xs text-muted-foreground">
+                          {t.documento}
+                        </span>
+                        <StatusBadge tone={tomDoStatus(t.status)}>{t.status}</StatusBadge>
+                      </div>
+                      <p className="font-semibold">{t.fornecedor}</p>
+                      <p className="mb-3 text-xs text-muted-foreground">{t.categoria}</p>
+                      <div className="flex items-end justify-between gap-3">
+                        <span className="flex flex-col">
+                          <span className="text-xs text-muted-foreground">Vencimento</span>
+                          <span className="num text-sm">{t.vencimento}</span>
+                        </span>
+                        <span className="num text-lg font-bold">{brl(t.valor)}</span>
+                      </div>
+                    </CardContent>
+                  </Card>
                 </button>
               );
             })
@@ -239,147 +243,126 @@ function Aprovacoes() {
 
         {/* Detalhe */}
         {detalhe ? (
-          <div className="flex flex-col overflow-hidden rounded-xl border border-outline-variant bg-surface-container-lowest shadow-sm xl:col-span-3">
-            <div className="flex flex-col gap-4 border-b border-outline-variant bg-surface p-md sm:flex-row sm:items-start sm:justify-between md:p-lg">
-              <div className="min-w-0">
-                <span className="mb-2 inline-flex rounded bg-surface-variant px-2 py-1 font-data-mono text-[11px] text-on-surface-variant">
-                  Título {detalhe.documento}
-                </span>
-                <h2 className="font-headline-md text-headline-md text-on-background">
-                  {detalhe.fornecedor}
-                </h2>
-                <p className="mt-1 font-body-sm text-body-sm text-on-surface-variant">
-                  Lançado por {detalhe.lancadoPor} · {detalhe.categoria}
-                </p>
-              </div>
-              <div className="shrink-0 text-left sm:text-right">
-                <p className="font-body-sm text-body-sm text-on-surface-variant">
-                  Valor do pagamento
-                </p>
-                <p className="font-data-mono text-display-lg text-primary">{brl(detalhe.valor)}</p>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-md border-b border-outline-variant p-md md:grid-cols-4 md:p-lg">
-              <div>
-                <p className="mb-1 font-body-sm text-body-sm text-on-surface-variant">Vencimento</p>
-                <p className="font-data-mono text-data-mono font-medium text-on-background">
-                  {detalhe.vencimento}
-                </p>
-              </div>
-              <div>
-                <p className="mb-1 font-body-sm text-body-sm text-on-surface-variant">Status</p>
-                <StatusBadge tone={tomDoStatus(detalhe.status)}>{detalhe.status}</StatusBadge>
-              </div>
-              {has("centro_custo") ? (
-                <div>
-                  <p className="mb-1 font-body-sm text-body-sm text-on-surface-variant">
-                    Centro de custo
-                  </p>
-                  <p className="font-body-md text-body-md font-medium text-on-background">
-                    {detalhe.rateio
-                      .map((r) => {
-                        const c = centrosDeCusto.find((x) => x.id === r.centroId);
-                        return `${c?.codigo ?? "—"} (${r.percentual}%)`;
-                      })
-                      .join(" · ")}
+          <Card className="shadow-card xl:col-span-3">
+            <CardContent className="pt-6">
+              <div className="flex flex-col gap-3 border-b border-border pb-5 sm:flex-row sm:items-start sm:justify-between">
+                <div className="min-w-0">
+                  <span className="num mb-2 inline-flex rounded bg-muted px-2 py-1 text-xs text-muted-foreground">
+                    Título {detalhe.documento}
+                  </span>
+                  <h2 className="text-xl font-bold">{detalhe.fornecedor}</h2>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Lançado por {detalhe.lancadoPor} · {detalhe.categoria}
                   </p>
                 </div>
-              ) : null}
-              <div>
-                <p className="mb-1 font-body-sm text-body-sm text-on-surface-variant">
-                  Parcela / recorrência
-                </p>
-                <p className="font-body-md text-body-md font-medium text-on-background">
-                  {detalhe.parcela ?? "À vista"}
-                  {detalhe.recorrencia ? ` · ${detalhe.recorrencia}` : ""}
-                </p>
+                <div className="shrink-0 text-left sm:text-right">
+                  <p className="text-xs text-muted-foreground">Valor do pagamento</p>
+                  <p className="num text-2xl font-bold">{brl(detalhe.valor)}</p>
+                </div>
               </div>
-            </div>
 
-            {/* Fluxo de aprovação */}
-            <div className="border-b border-outline-variant p-md md:p-lg">
-              <h4 className="mb-4 font-headline-sm text-headline-sm text-on-background">
-                Fluxo de aprovação
-              </h4>
-              <ol className="flex flex-col gap-4">
-                <li className="flex gap-3">
-                  <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-secondary text-on-secondary">
-                    <span className="material-symbols-outlined text-[18px]">check</span>
-                  </span>
-                  <span>
-                    <span className="block font-label-md text-label-md font-semibold text-on-background">
-                      Revisão nível 1 — conferência documental
-                    </span>
-                    <span className="mt-0.5 block font-body-sm text-body-sm text-on-surface-variant">
-                      Aprovado por {detalhe.lancadoPor}
-                    </span>
-                  </span>
-                </li>
-                <li className="flex gap-3">
-                  <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary text-on-primary ring-4 ring-primary-fixed">
-                    <span className="material-symbols-outlined text-[18px]">how_to_reg</span>
-                  </span>
-                  <span>
-                    <span className="block font-label-md text-label-md font-bold text-primary">
-                      Aprovação {perfil.nome} (sua alçada)
-                    </span>
-                    <span className="mt-0.5 block font-body-sm text-body-sm text-on-surface-variant">
-                      Aguardando sua ação · limite {brl(ALCADA)}
-                    </span>
-                  </span>
-                </li>
-                <li className="flex gap-3 opacity-60">
-                  <span className="flex size-8 shrink-0 items-center justify-center rounded-full border-2 border-outline-variant text-on-surface-variant">
-                    <span className="material-symbols-outlined text-[18px]">payments</span>
-                  </span>
-                  <span>
-                    <span className="block font-label-md text-label-md text-on-surface">
-                      Liberação para pagamento
-                    </span>
-                    <span className="mt-0.5 block font-body-sm text-body-sm text-on-surface-variant">
-                      Após aprovação, o título fica disponível para baixa
-                    </span>
-                  </span>
-                </li>
-              </ol>
-            </div>
+              <div className="grid gap-4 border-b border-border py-5 sm:grid-cols-2 lg:grid-cols-4">
+                <div>
+                  <p className="mb-1 text-xs text-muted-foreground">Vencimento</p>
+                  <p className="num text-sm font-medium">{detalhe.vencimento}</p>
+                </div>
+                <div>
+                  <p className="mb-1 text-xs text-muted-foreground">Status</p>
+                  <StatusBadge tone={tomDoStatus(detalhe.status)}>{detalhe.status}</StatusBadge>
+                </div>
+                {has("centro_custo") ? (
+                  <div>
+                    <p className="mb-1 text-xs text-muted-foreground">Centro de custo</p>
+                    <p className="text-sm font-medium">
+                      {detalhe.rateio
+                        .map((r) => {
+                          const c = centrosDeCusto.find((x) => x.id === r.centroId);
+                          return `${c?.codigo ?? "—"} (${r.percentual}%)`;
+                        })
+                        .join(" · ")}
+                    </p>
+                  </div>
+                ) : null}
+                <div>
+                  <p className="mb-1 text-xs text-muted-foreground">Parcela / recorrência</p>
+                  <p className="text-sm font-medium">
+                    {detalhe.parcela ?? "À vista"}
+                    {detalhe.recorrencia ? ` · ${detalhe.recorrencia}` : ""}
+                  </p>
+                </div>
+              </div>
 
-            {/* Ações */}
-            <div className="mt-auto flex flex-wrap items-center justify-end gap-3 bg-surface-container-low p-md md:p-lg">
-              {leitura ? (
-                <p className="mr-auto font-body-sm text-body-sm text-on-surface-variant">
-                  Perfil somente leitura: aprovação e devolução indisponíveis.
-                </p>
-              ) : (
-                <>
-                  <span className="mr-auto hidden font-body-sm text-body-sm text-on-surface-variant sm:block">
-                    A devolução exige justificativa de no mínimo 5 caracteres.
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => setDevolvendo(detalhe)}
-                    className="flex items-center gap-2 rounded-lg border border-outline px-5 py-2 font-label-md text-label-md text-on-surface transition-colors hover:bg-surface-container"
-                  >
-                    <span className="material-symbols-outlined text-[18px]">undo</span>
-                    Devolver
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => aprovar(detalhe)}
-                    className="flex items-center gap-2 rounded-lg bg-secondary px-5 py-2 font-label-md text-label-md text-on-secondary shadow-sm transition-colors hover:bg-on-secondary-container"
-                  >
-                    <span className="material-symbols-outlined text-[18px]">check_circle</span>
-                    Aprovar pagamento
-                  </button>
-                </>
-              )}
-            </div>
-          </div>
+              <div className="border-b border-border py-5">
+                <h3 className="mb-4 text-base font-semibold">Fluxo de aprovação</h3>
+                <ol className="flex flex-col gap-4">
+                  <li className="flex gap-3">
+                    <span className="grid size-8 shrink-0 place-items-center rounded-full bg-success text-success-foreground">
+                      <CheckCircle2 className="size-4" />
+                    </span>
+                    <span>
+                      <span className="block text-sm font-semibold">
+                        Revisão nível 1 — conferência documental
+                      </span>
+                      <span className="mt-0.5 block text-xs text-muted-foreground">
+                        Aprovado por {detalhe.lancadoPor}
+                      </span>
+                    </span>
+                  </li>
+                  <li className="flex gap-3">
+                    <span className="grid size-8 shrink-0 place-items-center rounded-full bg-primary text-primary-foreground ring-4 ring-primary/20">
+                      <ShieldCheck className="size-4" />
+                    </span>
+                    <span>
+                      <span className="block text-sm font-bold text-primary">
+                        Aprovação {perfil.nome} (sua alçada)
+                      </span>
+                      <span className="mt-0.5 block text-xs text-muted-foreground">
+                        Aguardando sua ação · limite {brl(ALCADA)}
+                      </span>
+                    </span>
+                  </li>
+                  <li className="flex gap-3 opacity-60">
+                    <span className="grid size-8 shrink-0 place-items-center rounded-full border-2 border-border text-muted-foreground">
+                      <CreditCard className="size-4" />
+                    </span>
+                    <span>
+                      <span className="block text-sm font-semibold">Liberação para pagamento</span>
+                      <span className="mt-0.5 block text-xs text-muted-foreground">
+                        Após aprovação, o título fica disponível para baixa
+                      </span>
+                    </span>
+                  </li>
+                </ol>
+              </div>
+
+              <div className="flex flex-wrap items-center justify-end gap-3 pt-5">
+                {leitura ? (
+                  <p className="mr-auto text-xs text-muted-foreground">
+                    Perfil somente leitura: aprovação e devolução indisponíveis.
+                  </p>
+                ) : (
+                  <>
+                    <span className="mr-auto hidden text-xs text-muted-foreground sm:block">
+                      A devolução exige justificativa de no mínimo 5 caracteres.
+                    </span>
+                    <Button
+                      variant="outline"
+                      className="gap-1.5"
+                      onClick={() => setDevolvendo(detalhe)}
+                    >
+                      <Undo2 className="size-4" /> Devolver
+                    </Button>
+                    <Button className="gap-1.5" onClick={() => aprovar(detalhe)}>
+                      <CheckCircle2 className="size-4" /> Aprovar pagamento
+                    </Button>
+                  </>
+                )}
+              </div>
+            </CardContent>
+          </Card>
         ) : null}
       </div>
 
-      {/* Devolução */}
       <Dialog
         open={!!devolvendo}
         onOpenChange={(o) => {
@@ -389,53 +372,42 @@ function Aprovacoes() {
           }
         }}
       >
-        <DialogContent className="border-outline-variant bg-surface-container-lowest">
+        <DialogContent>
           <DialogHeader>
-            <DialogTitle className="font-headline-sm text-headline-sm text-primary">
-              Devolver título
-            </DialogTitle>
-            <DialogDescription className="font-body-md text-body-md text-on-surface-variant">
+            <DialogTitle>Devolver título</DialogTitle>
+            <DialogDescription>
               {devolvendo
                 ? `${devolvendo.fornecedor} · ${brl(devolvendo.valor)} · venc. ${devolvendo.vencimento}`
                 : ""}
             </DialogDescription>
           </DialogHeader>
-          <div className="flex flex-col gap-2">
-            <label
-              htmlFor="justificativa"
-              className="font-label-md text-label-md text-on-surface-variant"
-            >
-              Justificativa <span className="text-error">*</span>
-            </label>
-            <textarea
+          <div className="space-y-2">
+            <Label htmlFor="justificativa">
+              Justificativa <span className="text-destructive">*</span>
+            </Label>
+            <Textarea
               id="justificativa"
               rows={4}
               placeholder="Ex.: nota fiscal divergente do pedido de compra 2026/0412."
               value={justificativa}
               onChange={(e) => setJustificativa(e.target.value)}
-              className="w-full rounded-lg border border-outline-variant bg-surface px-3 py-2 font-body-md text-body-md focus:border-secondary focus:outline-none focus:ring-1 focus:ring-secondary"
             />
-            <p className="font-body-sm text-body-sm text-on-surface-variant">
+            <p className="text-xs text-muted-foreground">
               Mínimo de 5 caracteres. A justificativa é enviada a quem lançou o título e gravada na
               trilha de auditoria.
             </p>
           </div>
           <DialogFooter>
-            <button
-              type="button"
-              onClick={() => setDevolvendo(null)}
-              className="rounded-lg border border-outline-variant px-4 py-2 font-label-md text-label-md text-on-surface transition-colors hover:bg-surface-container"
-            >
+            <Button variant="outline" onClick={() => setDevolvendo(null)}>
               Cancelar
-            </button>
-            <button
-              type="button"
+            </Button>
+            <Button
+              variant="destructive"
               disabled={justificativa.trim().length < 5}
               onClick={confirmarDevolucao}
-              className="rounded-lg bg-error px-4 py-2 font-label-md text-label-md text-on-error shadow-sm transition-colors hover:bg-error/90 disabled:cursor-not-allowed disabled:opacity-40"
             >
               Confirmar devolução
-            </button>
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

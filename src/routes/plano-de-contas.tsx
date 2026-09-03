@@ -1,21 +1,26 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
+import { Ban, ChevronDown, CornerDownRight, Pencil, Plus, PlusCircle, Search } from "lucide-react";
 import { PageHeader } from "@/components/app/PageHeader";
 import { StatusBadge } from "@/components/app/StatusBadge";
 import { usePerfil } from "@/components/app/PerfilContext";
 import { useFeatures } from "@/components/app/FeaturesContext";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { brl, contasPorRegime, planoDeContas, type ContaPlano } from "@/lib/mock-data";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/plano-de-contas")({
   head: () => ({
     meta: [
-      { title: "Plano de contas — FinCore ERP" },
+      { title: "Plano de contas — FinCore" },
       {
         name: "description",
         content: "Estrutura hierárquica contábil e gerencial com contas sintéticas e analíticas.",
       },
-      { property: "og:title", content: "Plano de contas — FinCore ERP" },
+      { property: "og:title", content: "Plano de contas — FinCore" },
       {
         property: "og:description",
         content: "Árvore de contas sugerida conforme o regime tributário do tenant.",
@@ -28,17 +33,10 @@ export const Route = createFileRoute("/plano-de-contas")({
 const GRUPOS = ["Ativo", "Passivo", "Receitas", "Despesas"] as const;
 
 const corGrupo: Record<string, string> = {
-  Ativo: "bg-primary-fixed-dim",
-  Passivo: "bg-tertiary-fixed-dim",
-  Receitas: "bg-secondary",
-  Despesas: "bg-error",
-};
-
-const corCodigo: Record<string, string> = {
-  Ativo: "text-primary",
-  Passivo: "text-primary",
-  Receitas: "text-secondary",
-  Despesas: "text-error",
+  Ativo: "bg-chart-4",
+  Passivo: "bg-chart-3",
+  Receitas: "bg-success",
+  Despesas: "bg-destructive",
 };
 
 function PlanoDeContas() {
@@ -52,10 +50,10 @@ function PlanoDeContas() {
   /** PV1: as contas tributárias do regime do tenant entram na árvore. */
   const extras = contasPorRegime[config.regime] ?? [];
 
-  const todas = useMemo<ContaPlano[]>(() => {
-    const juntas = [...planoDeContas, ...extras];
-    return juntas.sort((a, b) => a.codigo.localeCompare(b.codigo));
-  }, [extras]);
+  const todas = useMemo<ContaPlano[]>(
+    () => [...planoDeContas, ...extras].sort((a, b) => a.codigo.localeCompare(b.codigo)),
+    [extras],
+  );
 
   const raizDe = (codigo: string) => codigo.split(".")[0] ?? "";
 
@@ -103,240 +101,229 @@ function PlanoDeContas() {
           },
         ]}
         acoes={
-          <>
-            <div className="relative w-full sm:w-72">
-              <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[20px] text-outline">
-                search
-              </span>
-              <input
-                className="w-full rounded-lg border border-outline-variant bg-surface-container-lowest py-2 pl-10 pr-4 font-body-md text-body-md text-primary transition-shadow placeholder:text-outline focus:border-secondary focus:outline-none focus:ring-1 focus:ring-secondary"
-                placeholder="Buscar conta ou código..."
-                value={busca}
-                onChange={(e) => setBusca(e.target.value)}
-              />
-            </div>
-            {leitura ? (
-              <StatusBadge tone="info">Somente leitura</StatusBadge>
-            ) : (
-              <button
-                type="button"
-                onClick={() =>
-                  toast.success("Nova conta analítica criada", {
-                    description: "No protótipo a conta é adicionada apenas à sessão atual.",
-                  })
-                }
-                className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 font-label-md text-label-md text-on-primary shadow-sm transition-colors hover:bg-primary-container"
-              >
-                <span className="material-symbols-outlined text-[18px]">add_circle</span>
-                Nova conta
-              </button>
-            )}
-          </>
+          leitura ? (
+            <StatusBadge tone="info">Somente leitura</StatusBadge>
+          ) : (
+            <Button
+              className="gap-1.5"
+              onClick={() =>
+                toast.success("Nova conta analítica criada", {
+                  description: "No protótipo a conta é adicionada apenas à sessão atual.",
+                })
+              }
+            >
+              <PlusCircle className="size-4" /> Nova conta
+            </Button>
+          )
         }
       />
 
       {/* Totais por grupo */}
-      <div className="mb-md grid grid-cols-2 gap-md lg:grid-cols-4">
+      <div className="mb-4 grid grid-cols-2 gap-4 lg:grid-cols-4">
         {totais.map((t) => (
-          <div
-            key={t.grupo}
-            className="rounded-xl border border-outline-variant bg-surface-container-lowest p-md shadow-sm"
-          >
-            <div className="mb-1 flex items-center gap-2">
-              <span className={`size-2.5 rounded-sm ${corGrupo[t.grupo]}`} />
-              <span className="font-label-md text-label-md text-on-surface-variant">{t.grupo}</span>
-            </div>
-            <p className="font-data-mono text-body-lg font-medium text-primary">{brl(t.total)}</p>
-            <p className="font-body-sm text-body-sm text-on-surface-variant">{t.qtd} contas</p>
-          </div>
+          <Card key={t.grupo} className="shadow-card">
+            <CardContent className="pt-6">
+              <p className="mb-1 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                <span className={cn("size-2.5 rounded-sm", corGrupo[t.grupo])} />
+                {t.grupo}
+              </p>
+              <p className="num text-lg font-bold">{brl(t.total)}</p>
+              <p className="text-xs text-muted-foreground">{t.qtd} contas</p>
+            </CardContent>
+          </Card>
         ))}
       </div>
 
-      {/* Árvore */}
-      <div className="flex flex-col overflow-hidden rounded-xl border border-outline-variant bg-surface-container-lowest shadow-sm">
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-outline-variant bg-surface-container-low px-4 py-3">
-          <div className="flex items-center gap-4">
-            <span className="font-label-md text-label-md uppercase tracking-wider text-on-surface-variant">
-              {visiveis.length} contas exibidas
-            </span>
-            <label className="flex cursor-pointer items-center gap-2 font-label-md text-label-md text-on-surface-variant">
-              <input
-                type="checkbox"
-                checked={soAnaliticas}
-                onChange={(e) => setSoAnaliticas(e.target.checked)}
-                className="size-4 rounded-sm accent-[var(--color-secondary)]"
-              />
-              Só analíticas
-            </label>
-          </div>
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => setColapsados([])}
-              className="rounded-lg border border-outline-variant px-3 py-1 font-label-md text-label-md text-on-surface-variant transition-colors hover:bg-surface-container"
-            >
-              Expandir tudo
-            </button>
-            <button
-              type="button"
-              onClick={() => setColapsados(["1", "2", "3", "4"])}
-              className="rounded-lg border border-outline-variant px-3 py-1 font-label-md text-label-md text-on-surface-variant transition-colors hover:bg-surface-container"
-            >
-              Colapsar tudo
-            </button>
-          </div>
-        </div>
-
-        {/* Cabeçalho da tabela */}
-        <div className="hidden items-center border-b border-outline-variant bg-surface-container-low px-4 py-3 md:flex">
-          <div className="w-8 shrink-0" />
-          <div className="w-32 shrink-0 font-label-md text-label-md uppercase tracking-wider text-on-surface-variant">
-            Código
-          </div>
-          <div className="flex-1 font-label-md text-label-md uppercase tracking-wider text-on-surface-variant">
-            Descrição da conta
-          </div>
-          <div className="w-28 shrink-0 text-center font-label-md text-label-md uppercase tracking-wider text-on-surface-variant">
-            Tipo
-          </div>
-          <div className="w-40 shrink-0 text-right font-label-md text-label-md uppercase tracking-wider text-on-surface-variant">
-            Saldo atual
-          </div>
-          <div className="w-20 shrink-0" />
-        </div>
-
-        <div className="flex flex-col divide-y divide-surface-variant">
-          {visiveis.map((c) => {
-            const sintetica = c.tipo === "SINTÉTICA";
-            const raiz = raizDe(c.codigo);
-            const colapsado = colapsados.includes(raiz);
-            const doRegime = extras.some((x) => x.codigo === c.codigo);
-            return (
-              <div
-                key={c.codigo}
-                className="group relative flex flex-wrap items-center gap-y-1 px-4 py-3 transition-colors hover:bg-surface-container md:flex-nowrap"
-                style={{ paddingLeft: `${16 + c.nivel * 28}px` }}
+      <Card className="shadow-card">
+        <CardContent className="pt-6">
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+            <div className="flex flex-wrap items-center gap-4">
+              <span className="text-xs font-semibold text-muted-foreground">
+                {visiveis.length} contas exibidas
+              </span>
+              <label className="flex cursor-pointer items-center gap-2 text-sm text-muted-foreground">
+                <input
+                  type="checkbox"
+                  checked={soAnaliticas}
+                  onChange={(e) => setSoAnaliticas(e.target.checked)}
+                  className="size-4 rounded accent-[var(--primary)]"
+                />
+                Só analíticas
+              </label>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="relative w-full sm:w-64">
+                <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  className="pl-9"
+                  placeholder="Buscar conta ou código..."
+                  value={busca}
+                  onChange={(e) => setBusca(e.target.value)}
+                />
+              </div>
+              <Button size="sm" variant="outline" onClick={() => setColapsados([])}>
+                Expandir tudo
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => setColapsados(["1", "2", "3", "4"])}
               >
-                {c.nivel === 0 ? (
-                  <div
-                    className={`absolute left-0 top-0 bottom-0 w-1 rounded-r ${corGrupo[c.grupo]} opacity-60`}
-                  />
-                ) : null}
+                Colapsar tudo
+              </Button>
+            </div>
+          </div>
 
-                {c.nivel === 0 ? (
-                  <button
-                    type="button"
-                    onClick={() => alternarGrupo(raiz)}
-                    aria-label={colapsado ? "Expandir grupo" : "Colapsar grupo"}
-                    className="flex w-8 shrink-0 items-center justify-center text-outline transition-colors hover:text-primary"
-                  >
+          {/* Cabeçalho */}
+          <div className="hidden items-center border-b border-border px-3 py-2 md:flex">
+            <div className="w-8 shrink-0" />
+            <div className="w-32 shrink-0 text-xs font-bold uppercase tracking-wide text-muted-foreground">
+              Código
+            </div>
+            <div className="flex-1 text-xs font-bold uppercase tracking-wide text-muted-foreground">
+              Descrição da conta
+            </div>
+            <div className="w-28 shrink-0 text-center text-xs font-bold uppercase tracking-wide text-muted-foreground">
+              Tipo
+            </div>
+            <div className="w-40 shrink-0 text-right text-xs font-bold uppercase tracking-wide text-muted-foreground">
+              Saldo atual
+            </div>
+            <div className="w-24 shrink-0" />
+          </div>
+
+          <div className="flex flex-col divide-y divide-border">
+            {visiveis.map((c) => {
+              const sintetica = c.tipo === "SINTÉTICA";
+              const raiz = raizDe(c.codigo);
+              const colapsado = colapsados.includes(raiz);
+              const doRegime = extras.some((x) => x.codigo === c.codigo);
+              return (
+                <div
+                  key={c.codigo}
+                  className="group relative flex flex-wrap items-center gap-y-1 py-2.5 pr-3 transition-colors hover:bg-muted/40 md:flex-nowrap"
+                  style={{ paddingLeft: `${12 + c.nivel * 24}px` }}
+                >
+                  {c.nivel === 0 ? (
                     <span
-                      className={`material-symbols-outlined text-[20px] transition-transform ${colapsado ? "-rotate-90" : ""}`}
-                    >
-                      expand_more
-                    </span>
-                  </button>
-                ) : (
-                  <div className="flex w-8 shrink-0 items-center justify-center">
-                    {sintetica ? (
-                      <span className="material-symbols-outlined text-[18px] text-secondary">
-                        subdirectory_arrow_right
-                      </span>
-                    ) : (
-                      <span className="size-1.5 rounded-full bg-outline-variant" />
-                    )}
-                  </div>
-                )}
-
-                <div
-                  className={`w-32 shrink-0 font-data-mono text-data-mono ${
-                    sintetica ? `font-semibold ${corCodigo[c.grupo]}` : "text-on-surface-variant"
-                  }`}
-                >
-                  {c.codigo}
-                </div>
-
-                <div
-                  className={`min-w-0 flex-1 pr-3 font-body-md text-body-md ${
-                    sintetica ? "font-semibold text-primary" : "text-on-surface"
-                  }`}
-                >
-                  {c.descricao}
-                  {doRegime ? (
-                    <span className="ml-2 rounded-full bg-secondary/10 px-2 py-0.5 font-label-md text-[10px] text-secondary">
-                      {config.regime} · PV1
-                    </span>
+                      className={cn(
+                        "absolute inset-y-0 left-0 w-1 rounded-r opacity-70",
+                        corGrupo[c.grupo],
+                      )}
+                    />
                   ) : null}
-                </div>
 
-                <div className="w-28 shrink-0 text-center">
+                  {c.nivel === 0 ? (
+                    <button
+                      type="button"
+                      onClick={() => alternarGrupo(raiz)}
+                      aria-label={colapsado ? "Expandir grupo" : "Colapsar grupo"}
+                      className="grid w-8 shrink-0 place-items-center text-muted-foreground hover:text-foreground"
+                    >
+                      <ChevronDown
+                        className={cn("size-4 transition-transform", colapsado && "-rotate-90")}
+                      />
+                    </button>
+                  ) : (
+                    <span className="grid w-8 shrink-0 place-items-center">
+                      {sintetica ? (
+                        <CornerDownRight className="size-3.5 text-primary" />
+                      ) : (
+                        <span className="size-1.5 rounded-full bg-border" />
+                      )}
+                    </span>
+                  )}
+
                   <span
-                    className={`inline-flex rounded px-2 py-0.5 text-[11px] font-semibold tracking-wide ${
-                      sintetica
-                        ? "bg-surface-variant text-on-surface-variant"
-                        : "border border-outline-variant text-on-surface-variant"
-                    }`}
+                    className={cn(
+                      "num w-32 shrink-0 text-sm",
+                      sintetica ? "font-semibold" : "text-muted-foreground",
+                    )}
                   >
-                    {c.tipo}
+                    {c.codigo}
+                  </span>
+
+                  <span className={cn("min-w-0 flex-1 pr-3 text-sm", sintetica && "font-semibold")}>
+                    {c.descricao}
+                    {doRegime ? (
+                      <StatusBadge tone="info" className="ml-2">
+                        {config.regime} · PV1
+                      </StatusBadge>
+                    ) : null}
+                  </span>
+
+                  <span className="w-28 shrink-0 text-center">
+                    <span
+                      className={cn(
+                        "inline-flex rounded px-2 py-0.5 text-[0.65rem] font-bold tracking-wide",
+                        sintetica
+                          ? "bg-muted text-muted-foreground"
+                          : "border border-border text-muted-foreground",
+                      )}
+                    >
+                      {c.tipo}
+                    </span>
+                  </span>
+
+                  <span
+                    className={cn(
+                      "num w-40 shrink-0 text-right text-sm",
+                      sintetica && "font-semibold",
+                    )}
+                  >
+                    {brl(c.saldo)}
+                  </span>
+
+                  <span className="flex w-24 shrink-0 items-center justify-end gap-1 md:opacity-0 md:transition-opacity md:group-hover:opacity-100">
+                    {leitura ? null : (
+                      <>
+                        {sintetica ? (
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            title="Incluir subconta"
+                            onClick={() => toast.success(`Subconta criada sob ${c.codigo}`)}
+                          >
+                            <Plus className="size-4" />
+                          </Button>
+                        ) : null}
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          title="Editar"
+                          onClick={() => toast.info(`Editando conta ${c.codigo}`)}
+                        >
+                          <Pencil className="size-4" />
+                        </Button>
+                        {!sintetica ? (
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            title="Inativar"
+                            className="hover:text-destructive"
+                            onClick={() =>
+                              toast.warning(`Conta ${c.codigo} inativada`, {
+                                description: "Contas com saldo não podem ser excluídas.",
+                              })
+                            }
+                          >
+                            <Ban className="size-4" />
+                          </Button>
+                        ) : null}
+                      </>
+                    )}
                   </span>
                 </div>
-
-                <div
-                  className={`w-40 shrink-0 text-right font-data-mono text-data-mono ${
-                    sintetica ? `font-semibold ${corCodigo[c.grupo]}` : "text-on-surface"
-                  }`}
-                >
-                  {brl(c.saldo)}
-                </div>
-
-                <div className="flex w-20 shrink-0 items-center justify-end gap-1 md:opacity-0 md:transition-opacity md:group-hover:opacity-100">
-                  {leitura ? null : (
-                    <>
-                      {sintetica ? (
-                        <button
-                          type="button"
-                          title="Incluir subconta"
-                          onClick={() => toast.success(`Subconta criada sob ${c.codigo}`)}
-                          className="flex size-8 items-center justify-center rounded text-on-surface-variant transition-colors hover:bg-surface-variant hover:text-primary"
-                        >
-                          <span className="material-symbols-outlined text-[18px]">add</span>
-                        </button>
-                      ) : null}
-                      <button
-                        type="button"
-                        title="Editar"
-                        onClick={() => toast.info(`Editando conta ${c.codigo}`)}
-                        className="flex size-8 items-center justify-center rounded text-on-surface-variant transition-colors hover:bg-surface-variant hover:text-primary"
-                      >
-                        <span className="material-symbols-outlined text-[18px]">edit</span>
-                      </button>
-                      {!sintetica ? (
-                        <button
-                          type="button"
-                          title="Inativar"
-                          onClick={() =>
-                            toast.warning(`Conta ${c.codigo} inativada`, {
-                              description: "Contas com saldo não podem ser excluídas.",
-                            })
-                          }
-                          className="flex size-8 items-center justify-center rounded text-on-surface-variant transition-colors hover:bg-error-container hover:text-error"
-                        >
-                          <span className="material-symbols-outlined text-[18px]">block</span>
-                        </button>
-                      ) : null}
-                    </>
-                  )}
-                </div>
-              </div>
-            );
-          })}
-          {visiveis.length === 0 ? (
-            <div className="p-8 text-center font-body-md text-body-md text-on-surface-variant">
-              Nenhuma conta encontrada.
-            </div>
-          ) : null}
-        </div>
-      </div>
+              );
+            })}
+            {visiveis.length === 0 ? (
+              <p className="py-10 text-center text-sm text-muted-foreground">
+                Nenhuma conta encontrada.
+              </p>
+            ) : null}
+          </div>
+        </CardContent>
+      </Card>
     </>
   );
 }

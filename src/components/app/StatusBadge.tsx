@@ -1,31 +1,28 @@
-import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
-export type Tone = "ok" | "atencao" | "erro" | "critico" | "neutro" | "info";
+export type Tone = "success" | "warning" | "danger" | "neutral" | "info";
 
 const tones: Record<Tone, string> = {
-  ok: "bg-secondary/10 text-secondary",
-  atencao: "bg-tertiary-fixed text-on-tertiary-fixed",
-  erro: "bg-error-container text-on-error-container",
-  critico: "bg-error text-on-error",
-  neutro: "bg-surface-variant text-on-surface-variant border border-outline/30",
-  info: "bg-primary-fixed text-on-primary-fixed-variant",
+  success: "bg-success/12 text-success border-success/30",
+  warning: "bg-warning/15 text-warning-foreground border-warning/40",
+  danger: "bg-destructive/10 text-destructive border-destructive/30",
+  neutral: "bg-muted text-muted-foreground border-border",
+  info: "bg-primary/10 text-primary border-primary/25",
 };
 
-/** Pílula de status no padrão visual do FinCore (Material 3). */
 export function StatusBadge({
-  tone = "neutro",
+  tone = "neutral",
   children,
   className,
 }: {
   tone?: Tone;
-  children: ReactNode;
+  children: React.ReactNode;
   className?: string;
 }) {
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1 whitespace-nowrap rounded-full px-2 py-0.5 font-label-md text-[11px]",
+        "inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border px-2.5 py-0.5 text-xs font-semibold",
         tones[tone],
         className,
       )}
@@ -36,17 +33,17 @@ export function StatusBadge({
 }
 
 const porStatus: Record<string, Tone> = {
-  "Em aberto": "neutro",
-  "Aprovação pendente": "atencao",
-  Agendado: "atencao",
-  Pago: "ok",
-  Atrasado: "erro",
-  Cancelado: "neutro",
-  "A vencer": "atencao",
-  Recebido: "ok",
-  "Em atraso": "erro",
-  Ativo: "ok",
-  Inativo: "neutro",
+  "Em aberto": "neutral",
+  "Aprovação pendente": "warning",
+  Agendado: "warning",
+  Pago: "success",
+  Atrasado: "danger",
+  Cancelado: "neutral",
+  "A vencer": "warning",
+  Recebido: "success",
+  "Em atraso": "danger",
+  Ativo: "success",
+  Inativo: "neutral",
 };
 
-export const tomDoStatus = (status: string): Tone => porStatus[status] ?? "neutro";
+export const tomDoStatus = (status: string): Tone => porStatus[status] ?? "neutral";

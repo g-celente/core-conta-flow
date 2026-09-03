@@ -1,23 +1,41 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
+import {
+  Check,
+  CheckCircle2,
+  ClipboardList,
+  CloudUpload,
+  Database,
+  FileText,
+  ListChecks,
+  Loader2,
+  Play,
+  RotateCcw,
+  ScrollText,
+  ShieldCheck,
+  TriangleAlert,
+} from "lucide-react";
 import { PageHeader } from "@/components/app/PageHeader";
 import { StatusBadge } from "@/components/app/StatusBadge";
 import { TODAS_FEATURES, useFeatures } from "@/components/app/FeaturesContext";
 import { usePerfil } from "@/components/app/PerfilContext";
 import { useAuditoria } from "@/components/app/AuditoriaContext";
 import { useEmpresa } from "@/components/app/EmpresaContext";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/instanciacao/")({
   head: () => ({
     meta: [
-      { title: "Assistente de instanciação — FinCore ERP" },
+      { title: "Assistente de instanciação — FinCore" },
       {
         name: "description",
         content:
           "Sete etapas para instanciar um tenant: necessidades, features, cobertura, provisão, carga, testes e homologação.",
       },
-      { property: "og:title", content: "Assistente de instanciação — FinCore ERP" },
+      { property: "og:title", content: "Assistente de instanciação — FinCore" },
       { property: "og:description", content: "Processo de derivação de uma instância do produto." },
     ],
   }),
@@ -30,43 +48,43 @@ const ETAPAS = [
   {
     id: 1,
     nome: "Levantar necessidades",
-    icone: "assignment",
+    icone: ClipboardList,
     descricao: "Entrevista de escopo com o cliente e mapeamento dos processos financeiros.",
   },
   {
     id: 2,
     nome: "Selecionar features",
-    icone: "checklist",
+    icone: ListChecks,
     descricao: "Marcação das funcionalidades contratadas nos pontos de variação PV1–PV7.",
   },
   {
     id: 3,
     nome: "Verificar cobertura",
-    icone: "rule",
+    icone: FileText,
     descricao: "Checagem de dependências entre features e das necessidades não cobertas.",
   },
   {
     id: 4,
     nome: "Provisionar tenant",
-    icone: "cloud_upload",
+    icone: CloudUpload,
     descricao: "Criação do schema isolado, das chaves e do domínio do cliente.",
   },
   {
     id: 5,
     nome: "Carga inicial",
-    icone: "database",
+    icone: Database,
     descricao: "Importação do plano de contas, parceiros, centros de custo e saldos de abertura.",
   },
   {
     id: 6,
     nome: "Executar suíte de testes",
-    icone: "science",
+    icone: ShieldCheck,
     descricao: "Testes de fumaça sobre cada feature ativa e os fluxos críticos do núcleo.",
   },
   {
     id: 7,
     nome: "Homologar",
-    icone: "verified",
+    icone: CheckCircle2,
     descricao: "Aceite formal do cliente e liberação do ambiente de produção.",
   },
 ] as const;
@@ -93,10 +111,10 @@ function Instanciacao() {
           detalhes: [
             "Regime tributário identificado: " + config.regime + " (PV1)",
             "Banco principal com retorno " + config.adaptador + " (PV2)",
-            ativas.some((f) => f.id === "alcada")
+            has("alcada")
               ? "Exige aprovação hierárquica acima de R$ 10.000 (PV3)"
               : "Não exige aprovação hierárquica (PV3 dispensado)",
-            ativas.some((f) => f.id === "multiempresa")
+            has("multiempresa")
               ? "Grupo com múltiplos CNPJs (PV7)"
               : "CNPJ único (PV7 na escala mínima)",
           ],
@@ -263,172 +281,156 @@ function Instanciacao() {
         ]}
         acoes={
           <>
-            <StatusBadge tone={progresso === 100 ? "ok" : "atencao"}>
+            <StatusBadge tone={progresso === 100 ? "success" : "warning"}>
               {concluidas.length}/{ETAPAS.length} etapas
             </StatusBadge>
-            <button
-              type="button"
-              onClick={executarTudo}
-              className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 font-label-md text-label-md text-on-primary shadow-sm transition-colors hover:bg-primary-container"
-            >
-              <span className="material-symbols-outlined text-[18px]">play_arrow</span>
-              Executar todas
-            </button>
-            <button
-              type="button"
+            <Button onClick={executarTudo} className="gap-1.5">
+              <Play className="size-4" /> Executar todas
+            </Button>
+            <Button
+              variant="outline"
+              className="gap-1.5"
               onClick={() => {
                 setConcluidas([]);
                 setResultados({});
               }}
-              className="flex items-center gap-2 rounded-lg border border-outline-variant px-4 py-2 font-label-md text-label-md text-primary transition-colors hover:bg-surface-container"
             >
-              <span className="material-symbols-outlined text-[18px]">restart_alt</span>
-              Reiniciar
-            </button>
+              <RotateCcw className="size-4" /> Reiniciar
+            </Button>
           </>
         }
       />
 
-      {/* Barra de progresso */}
-      <div className="mb-lg rounded-xl border border-outline-variant bg-surface-container-lowest p-md shadow-sm">
-        <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-          <span className="font-label-md text-label-md text-on-surface-variant">
-            Progresso da instanciação
-          </span>
-          <span className="font-data-mono text-data-mono font-bold text-secondary">
-            {progresso}%
-          </span>
-        </div>
-        <div className="h-3 overflow-hidden rounded-full bg-surface-variant">
-          <div
-            className="h-full rounded-full bg-secondary transition-all duration-500"
-            style={{ width: `${progresso}%` }}
-          />
-        </div>
-        {progresso === 100 ? (
-          <div className="mt-3 flex flex-wrap items-center gap-3 rounded-lg bg-secondary/10 p-3">
-            <span className="material-symbols-outlined text-secondary">verified</span>
-            <p className="flex-1 font-body-md text-body-md text-on-surface">
-              Instanciação concluída. A ficha de configuração já reflete todas as decisões tomadas.
-            </p>
-            <Link
-              to="/instanciacao/resumo"
-              className="flex items-center gap-1.5 rounded-lg bg-secondary px-3 py-1.5 font-label-md text-label-md text-on-secondary"
-            >
-              <span className="material-symbols-outlined text-[16px]">description</span>
-              Ver ficha de configuração
-            </Link>
+      <Card className="mb-6 shadow-card">
+        <CardContent className="pt-6">
+          <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+            <span className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
+              Progresso da instanciação
+            </span>
+            <span className="num font-bold text-success">{progresso}%</span>
           </div>
-        ) : null}
-      </div>
+          <div className="h-3 overflow-hidden rounded-full bg-muted">
+            <div
+              className="h-full rounded-full bg-success transition-all duration-500"
+              style={{ width: `${progresso}%` }}
+            />
+          </div>
+          {progresso === 100 ? (
+            <div className="mt-4 flex flex-wrap items-center gap-3 rounded-lg bg-success/10 p-3">
+              <CheckCircle2 className="size-4 shrink-0 text-success" />
+              <p className="flex-1 text-sm">
+                Instanciação concluída. A ficha de configuração já reflete todas as decisões
+                tomadas.
+              </p>
+              <Button asChild size="sm" className="gap-1.5">
+                <Link to="/instanciacao/resumo">
+                  <ScrollText className="size-3.5" /> Ver ficha de configuração
+                </Link>
+              </Button>
+            </div>
+          ) : null}
+        </CardContent>
+      </Card>
 
-      {/* Etapas */}
-      <div className="flex flex-col gap-md">
+      <div className="flex flex-col gap-4">
         {ETAPAS.map((e) => {
           const feito = concluidas.includes(e.id);
           const rodando = executando === e.id;
           const resultado = resultados[e.id];
           const liberada = e.id === 1 || concluidas.includes(e.id - 1);
+          const Icone = e.icone;
 
           return (
-            <div
+            <Card
               key={e.id}
-              className={`overflow-hidden rounded-xl border shadow-sm transition-all ${
-                feito
-                  ? resultado?.ok
-                    ? "border-secondary/50 bg-surface-container-lowest"
-                    : "border-tertiary-fixed-dim bg-surface-container-lowest"
-                  : "border-outline-variant bg-surface-container-lowest"
-              } ${liberada ? "" : "opacity-60"}`}
+              className={cn(
+                "shadow-card transition-all",
+                feito && (resultado?.ok ? "border-success/40" : "border-warning/50"),
+                !liberada && "opacity-60",
+              )}
             >
-              <div className="flex flex-wrap items-center gap-4 p-md">
-                <span
-                  className={`flex size-11 shrink-0 items-center justify-center rounded-full font-label-md text-label-md ${
-                    feito
-                      ? "bg-secondary text-on-secondary"
-                      : rodando
-                        ? "bg-primary text-on-primary ring-4 ring-primary-fixed"
-                        : "border-2 border-outline-variant bg-surface text-on-surface-variant"
-                  }`}
-                >
-                  {feito ? (
-                    <span className="material-symbols-outlined">check</span>
-                  ) : rodando ? (
-                    <span className="material-symbols-outlined animate-spin">
-                      progress_activity
-                    </span>
-                  ) : (
-                    e.id
-                  )}
-                </span>
-
-                <div className="min-w-0 flex-1">
-                  <h3 className="flex flex-wrap items-center gap-2 font-headline-sm text-headline-sm text-primary">
-                    <span className="material-symbols-outlined text-[20px] text-on-surface-variant">
-                      {e.icone}
-                    </span>
-                    {e.nome}
-                  </h3>
-                  <p className="mt-0.5 font-body-sm text-body-sm text-on-surface-variant">
-                    {e.descricao}
-                  </p>
-                </div>
-
-                <div className="flex shrink-0 items-center gap-2">
-                  {feito ? (
-                    <StatusBadge tone={resultado?.ok ? "ok" : "atencao"}>
-                      {resultado?.ok ? "Concluída" : "Com observações"}
-                    </StatusBadge>
-                  ) : (
-                    <button
-                      type="button"
-                      disabled={!liberada || rodando}
-                      onClick={() => executar(e.id)}
-                      className="flex items-center gap-1.5 rounded-lg bg-secondary px-4 py-2 font-label-md text-label-md text-on-secondary transition-colors hover:bg-on-secondary-container disabled:cursor-not-allowed disabled:opacity-40"
-                    >
-                      <span className="material-symbols-outlined text-[16px]">play_arrow</span>
-                      Executar
-                    </button>
-                  )}
-                </div>
-              </div>
-
-              {resultado ? (
-                <div className="border-t border-outline-variant bg-surface p-md">
-                  <p
-                    className={`mb-2 flex items-center gap-2 font-label-md text-label-md ${
-                      resultado.ok ? "text-secondary" : "text-on-tertiary-fixed-variant"
-                    }`}
+              <CardContent className="pt-6">
+                <div className="flex flex-wrap items-center gap-4">
+                  <span
+                    className={cn(
+                      "grid size-11 shrink-0 place-items-center rounded-full text-sm font-bold",
+                      feito && "bg-success text-success-foreground",
+                      rodando && "bg-primary text-primary-foreground ring-4 ring-primary/20",
+                      !feito && !rodando && "border-2 border-border text-muted-foreground",
+                    )}
                   >
-                    <span className="material-symbols-outlined text-[18px]">
-                      {resultado.ok ? "check_circle" : "warning"}
-                    </span>
-                    {resultado.titulo}
-                  </p>
-                  <ul className="flex flex-col gap-1">
-                    {resultado.detalhes.map((d) => (
-                      <li
-                        key={d}
-                        className="flex items-start gap-2 font-body-sm text-body-sm text-on-surface-variant"
+                    {feito ? (
+                      <Check className="size-5" />
+                    ) : rodando ? (
+                      <Loader2 className="size-5 animate-spin" />
+                    ) : (
+                      e.id
+                    )}
+                  </span>
+
+                  <div className="min-w-0 flex-1">
+                    <h3 className="flex flex-wrap items-center gap-2 text-base font-semibold">
+                      <Icone className="size-4 shrink-0 text-muted-foreground" />
+                      {e.nome}
+                    </h3>
+                    <p className="mt-0.5 text-xs text-muted-foreground">{e.descricao}</p>
+                  </div>
+
+                  <div className="shrink-0">
+                    {feito ? (
+                      <StatusBadge tone={resultado?.ok ? "success" : "warning"}>
+                        {resultado?.ok ? "Concluída" : "Com observações"}
+                      </StatusBadge>
+                    ) : (
+                      <Button
+                        size="sm"
+                        className="gap-1.5"
+                        disabled={!liberada || rodando}
+                        onClick={() => executar(e.id)}
                       >
-                        <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-outline-variant" />
-                        <span
-                          className={
-                            d.startsWith("PASS")
-                              ? "font-data-mono text-secondary"
-                              : d.startsWith("FAIL")
-                                ? "font-data-mono text-error"
-                                : ""
-                          }
-                        >
-                          {d}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
+                        <Play className="size-3.5" /> Executar
+                      </Button>
+                    )}
+                  </div>
                 </div>
-              ) : null}
-            </div>
+
+                {resultado ? (
+                  <div className="mt-4 rounded-lg border border-border bg-muted/40 p-4">
+                    <p
+                      className={cn(
+                        "mb-2 flex items-center gap-2 text-sm font-semibold",
+                        resultado.ok ? "text-success" : "text-warning-foreground",
+                      )}
+                    >
+                      {resultado.ok ? (
+                        <CheckCircle2 className="size-4" />
+                      ) : (
+                        <TriangleAlert className="size-4" />
+                      )}
+                      {resultado.titulo}
+                    </p>
+                    <ul className="flex flex-col gap-1">
+                      {resultado.detalhes.map((d) => (
+                        <li
+                          key={d}
+                          className="flex items-start gap-2 text-xs text-muted-foreground"
+                        >
+                          <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-border" />
+                          <span
+                            className={cn(
+                              d.startsWith("PASS") && "num text-success",
+                              d.startsWith("FAIL") && "num text-destructive",
+                            )}
+                          >
+                            {d}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
+              </CardContent>
+            </Card>
           );
         })}
       </div>

@@ -1,23 +1,27 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
+import { CheckCircle2, Link2, RotateCcw, ToggleLeft, TriangleAlert } from "lucide-react";
 import { PageHeader } from "@/components/app/PageHeader";
 import { StatusBadge } from "@/components/app/StatusBadge";
 import { useFeatures } from "@/components/app/FeaturesContext";
 import { usePerfil } from "@/components/app/PerfilContext";
 import { useAuditoria } from "@/components/app/AuditoriaContext";
 import { useEmpresa } from "@/components/app/EmpresaContext";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { brl, paresConciliacao } from "@/lib/mock-data";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/conciliacao")({
   head: () => ({
     meta: [
-      { title: "Conciliação bancária — FinCore ERP" },
+      { title: "Conciliação bancária — FinCore" },
       {
         name: "description",
         content: "Cruze lançamentos do extrato com os títulos do sistema e confirme conciliações.",
       },
-      { property: "og:title", content: "Conciliação bancária — FinCore ERP" },
+      { property: "og:title", content: "Conciliação bancária — FinCore" },
       { property: "og:description", content: "Sugestões automáticas de par extrato × sistema." },
     ],
   }),
@@ -45,21 +49,21 @@ function Conciliacao() {
             },
           ]}
         />
-        <div className="flex items-start gap-3 rounded-xl border border-outline-variant bg-surface-container-lowest p-md shadow-sm">
-          <span className="material-symbols-outlined text-on-surface-variant">toggle_off</span>
-          <div>
-            <p className="font-label-md text-label-md text-primary">
-              Módulo de conciliação não contratado
-            </p>
-            <p className="mt-1 font-body-md text-body-md text-on-surface-variant">
-              Ative a feature <code className="font-data-mono">conciliacao</code> em{" "}
-              <Link to="/configuracoes" className="text-secondary underline decoration-dotted">
-                Features do tenant
-              </Link>{" "}
-              (PV6) para habilitar a importação de extratos e a conciliação.
-            </p>
-          </div>
-        </div>
+        <Card className="shadow-card">
+          <CardContent className="flex items-start gap-3 pt-6">
+            <ToggleLeft className="mt-0.5 size-5 shrink-0 text-muted-foreground" />
+            <div>
+              <p className="text-sm font-semibold">Módulo de conciliação não contratado</p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Ative a feature <code className="num">conciliacao</code> em{" "}
+                <Link to="/configuracoes" className="text-primary underline decoration-dotted">
+                  Features do tenant
+                </Link>{" "}
+                (PV6) para habilitar a importação de extratos e a conciliação.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
       </>
     );
   }
@@ -108,156 +112,134 @@ function Conciliacao() {
         ]}
         acoes={
           <>
-            <StatusBadge tone="atencao">{pendentes} pendentes</StatusBadge>
-            <StatusBadge tone="ok">{conciliados} conciliados</StatusBadge>
+            <StatusBadge tone="warning">{pendentes} pendentes</StatusBadge>
+            <StatusBadge tone="success">{conciliados} conciliados</StatusBadge>
           </>
         }
       />
 
-      {/* Progresso */}
-      <div className="mb-lg rounded-xl border border-outline-variant bg-surface-container-lowest p-md shadow-sm">
-        <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-          <span className="font-label-md text-label-md text-on-surface-variant">
-            Progresso da conciliação
-          </span>
-          <span className="font-data-mono text-data-mono font-bold text-secondary">
-            {progresso}%
-          </span>
-        </div>
-        <div className="h-2.5 overflow-hidden rounded-full bg-surface-variant">
-          <div
-            className="h-full rounded-full bg-secondary transition-all duration-300"
-            style={{ width: `${progresso}%` }}
-          />
-        </div>
-      </div>
+      <Card className="mb-6 shadow-card">
+        <CardContent className="pt-6">
+          <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+            <span className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
+              Progresso da conciliação
+            </span>
+            <span className="num font-bold text-success">{progresso}%</span>
+          </div>
+          <div className="h-2.5 overflow-hidden rounded-full bg-muted">
+            <div
+              className="h-full rounded-full bg-success transition-all duration-300"
+              style={{ width: `${progresso}%` }}
+            />
+          </div>
+        </CardContent>
+      </Card>
 
-      <div className="mb-3 hidden grid-cols-[1fr_auto_1fr] gap-4 px-2 font-label-md text-label-md uppercase tracking-wider text-on-surface-variant lg:grid">
+      <div className="mb-3 hidden grid-cols-[1fr_auto_1fr] gap-4 px-2 text-xs font-bold uppercase tracking-wide text-muted-foreground lg:grid">
         <span>Lançamentos do extrato</span>
-        <span className="w-44 text-center">Ação</span>
+        <span className="w-40 text-center">Ação</span>
         <span>Títulos do sistema</span>
       </div>
 
-      <div className="flex flex-col gap-3">
+      <div className="space-y-3">
         {pares.map((par) => {
           const divergencia = Math.abs(par.extrato.valor - par.sistema.valor);
           return (
-            <div
+            <Card
               key={par.id}
-              className={`rounded-xl border border-outline-variant bg-surface-container-lowest p-md shadow-sm transition-opacity ${
-                par.conciliado ? "opacity-60" : ""
-              }`}
+              className={cn("shadow-card transition-opacity", par.conciliado && "opacity-60")}
             >
-              <div className="grid items-center gap-4 lg:grid-cols-[1fr_auto_1fr]">
-                <div className="rounded-lg border border-outline-variant bg-surface-container p-3">
-                  <p className="font-data-mono text-body-sm text-on-surface-variant">
-                    {par.extrato.data}
-                  </p>
-                  <p className="font-label-md text-label-md text-on-surface">
-                    {par.extrato.descricao}
-                  </p>
-                  <p className="mt-1 font-data-mono text-body-lg font-bold text-primary">
-                    {brl(par.extrato.valor)}
-                  </p>
+              <CardContent className="grid items-center gap-4 pt-6 lg:grid-cols-[1fr_auto_1fr]">
+                <div className="rounded-lg border border-border bg-muted/40 p-3">
+                  <p className="num text-xs text-muted-foreground">{par.extrato.data}</p>
+                  <p className="text-sm font-semibold">{par.extrato.descricao}</p>
+                  <p className="num mt-1 text-base font-bold">{brl(par.extrato.valor)}</p>
                 </div>
 
-                <div className="flex w-full flex-col items-center gap-2 lg:w-44">
-                  <div className="hidden h-px w-full bg-outline-variant lg:block" />
+                <div className="flex w-full flex-col items-center gap-2 lg:w-40">
+                  <div className="hidden h-px w-full bg-border lg:block" />
                   {par.conciliado ? (
                     <>
-                      <StatusBadge tone="ok">
-                        <span className="material-symbols-outlined text-[14px]">check_circle</span>
-                        Conciliado
+                      <StatusBadge tone="success">
+                        <CheckCircle2 className="size-3.5" /> Conciliado
                       </StatusBadge>
                       {leitura ? null : (
-                        <button
-                          type="button"
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="gap-1.5"
                           onClick={() => alternar(par.id, false)}
-                          className="flex items-center gap-1.5 rounded-lg border border-outline-variant px-3 py-1.5 font-label-md text-label-md text-on-surface transition-colors hover:bg-surface-container"
                         >
-                          <span className="material-symbols-outlined text-[16px]">restart_alt</span>
-                          Desfazer
-                        </button>
+                          <RotateCcw className="size-3.5" /> Desfazer
+                        </Button>
                       )}
                     </>
                   ) : (
                     <>
-                      <StatusBadge tone={par.confianca === "alta" ? "info" : "atencao"}>
+                      <StatusBadge tone={par.confianca === "alta" ? "info" : "warning"}>
                         Sugestão {par.confianca}
                       </StatusBadge>
                       {leitura ? (
-                        <span className="font-body-sm text-body-sm text-outline">Só leitura</span>
+                        <span className="text-xs text-muted-foreground">Só leitura</span>
                       ) : (
-                        <button
-                          type="button"
+                        <Button
+                          size="sm"
+                          className="gap-1.5"
                           onClick={() => alternar(par.id, true)}
-                          className="flex items-center gap-1.5 rounded-lg bg-secondary px-3 py-1.5 font-label-md text-label-md text-on-secondary transition-colors hover:bg-on-secondary-container"
                         >
-                          <span className="material-symbols-outlined text-[16px]">link</span>
-                          Conciliar
-                        </button>
+                          <Link2 className="size-3.5" /> Conciliar
+                        </Button>
                       )}
                     </>
                   )}
-                  <div className="hidden h-px w-full bg-outline-variant lg:block" />
+                  <div className="hidden h-px w-full bg-border lg:block" />
                 </div>
 
-                <div className="rounded-lg border border-outline-variant bg-surface p-3">
-                  <p className="font-data-mono text-body-sm text-on-surface-variant">
-                    {par.sistema.data}
-                  </p>
-                  <p className="font-label-md text-label-md text-on-surface">
-                    {par.sistema.descricao}
-                  </p>
-                  <p className="mt-1 font-data-mono text-body-lg font-bold text-primary">
-                    {brl(par.sistema.valor)}
-                  </p>
+                <div className="rounded-lg border border-border bg-card p-3">
+                  <p className="num text-xs text-muted-foreground">{par.sistema.data}</p>
+                  <p className="text-sm font-semibold">{par.sistema.descricao}</p>
+                  <p className="num mt-1 text-base font-bold">{brl(par.sistema.valor)}</p>
                 </div>
-              </div>
 
-              {divergencia > 0.001 && !par.conciliado ? (
-                <div className="mt-3 flex items-start gap-2 rounded-lg border border-tertiary-fixed-dim bg-tertiary-fixed p-3">
-                  <span className="material-symbols-outlined text-[18px] text-on-tertiary-fixed-variant">
-                    warning
-                  </span>
-                  <p className="font-body-sm text-body-sm text-on-tertiary-fixed-variant">
-                    Divergência de <strong className="font-data-mono">{brl(divergencia)}</strong>{" "}
-                    entre extrato e sistema. Ao conciliar, a diferença será lançada como despesa
-                    financeira.
-                  </p>
-                </div>
-              ) : null}
-            </div>
+                {divergencia > 0.001 && !par.conciliado ? (
+                  <div className="flex items-start gap-2 rounded-lg border border-warning/40 bg-warning/15 p-3 lg:col-span-3">
+                    <TriangleAlert className="mt-0.5 size-4 shrink-0 text-warning-foreground" />
+                    <p className="text-xs text-warning-foreground">
+                      Divergência de <strong className="num">{brl(divergencia)}</strong> entre
+                      extrato e sistema. Ao conciliar, a diferença será lançada como despesa
+                      financeira.
+                    </p>
+                  </div>
+                ) : null}
+              </CardContent>
+            </Card>
           );
         })}
       </div>
 
-      {/* Sem par sugerido */}
-      <div className="mt-lg overflow-hidden rounded-xl border border-outline-variant bg-surface-container-lowest shadow-sm">
-        <h3 className="border-b border-outline-variant bg-surface px-md py-3 font-headline-sm text-headline-sm text-primary">
-          Sem par sugerido
-        </h3>
-        <div className="grid gap-3 p-md sm:grid-cols-2">
-          <div className="rounded-lg border border-dashed border-outline-variant p-3">
-            <p className="font-data-mono text-body-sm text-on-surface-variant">03/06/2026</p>
-            <p className="font-label-md text-label-md text-on-surface">TARIFA PACOTE SERVICOS</p>
-            <p className="mt-1 font-data-mono font-bold text-primary">{brl(89.9)}</p>
-            <p className="mt-1 font-body-sm text-body-sm text-on-surface-variant">
+      <Card className="mt-6 shadow-card">
+        <CardHeader>
+          <CardTitle className="text-base">Sem par sugerido</CardTitle>
+        </CardHeader>
+        <CardContent className="grid gap-3 sm:grid-cols-2">
+          <div className="rounded-lg border border-dashed border-border p-3">
+            <p className="num text-xs text-muted-foreground">03/06/2026</p>
+            <p className="text-sm font-semibold">TARIFA PACOTE SERVICOS</p>
+            <p className="num mt-1 font-bold">{brl(89.9)}</p>
+            <p className="mt-1 text-xs text-muted-foreground">
               Nenhum título correspondente — lance como despesa financeira.
             </p>
           </div>
-          <div className="rounded-lg border border-dashed border-outline-variant p-3">
-            <p className="font-data-mono text-body-sm text-on-surface-variant">07/06/2026</p>
-            <p className="font-label-md text-label-md text-on-surface">
-              Título 8901 — Serviços Contábeis Aliança
-            </p>
-            <p className="mt-1 font-data-mono font-bold text-primary">{brl(3200)}</p>
-            <p className="mt-1 font-body-sm text-body-sm text-on-surface-variant">
+          <div className="rounded-lg border border-dashed border-border p-3">
+            <p className="num text-xs text-muted-foreground">07/06/2026</p>
+            <p className="text-sm font-semibold">Título 8901 — Serviços Contábeis Aliança</p>
+            <p className="num mt-1 font-bold">{brl(3200)}</p>
+            <p className="mt-1 text-xs text-muted-foreground">
               Sem lançamento no extrato — verifique se o pagamento foi efetivado.
             </p>
           </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     </>
   );
 }

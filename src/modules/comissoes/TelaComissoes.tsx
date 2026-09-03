@@ -1,11 +1,44 @@
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
+import {
+  Cable,
+  CheckCircle2,
+  CheckCheck,
+  FilePlus2,
+  FolderLock,
+  Sigma,
+  Table as TableIcon,
+  ToggleRight,
+  Wallet,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { StatusBadge } from "@/components/app/StatusBadge";
+import { cn } from "@/lib/utils";
 import { calcularComissoes, competencias, type LinhaComissao } from "./dados";
 import type { PortaNucleo } from "./tipos";
 
 /**
  * Tela do módulo exclusivo. Recebe a porta do núcleo por props — não importa
- * nenhum contexto nem tipo do núcleo, o que mantém a fronteira de isolamento.
+ * nenhum contexto nem tipo de domínio do núcleo, o que mantém a fronteira de
+ * isolamento. (Os componentes de UI compartilhados são design system, não
+ * regra de negócio.)
  */
 
 const moeda = (v: number) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
@@ -82,136 +115,136 @@ export function TelaComissoes({ porta }: { porta: PortaNucleo }) {
     .filter((l) => l.status === "A aprovar")
     .map((l) => l.vendedorId);
 
+  const fronteiras = [
+    {
+      icone: FolderLock,
+      titulo: "Pacote separado",
+      texto:
+        "Todo o código vive em src/modules/comissoes/ — rota, componentes, dados e tipos. Nenhum arquivo do núcleo importa desta pasta.",
+    },
+    {
+      icone: TableIcon,
+      titulo: "Tabela própria",
+      texto:
+        "O cadastro de vendedores, percentuais e recebimentos por competência está em modules/comissoes/dados.ts, fora de src/lib/mock-data.ts.",
+    },
+    {
+      icone: Cable,
+      titulo: "Leitura via interface do núcleo",
+      texto:
+        "O módulo declara a porta PortaNucleo em tipos.ts. A rota injeta a implementação; o módulo nunca conhece TituloPagar nem os contextos do núcleo.",
+    },
+    {
+      icone: ToggleRight,
+      titulo: "Rota condicional",
+      texto:
+        "A rota /comissoes só renderiza a tela quando a flag mod_comissoes está ativa. Em qualquer outro tenant, redireciona para o dashboard com aviso.",
+    },
+  ];
+
   return (
     <>
-      {/* Seletor de competência e regra */}
-      <div className="mb-lg grid grid-cols-1 gap-md lg:grid-cols-3">
-        <div className="rounded-xl border border-outline-variant bg-surface-container-lowest p-md shadow-sm">
-          <label
-            htmlFor="comp"
-            className="mb-1.5 block font-label-md text-label-md text-on-surface-variant"
-          >
-            Competência
-          </label>
-          <select
-            id="comp"
-            value={competencia}
-            onChange={(e) => trocarCompetencia(e.target.value)}
-            className="w-full rounded-lg border border-outline-variant bg-surface px-3 py-2 font-body-md text-body-md focus:border-secondary focus:outline-none focus:ring-1 focus:ring-secondary"
-          >
-            {competencias.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.rotulo}
-              </option>
-            ))}
-          </select>
-          <p className="mt-2 font-body-sm text-body-sm text-on-surface-variant">
-            {linhas.length} vendedores comissionados nesta competência.
-          </p>
-        </div>
+      <div className="mb-6 grid gap-4 lg:grid-cols-3">
+        <Card className="shadow-card">
+          <CardContent className="space-y-1.5 pt-6">
+            <Label htmlFor="comp">Competência</Label>
+            <Select value={competencia} onValueChange={trocarCompetencia}>
+              <SelectTrigger id="comp">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {competencias.map((c) => (
+                  <SelectItem key={c.id} value={c.id}>
+                    {c.rotulo}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-muted-foreground">
+              {linhas.length} vendedores comissionados nesta competência.
+            </p>
+          </CardContent>
+        </Card>
 
-        <div className="rounded-xl border border-outline-variant bg-surface-container-lowest p-md shadow-sm">
-          <p className="mb-1 flex items-center gap-2 font-label-md text-label-md text-on-surface-variant">
-            <span className="material-symbols-outlined text-[18px]">functions</span>
-            Regra de cálculo
-          </p>
-          <p className="font-body-md text-body-md text-on-surface">
-            Percentual contratado <strong>sobre o valor de títulos recebidos no mês</strong>.
-            Títulos cancelados e não liquidados ficam fora da base.
-          </p>
-        </div>
+        <Card className="shadow-card">
+          <CardContent className="pt-6">
+            <p className="mb-1 flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-muted-foreground">
+              <Sigma className="size-4" /> Regra de cálculo
+            </p>
+            <p className="text-sm">
+              Percentual contratado <strong>sobre o valor de títulos recebidos no mês</strong>.
+              Títulos cancelados e não liquidados ficam fora da base.
+            </p>
+          </CardContent>
+        </Card>
 
-        <div className="rounded-xl border border-outline-variant bg-surface-container-lowest p-md shadow-sm">
-          <p className="mb-1 flex items-center gap-2 font-label-md text-label-md text-on-surface-variant">
-            <span className="material-symbols-outlined text-[18px]">payments</span>
-            Total de comissões
-          </p>
-          <p className="font-data-mono text-[clamp(1.4rem,4vw,2rem)] leading-tight text-secondary">
-            {moeda(totais.comissao)}
-          </p>
-          <p className="mt-1 font-body-sm text-body-sm text-on-surface-variant">
-            Base recebida {moeda(totais.recebido)} · {totais.aprovadas} de {linhas.length} aprovadas
-          </p>
-        </div>
+        <Card className="shadow-card">
+          <CardContent className="pt-6">
+            <p className="mb-1 flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-muted-foreground">
+              <Wallet className="size-4" /> Total de comissões
+            </p>
+            <p className="num text-2xl font-bold text-success">{moeda(totais.comissao)}</p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Base recebida {moeda(totais.recebido)} · {totais.aprovadas} de {linhas.length}{" "}
+              aprovadas
+            </p>
+          </CardContent>
+        </Card>
       </div>
 
-      {/* Tabela */}
-      <div className="flex flex-col overflow-hidden rounded-xl border border-outline-variant bg-surface-container-lowest shadow-sm">
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-outline-variant bg-surface px-md py-3">
-          <h3 className="font-headline-sm text-headline-sm text-primary">
-            Comissões de {rotuloCompetencia}
-          </h3>
+      <Card className="shadow-card">
+        <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <CardTitle className="text-base">Comissões de {rotuloCompetencia}</CardTitle>
           <div className="flex flex-wrap gap-2">
-            <button
-              type="button"
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-1.5"
               disabled={selecionadas.length === 0}
               onClick={() => aprovar(selecionadas)}
-              className="flex items-center gap-1.5 rounded-lg border border-outline-variant px-3 py-1.5 font-label-md text-label-md text-primary transition-colors hover:bg-surface-container disabled:opacity-40"
             >
-              <span className="material-symbols-outlined text-[16px]">done_all</span>
-              Aprovar selecionadas ({selecionadas.length})
-            </button>
-            <button
-              type="button"
-              onClick={gerarTitulo}
-              className="flex items-center gap-1.5 rounded-lg bg-secondary px-4 py-1.5 font-label-md text-label-md text-on-secondary shadow-sm transition-colors hover:bg-on-secondary-container"
-            >
-              <span className="material-symbols-outlined text-[16px]">post_add</span>
-              Gerar título a pagar (comissão)
-            </button>
+              <CheckCheck className="size-3.5" /> Aprovar selecionadas ({selecionadas.length})
+            </Button>
+            <Button size="sm" className="gap-1.5" onClick={gerarTitulo}>
+              <FilePlus2 className="size-3.5" /> Gerar título a pagar (comissão)
+            </Button>
           </div>
-        </div>
-
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[46rem] border-collapse text-left">
-            <thead className="border-b border-outline-variant bg-surface-container-low">
-              <tr>
-                <th className="w-12 p-3 pl-4">
+        </CardHeader>
+        <CardContent className="overflow-x-auto">
+          <Table className="min-w-[46rem]">
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-12">
                   <input
                     type="checkbox"
                     aria-label="Selecionar todas"
-                    className="size-4 rounded-sm accent-[var(--color-secondary)]"
+                    className="size-4 rounded accent-[var(--primary)]"
                     checked={
                       todasSelecionaveis.length > 0 &&
                       selecionadas.length === todasSelecionaveis.length
                     }
                     onChange={(e) => setSelecionadas(e.target.checked ? todasSelecionaveis : [])}
                   />
-                </th>
-                <th className="p-3 font-label-md text-label-md text-on-surface-variant">
-                  Vendedor
-                </th>
-                <th className="p-3 text-right font-label-md text-label-md text-on-surface-variant">
-                  Recebido
-                </th>
-                <th className="w-20 p-3 text-right font-label-md text-label-md text-on-surface-variant">
-                  %
-                </th>
-                <th className="p-3 text-right font-label-md text-label-md text-on-surface-variant">
-                  Comissão
-                </th>
-                <th className="w-40 p-3 text-center font-label-md text-label-md text-on-surface-variant">
-                  Status
-                </th>
-                <th className="w-28 p-3 text-right font-label-md text-label-md text-on-surface-variant">
-                  Ações
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-outline-variant font-body-md text-body-md">
+                </TableHead>
+                <TableHead>Vendedor</TableHead>
+                <TableHead className="text-right">Recebido</TableHead>
+                <TableHead className="w-20 text-right">%</TableHead>
+                <TableHead className="text-right">Comissão</TableHead>
+                <TableHead className="w-40 text-center">Status</TableHead>
+                <TableHead className="w-24 text-right">Ações</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {linhas.map((l) => {
                 const podeAprovar = l.status === "A aprovar";
                 return (
-                  <tr
-                    key={l.vendedorId}
-                    className="transition-colors hover:bg-surface-container-low"
-                  >
-                    <td className="p-3 pl-4">
+                  <TableRow key={l.vendedorId}>
+                    <TableCell>
                       <input
                         type="checkbox"
                         aria-label={`Selecionar ${l.vendedor}`}
                         disabled={!podeAprovar}
-                        className="size-4 rounded-sm accent-[var(--color-secondary)] disabled:opacity-30"
+                        className="size-4 rounded accent-[var(--primary)] disabled:opacity-30"
                         checked={selecionadas.includes(l.vendedorId)}
                         onChange={(e) =>
                           setSelecionadas((s) =>
@@ -221,134 +254,96 @@ export function TelaComissoes({ porta }: { porta: PortaNucleo }) {
                           )
                         }
                       />
-                    </td>
-                    <td className="p-3">
-                      <span className="block font-medium text-primary">{l.vendedor}</span>
-                      <span className="block font-body-sm text-body-sm text-on-surface-variant">
-                        {l.equipe}
-                      </span>
-                    </td>
-                    <td className="p-3 text-right font-data-mono text-data-mono text-on-surface">
-                      {moeda(l.recebido)}
-                    </td>
-                    <td className="p-3 text-right font-data-mono text-data-mono text-on-surface-variant">
+                    </TableCell>
+                    <TableCell>
+                      <span className="block font-medium">{l.vendedor}</span>
+                      <span className="block text-xs text-muted-foreground">{l.equipe}</span>
+                    </TableCell>
+                    <TableCell className="num text-right">{moeda(l.recebido)}</TableCell>
+                    <TableCell className="num text-right text-muted-foreground">
                       {l.percentual}%
-                    </td>
-                    <td className="p-3 text-right font-data-mono text-data-mono font-bold text-secondary">
+                    </TableCell>
+                    <TableCell className="num text-right font-bold text-success">
                       {moeda(l.comissao)}
-                    </td>
-                    <td className="p-3 text-center">
-                      <span
-                        className={`inline-flex whitespace-nowrap rounded-full px-2 py-0.5 font-label-md text-[11px] ${
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <StatusBadge
+                        tone={
                           l.status === "A aprovar"
-                            ? "bg-tertiary-fixed text-on-tertiary-fixed"
+                            ? "warning"
                             : l.status === "Aprovada"
-                              ? "bg-secondary/10 text-secondary"
-                              : "bg-primary-fixed text-on-primary-fixed-variant"
-                        }`}
+                              ? "success"
+                              : "info"
+                        }
                       >
                         {l.status}
-                      </span>
-                    </td>
-                    <td className="p-3 text-right">
+                      </StatusBadge>
+                    </TableCell>
+                    <TableCell className="text-right">
                       {podeAprovar ? (
-                        <button
-                          type="button"
-                          onClick={() => aprovar([l.vendedorId])}
-                          className="rounded p-1 text-on-surface-variant transition-colors hover:bg-secondary/10 hover:text-secondary"
+                        <Button
+                          size="icon"
+                          variant="ghost"
                           title="Aprovar comissão"
+                          className="hover:text-success"
+                          onClick={() => aprovar([l.vendedorId])}
                         >
-                          <span className="material-symbols-outlined text-[20px]">
-                            check_circle
-                          </span>
-                        </button>
+                          <CheckCircle2 className="size-4" />
+                        </Button>
                       ) : (
-                        <span className="font-body-sm text-body-sm text-outline">Finalizada</span>
+                        <span className="text-xs text-muted-foreground">Finalizada</span>
                       )}
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 );
               })}
-            </tbody>
-          </table>
-        </div>
+            </TableBody>
+          </Table>
 
-        <div className="flex flex-wrap items-center justify-between gap-4 border-t border-outline-variant bg-surface-container-low p-md">
-          <span className="font-body-sm text-body-sm text-on-surface-variant">
-            {linhas.length} vendedores · competência {rotuloCompetencia}
-          </span>
-          <div className="flex items-center gap-6">
-            <span className="flex flex-col text-right">
-              <span className="font-body-sm text-[11px] uppercase tracking-wider text-on-surface-variant">
-                Base recebida
-              </span>
-              <span className="font-data-mono font-bold text-primary">
-                {moeda(totais.recebido)}
-              </span>
+          <div className="mt-4 flex flex-wrap items-center justify-between gap-4 border-t border-border pt-4">
+            <span className="text-xs text-muted-foreground">
+              {linhas.length} vendedores · competência {rotuloCompetencia}
             </span>
-            <span className="hidden h-8 w-px bg-outline-variant sm:block" />
-            <span className="flex flex-col text-right">
-              <span className="font-body-sm text-[11px] uppercase tracking-wider text-on-surface-variant">
-                Total de comissões
-              </span>
-              <span className="font-data-mono text-body-lg font-bold text-secondary">
-                {moeda(totais.comissao)}
-              </span>
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* Fronteiras de isolamento */}
-      <div className="mt-lg overflow-hidden rounded-xl border-2 border-error-container bg-surface-container-lowest shadow-sm">
-        <div className="flex items-center gap-3 border-b border-outline-variant bg-error-container/20 px-md py-3">
-          <span className="material-symbols-outlined text-error">workspace_premium</span>
-          <h3 className="font-headline-sm text-headline-sm text-primary">
-            Fronteiras de isolamento do módulo
-          </h3>
-        </div>
-        <ul className="grid gap-md p-md sm:grid-cols-2">
-          {[
-            {
-              icone: "folder_special",
-              titulo: "Pacote separado",
-              texto:
-                "Todo o código vive em src/modules/comissoes/ — rota, componentes, dados e tipos. Nenhum arquivo do núcleo importa desta pasta.",
-            },
-            {
-              icone: "table",
-              titulo: "Tabela própria",
-              texto:
-                "O cadastro de vendedores, percentuais e recebimentos por competência está em modules/comissoes/dados.ts, fora de src/lib/mock-data.ts.",
-            },
-            {
-              icone: "cable",
-              titulo: "Leitura via interface do núcleo",
-              texto:
-                "O módulo declara a porta PortaNucleo em tipos.ts. A rota injeta a implementação; o módulo nunca conhece TituloPagar nem os contextos do núcleo.",
-            },
-            {
-              icone: "toggle_on",
-              titulo: "Rota condicional",
-              texto:
-                "A rota /comissoes só renderiza a tela quando a flag mod_comissoes está ativa. Em qualquer outro tenant, redireciona para o dashboard com aviso.",
-            },
-          ].map((c) => (
-            <li
-              key={c.titulo}
-              className="flex gap-3 rounded-lg border border-outline-variant bg-surface p-3"
-            >
-              <span className="material-symbols-outlined text-secondary">{c.icone}</span>
-              <span>
-                <span className="block font-label-md text-label-md text-primary">{c.titulo}</span>
-                <span className="mt-0.5 block font-body-sm text-body-sm text-on-surface-variant">
-                  {c.texto}
+            <div className="flex items-center gap-5">
+              <span className="flex flex-col text-right">
+                <span className="text-[0.68rem] font-bold uppercase tracking-wide text-muted-foreground">
+                  Base recebida
                 </span>
+                <span className="num font-bold">{moeda(totais.recebido)}</span>
               </span>
-            </li>
-          ))}
-        </ul>
-      </div>
+              <span className="flex flex-col text-right">
+                <span className="text-[0.68rem] font-bold uppercase tracking-wide text-muted-foreground">
+                  Total de comissões
+                </span>
+                <span className="num text-lg font-bold text-success">{moeda(totais.comissao)}</span>
+              </span>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className={cn("mt-6 border-destructive/40 shadow-card")}>
+        <CardHeader>
+          <CardTitle className="text-base">Fronteiras de isolamento do módulo</CardTitle>
+        </CardHeader>
+        <CardContent className="grid gap-4 sm:grid-cols-2">
+          {fronteiras.map((c) => {
+            const Icone = c.icone;
+            return (
+              <div
+                key={c.titulo}
+                className="flex gap-3 rounded-lg border border-border bg-muted/40 p-3"
+              >
+                <Icone className="mt-0.5 size-4 shrink-0 text-primary" />
+                <span>
+                  <span className="block text-sm font-semibold">{c.titulo}</span>
+                  <span className="mt-0.5 block text-xs text-muted-foreground">{c.texto}</span>
+                </span>
+              </div>
+            );
+          })}
+        </CardContent>
+      </Card>
     </>
   );
 }

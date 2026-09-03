@@ -1,23 +1,43 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
+import { Save, ToggleLeft } from "lucide-react";
 import { PageHeader } from "@/components/app/PageHeader";
 import { StatusBadge } from "@/components/app/StatusBadge";
 import { useFeatures } from "@/components/app/FeaturesContext";
 import { usePerfil } from "@/components/app/PerfilContext";
 import { useAuditoria } from "@/components/app/AuditoriaContext";
 import { useEmpresa } from "@/components/app/EmpresaContext";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { brl, usuarios } from "@/lib/mock-data";
 
 export const Route = createFileRoute("/alcadas")({
   head: () => ({
     meta: [
-      { title: "Configurar alçada de aprovação — FinCore ERP" },
+      { title: "Configurar alçada de aprovação — FinCore" },
       {
         name: "description",
         content: "Defina limites de aprovação automática por perfil e aprovadores substitutos.",
       },
-      { property: "og:title", content: "Configurar alçada de aprovação — FinCore ERP" },
+      { property: "og:title", content: "Configurar alçada de aprovação — FinCore" },
       { property: "og:description", content: "Limites por perfil e substituto em ausências." },
     ],
   }),
@@ -63,9 +83,6 @@ const iniciais: PerfilAlcada[] = [
   },
 ];
 
-const inputCls =
-  "w-full rounded-lg border border-outline-variant bg-surface px-3 py-2 font-data-mono text-data-mono focus:border-secondary focus:outline-none focus:ring-1 focus:ring-secondary";
-
 function Alcadas() {
   const { has } = useFeatures();
   const { leitura, perfil } = usePerfil();
@@ -91,21 +108,21 @@ function Alcadas() {
             },
           ]}
         />
-        <div className="flex items-start gap-3 rounded-xl border border-outline-variant bg-surface-container-lowest p-md shadow-sm">
-          <span className="material-symbols-outlined text-on-surface-variant">toggle_off</span>
-          <div>
-            <p className="font-label-md text-label-md text-primary">
-              Aprovação por alçada não contratada
-            </p>
-            <p className="mt-1 font-body-md text-body-md text-on-surface-variant">
-              Ative a feature <code className="font-data-mono">alcada</code> em{" "}
-              <Link to="/configuracoes" className="text-secondary underline decoration-dotted">
-                Features do tenant
-              </Link>{" "}
-              (PV3) para configurar limites por perfil.
-            </p>
-          </div>
-        </div>
+        <Card className="shadow-card">
+          <CardContent className="flex items-start gap-3 pt-6">
+            <ToggleLeft className="mt-0.5 size-5 shrink-0 text-muted-foreground" />
+            <div>
+              <p className="text-sm font-semibold">Aprovação por alçada não contratada</p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Ative a feature <code className="num">alcada</code> em{" "}
+                <Link to="/configuracoes" className="text-primary underline decoration-dotted">
+                  Features do tenant
+                </Link>{" "}
+                (PV3) para configurar limites por perfil.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
       </>
     );
   }
@@ -148,130 +165,115 @@ function Alcadas() {
           leitura ? (
             <StatusBadge tone="info">Somente leitura</StatusBadge>
           ) : (
-            <button
-              type="button"
-              onClick={salvar}
-              className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 font-label-md text-label-md text-on-primary shadow-sm transition-colors hover:bg-primary-container"
-            >
-              <span className="material-symbols-outlined text-[18px]">save</span>
-              Salvar alterações
-            </button>
+            <Button onClick={salvar} className="gap-1.5">
+              <Save className="size-4" /> Salvar alterações
+            </Button>
           )
         }
       />
 
-      <div className="overflow-hidden rounded-xl border border-outline-variant bg-surface-container-lowest shadow-sm">
-        <h3 className="border-b border-outline-variant bg-surface px-md py-3 font-headline-sm text-headline-sm text-primary">
-          Perfis de usuário
-        </h3>
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[46rem] border-collapse text-left">
-            <thead className="border-b border-outline-variant bg-surface-container-low">
-              <tr>
-                <th className="p-3 font-label-md text-label-md text-on-surface-variant">Perfil</th>
-                <th className="p-3 font-label-md text-label-md text-on-surface-variant">Titular</th>
-                <th className="w-56 p-3 font-label-md text-label-md text-on-surface-variant">
-                  Limite de aprovação automática
-                </th>
-                <th className="w-64 p-3 font-label-md text-label-md text-on-surface-variant">
-                  Aprovador substituto
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-outline-variant">
+      <Card className="shadow-card">
+        <CardHeader>
+          <CardTitle className="text-base">Perfis de usuário</CardTitle>
+        </CardHeader>
+        <CardContent className="overflow-x-auto">
+          <Table className="min-w-[46rem]">
+            <TableHeader>
+              <TableRow>
+                <TableHead>Perfil</TableHead>
+                <TableHead>Titular</TableHead>
+                <TableHead className="w-56">Limite de aprovação automática</TableHead>
+                <TableHead className="w-64">Aprovador substituto</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {perfis.map((p) => (
-                <tr key={p.id} className="hover:bg-surface-container-low">
-                  <td className="p-3">
-                    <span className="block font-label-md text-label-md text-primary">{p.nome}</span>
-                    <span className="block font-data-mono text-body-sm text-on-surface-variant">
+                <TableRow key={p.id}>
+                  <TableCell className="font-medium">
+                    {p.nome}
+                    <p className="num text-xs text-muted-foreground">
                       Limite atual {brl(p.limite)}
-                    </span>
-                  </td>
-                  <td className="p-3 font-body-md text-body-md text-on-surface">{p.titular}</td>
-                  <td className="p-3">
+                    </p>
+                  </TableCell>
+                  <TableCell className="text-sm">{p.titular}</TableCell>
+                  <TableCell>
                     <div className="flex items-center gap-2">
-                      <span className="font-data-mono text-on-surface-variant">R$</span>
-                      <input
+                      <span className="text-sm text-muted-foreground">R$</span>
+                      <Input
                         type="number"
                         min={0}
                         step={500}
                         disabled={leitura}
-                        className={`${inputCls} disabled:opacity-60`}
+                        className="num"
                         value={p.limite}
                         onChange={(e) => atualizar(p.id, "limite", Number(e.target.value))}
                       />
                     </div>
-                  </td>
-                  <td className="p-3">
-                    <select
-                      disabled={leitura}
-                      className="w-full rounded-lg border border-outline-variant bg-surface px-3 py-2 font-body-md text-body-md focus:border-secondary focus:outline-none focus:ring-1 focus:ring-secondary disabled:opacity-60"
+                  </TableCell>
+                  <TableCell>
+                    <Select
                       value={p.substituto}
-                      onChange={(e) => atualizar(p.id, "substituto", e.target.value)}
+                      disabled={leitura}
+                      onValueChange={(v) => atualizar(p.id, "substituto", v)}
                     >
-                      {usuarios.map((u) => (
-                        <option key={u} value={u}>
-                          {u}
-                        </option>
-                      ))}
-                    </select>
-                  </td>
-                </tr>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {usuarios.map((u) => (
+                          <SelectItem key={u} value={u}>
+                            {u}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </TableCell>
+                </TableRow>
               ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
 
-      <div className="mt-md overflow-hidden rounded-xl border border-outline-variant bg-surface-container-lowest shadow-sm">
-        <h3 className="border-b border-outline-variant bg-surface px-md py-3 font-headline-sm text-headline-sm text-primary">
-          Regras gerais
-        </h3>
-        <div className="grid gap-md p-md sm:grid-cols-2">
-          <div>
-            <label
-              htmlFor="a-prazo"
-              className="mb-1.5 block font-label-md text-label-md text-on-surface-variant"
-            >
-              Prazo para aprovação (dias úteis)
-            </label>
-            <input
-              id="a-prazo"
-              type="number"
-              min={1}
-              disabled={leitura}
-              className={`${inputCls} disabled:opacity-60`}
-              value={prazo}
-              onChange={(e) => setPrazo(Number(e.target.value))}
-            />
+      <Card className="mt-4 shadow-card">
+        <CardHeader>
+          <CardTitle className="text-base">Regras gerais</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-1.5">
+              <Label htmlFor="a-prazo">Prazo para aprovação (dias úteis)</Label>
+              <Input
+                id="a-prazo"
+                type="number"
+                min={1}
+                disabled={leitura}
+                className="num"
+                value={prazo}
+                onChange={(e) => setPrazo(Number(e.target.value))}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="a-horas">Acionar substituto após (horas sem ação)</Label>
+              <Input
+                id="a-horas"
+                type="number"
+                min={1}
+                disabled={leitura}
+                className="num"
+                value={horas}
+                onChange={(e) => setHoras(Number(e.target.value))}
+              />
+            </div>
           </div>
-          <div>
-            <label
-              htmlFor="a-horas"
-              className="mb-1.5 block font-label-md text-label-md text-on-surface-variant"
-            >
-              Acionar substituto após (horas sem ação)
-            </label>
-            <input
-              id="a-horas"
-              type="number"
-              min={1}
-              disabled={leitura}
-              className={`${inputCls} disabled:opacity-60`}
-              value={horas}
-              onChange={(e) => setHoras(Number(e.target.value))}
-            />
-          </div>
-        </div>
-        <div className="border-t border-outline-variant bg-surface-container-low p-md">
-          <p className="font-body-sm text-body-sm text-on-surface-variant">
+          <p className="border-t border-border pt-4 text-xs text-muted-foreground">
             Títulos sem ação por <strong>{horas}h</strong> são encaminhados ao substituto. Após{" "}
             <strong>{prazo} dias úteis</strong> o título retorna a quem o lançou com aviso
             {has("notificacoes_push") ? " por e-mail, in-app e push (PV5)" : " por e-mail e in-app"}
             .
           </p>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     </>
   );
 }

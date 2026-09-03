@@ -1,22 +1,45 @@
 import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
+import {
+  ArrowLeft,
+  ArrowRight,
+  Check,
+  FileText,
+  FolderTree,
+  Landmark,
+  Lock,
+  Search,
+  Sparkles,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { StatusBadge } from "@/components/app/StatusBadge";
 import { useFeatures, type Regime } from "@/components/app/FeaturesContext";
 import { useAuditoria } from "@/components/app/AuditoriaContext";
 import { usePerfil } from "@/components/app/PerfilContext";
 import { useEmpresa } from "@/components/app/EmpresaContext";
 import { brl, contasPorRegime, planoDeContas } from "@/lib/mock-data";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/onboarding")({
   head: () => ({
     meta: [
-      { title: "Onboarding — FinCore ERP" },
+      { title: "Onboarding — FinCore" },
       {
         name: "description",
         content:
           "Configure empresa, plano de contas sugerido por regime e a primeira conta bancária.",
       },
-      { property: "og:title", content: "Onboarding — FinCore ERP" },
+      { property: "og:title", content: "Onboarding — FinCore" },
       {
         property: "og:description",
         content: "Assistente de três passos para inicializar o ambiente do tenant.",
@@ -37,12 +60,6 @@ const BANCOS = [
 ];
 
 const PASSOS = ["Empresa", "Plano de contas", "Banco"] as const;
-
-const inputCls =
-  "w-full rounded-lg border border-outline-variant bg-surface px-4 py-3 font-body-md text-body-md transition-shadow focus:border-secondary focus:outline-none focus:ring-1 focus:ring-secondary";
-const monoCls =
-  "w-full rounded-lg border border-outline-variant bg-surface px-4 py-3 font-data-mono text-data-mono transition-shadow focus:border-secondary focus:outline-none focus:ring-1 focus:ring-secondary";
-const labelCls = "mb-2 block font-label-md text-label-md text-on-surface-variant";
 
 function OnboardingPage() {
   const router = useRouter();
@@ -96,56 +113,48 @@ function OnboardingPage() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col bg-surface font-body-md text-on-surface antialiased">
-      <header className="sticky top-0 z-40 flex h-16 items-center justify-center border-b border-outline-variant bg-surface-container-lowest">
-        <div className="flex items-center gap-3">
-          <div className="flex size-8 items-center justify-center rounded bg-primary text-on-primary">
-            <span className="material-symbols-outlined filled text-[20px]">analytics</span>
-          </div>
-          <span className="font-headline-sm text-headline-sm tracking-tight text-primary">
-            FinCore ERP
+    <div className="flex min-h-screen flex-col bg-background text-foreground">
+      <header className="sticky top-0 z-40 flex h-16 items-center justify-center border-b border-border bg-card">
+        <div className="flex items-center gap-2">
+          <span className="grid size-8 place-items-center rounded-md bg-primary text-sm font-black text-primary-foreground">
+            F
           </span>
+          <span className="text-base font-extrabold tracking-tight">FinCore ERP</span>
         </div>
       </header>
 
-      <main className="mx-auto flex w-full max-w-4xl flex-1 flex-col items-center px-4 py-12 sm:px-6 lg:px-8">
-        <div className="mb-12 text-center">
-          <h1 className="mb-2 font-headline-md text-headline-md text-primary">
-            Bem-vindo ao FinCore
-          </h1>
-          <p className="font-body-lg text-body-lg text-on-surface-variant">
+      <main className="mx-auto flex w-full max-w-4xl flex-1 flex-col items-center px-4 py-10 sm:px-6">
+        <div className="mb-10 text-center">
+          <h1 className="text-2xl font-bold sm:text-[1.7rem]">Bem-vindo ao FinCore</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
             Vamos configurar seu ambiente em poucos passos.
           </p>
         </div>
 
-        {/* Indicador do wizard */}
+        {/* Indicador */}
         <div className="relative mb-8 w-full max-w-2xl">
-          <div className="absolute left-[16%] right-[16%] top-5 -z-10 h-[2px] rounded-full bg-outline-variant" />
-          <div className="relative z-0 flex justify-between">
+          <div className="absolute left-[16%] right-[16%] top-5 -z-10 h-0.5 rounded-full bg-border" />
+          <div className="relative flex justify-between">
             {PASSOS.map((nome, i) => {
               const feito = i < passo;
               const ativo = i === passo;
               return (
-                <div key={nome} className="flex flex-col items-center gap-3 bg-surface px-3">
+                <div key={nome} className="flex flex-col items-center gap-2 bg-background px-3">
                   <div
-                    className={`flex size-10 items-center justify-center rounded-full font-label-md text-label-md shadow-sm transition-all duration-300 ${
-                      feito
-                        ? "bg-secondary text-on-secondary"
-                        : ativo
-                          ? "bg-primary text-on-primary ring-4 ring-primary-fixed"
-                          : "border-2 border-outline-variant bg-surface-container-lowest text-on-surface-variant"
-                    }`}
-                  >
-                    {feito ? (
-                      <span className="material-symbols-outlined text-[20px]">check</span>
-                    ) : (
-                      i + 1
+                    className={cn(
+                      "grid size-10 place-items-center rounded-full text-sm font-bold transition-colors",
+                      feito && "bg-success text-success-foreground",
+                      ativo && "bg-primary text-primary-foreground ring-4 ring-primary/20",
+                      !feito && !ativo && "border-2 border-border bg-card text-muted-foreground",
                     )}
+                  >
+                    {feito ? <Check className="size-5" /> : i + 1}
                   </div>
                   <span
-                    className={`text-center font-label-md text-label-md ${
-                      ativo ? "text-primary" : "text-on-surface-variant"
-                    }`}
+                    className={cn(
+                      "text-center text-xs font-semibold",
+                      ativo ? "text-foreground" : "text-muted-foreground",
+                    )}
                   >
                     {nome}
                   </span>
@@ -155,70 +164,62 @@ function OnboardingPage() {
           </div>
         </div>
 
-        {/* Conteúdo */}
-        <div className="flex min-h-[480px] w-full flex-col overflow-hidden rounded-xl border border-outline-variant bg-surface-container-lowest shadow-sm">
+        <div className="flex min-h-[480px] w-full flex-col overflow-hidden rounded-xl border border-border bg-card shadow-card">
           {passo === 0 ? (
             <div className="flex flex-1 flex-col gap-6 p-6 sm:p-8">
               <div>
-                <h2 className="font-headline-sm text-headline-sm text-primary">Dados da empresa</h2>
-                <p className="mt-1 font-body-sm text-body-sm text-on-surface-variant">
+                <h2 className="text-lg font-bold">Dados da empresa</h2>
+                <p className="mt-1 text-sm text-muted-foreground">
                   Informe os dados fiscais básicos para inicializar o sistema.
                 </p>
               </div>
-              <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                <div className="md:col-span-2">
-                  <label className={labelCls} htmlFor="razao">
-                    Razão social
-                  </label>
-                  <input
+              <div className="grid gap-5 md:grid-cols-2">
+                <div className="space-y-1.5 md:col-span-2">
+                  <Label htmlFor="razao">Razão social</Label>
+                  <Input
                     id="razao"
-                    className={inputCls}
                     placeholder="Ex.: Acme Tecnologia Ltda"
                     value={empresa.razaoSocial}
                     onChange={(e) => setEmpresa((s) => ({ ...s, razaoSocial: e.target.value }))}
                   />
                 </div>
-                <div>
-                  <label className={labelCls} htmlFor="cnpj">
-                    CNPJ
-                  </label>
-                  <input
+                <div className="space-y-1.5">
+                  <Label htmlFor="cnpj">CNPJ</Label>
+                  <Input
                     id="cnpj"
-                    className={monoCls}
+                    className="num"
                     placeholder="00.000.000/0001-00"
                     value={empresa.cnpj}
                     onChange={(e) => setEmpresa((s) => ({ ...s, cnpj: e.target.value }))}
                   />
                 </div>
-                <div>
-                  <label className={labelCls} htmlFor="regime">
-                    Regime tributário <span className="text-secondary">(PV1)</span>
-                  </label>
-                  <div className="relative">
-                    <select
-                      id="regime"
-                      className={`${inputCls} appearance-none pr-10`}
-                      value={empresa.regime}
-                      onChange={(e) => {
-                        setEmpresa((s) => ({ ...s, regime: e.target.value as Regime }));
-                        setPlanoAplicado(false);
-                      }}
-                    >
+                <div className="space-y-1.5">
+                  <Label htmlFor="regime">
+                    Regime tributário <span className="text-primary">(PV1)</span>
+                  </Label>
+                  <Select
+                    value={empresa.regime}
+                    onValueChange={(v) => {
+                      setEmpresa((s) => ({ ...s, regime: v as Regime }));
+                      setPlanoAplicado(false);
+                    }}
+                  >
+                    <SelectTrigger id="regime">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
                       {REGIMES.map((r) => (
-                        <option key={r} value={r}>
+                        <SelectItem key={r} value={r}>
                           {r}
-                        </option>
+                        </SelectItem>
                       ))}
-                    </select>
-                    <span className="material-symbols-outlined pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant">
-                      expand_more
-                    </span>
-                  </div>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
-              <div className="mt-auto flex items-start gap-3 rounded-lg border border-primary-fixed-dim bg-primary-fixed/30 p-4">
-                <span className="material-symbols-outlined text-secondary">auto_awesome</span>
-                <p className="font-body-md text-body-md text-on-surface-variant">
+              <div className="mt-auto flex items-start gap-3 rounded-lg border border-primary/25 bg-primary/8 p-4">
+                <Sparkles className="mt-0.5 size-4 shrink-0 text-primary" />
+                <p className="text-sm text-muted-foreground">
                   O regime escolhido é o <strong>ponto de variação PV1</strong>: ele define quais
                   contas tributárias entram no plano sugerido no próximo passo.
                 </p>
@@ -227,16 +228,14 @@ function OnboardingPage() {
           ) : null}
 
           {passo === 1 ? (
-            <div className="flex flex-1 flex-col gap-6 p-6 sm:p-8">
-              <div className="flex flex-col items-start justify-between gap-4 sm:flex-row">
+            <div className="flex flex-1 flex-col gap-5 p-6 sm:p-8">
+              <div className="flex flex-col items-start justify-between gap-3 sm:flex-row">
                 <div>
-                  <h2 className="flex flex-wrap items-center gap-2 font-headline-sm text-headline-sm text-primary">
+                  <h2 className="flex flex-wrap items-center gap-2 text-lg font-bold">
                     Plano de contas
-                    <span className="rounded-full bg-secondary-fixed px-2 py-0.5 font-label-md text-[10px] uppercase tracking-wider text-on-secondary-fixed-variant">
-                      Recomendado
-                    </span>
+                    <StatusBadge tone="info">Recomendado</StatusBadge>
                   </h2>
-                  <p className="mt-1 font-body-sm text-body-sm text-on-surface-variant">
+                  <p className="mt-1 text-sm text-muted-foreground">
                     Sugerimos esta estrutura inicial com base no regime{" "}
                     <strong>{empresa.regime}</strong>
                     {extrasDoRegime.length > 0
@@ -244,38 +243,30 @@ function OnboardingPage() {
                       : "."}
                   </p>
                 </div>
-                <button
-                  type="button"
+                <Button
+                  className="shrink-0 gap-1.5"
+                  variant={planoAplicado ? "secondary" : "default"}
                   onClick={() => {
                     setPlanoAplicado(true);
                     toast.success(`${contasSugeridas.length} contas aplicadas ao plano`);
                   }}
-                  className={`flex shrink-0 items-center gap-2 rounded-lg px-5 py-2.5 font-label-md text-label-md shadow-sm transition-colors ${
-                    planoAplicado
-                      ? "bg-secondary-container text-on-secondary-container"
-                      : "bg-secondary text-on-secondary hover:bg-on-secondary-container"
-                  }`}
                 >
-                  <span className="material-symbols-outlined text-[18px]">
-                    {planoAplicado ? "check_circle" : "account_tree"}
-                  </span>
+                  {planoAplicado ? <Check className="size-4" /> : <FolderTree className="size-4" />}
                   {planoAplicado ? "Plano aplicado" : "Aplicar plano sugerido"}
-                </button>
+                </Button>
               </div>
 
-              <div className="flex flex-1 flex-col overflow-hidden rounded-lg border border-outline-variant bg-surface">
-                <div className="flex items-center gap-2 border-b border-outline-variant bg-surface-container-low px-4 py-2">
-                  <span className="material-symbols-outlined text-[18px] text-on-surface-variant">
-                    search
-                  </span>
+              <div className="flex flex-1 flex-col overflow-hidden rounded-lg border border-border">
+                <div className="flex items-center gap-2 border-b border-border bg-muted/40 px-3 py-2">
+                  <Search className="size-4 shrink-0 text-muted-foreground" />
                   <input
-                    className="w-full border-none bg-transparent font-body-sm text-body-sm text-on-surface outline-none placeholder:text-outline"
+                    className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
                     placeholder="Buscar conta..."
                     value={busca}
                     onChange={(e) => setBusca(e.target.value)}
                   />
                 </div>
-                <div className="max-h-[300px] flex-1 overflow-y-auto p-2">
+                <div className="max-h-[280px] flex-1 overflow-y-auto p-2">
                   <div className="flex flex-col gap-0.5">
                     {contasSugeridas.map((c) => {
                       const sintetica = c.tipo === "SINTÉTICA";
@@ -283,33 +274,27 @@ function OnboardingPage() {
                       return (
                         <div
                           key={c.codigo}
-                          className={`flex items-center gap-2 rounded-md px-2 py-1.5 hover:bg-surface-variant ${
-                            doRegime ? "bg-secondary/5" : ""
-                          }`}
+                          className={cn(
+                            "flex items-center gap-2 rounded-md px-2 py-1.5 hover:bg-muted/60",
+                            doRegime && "bg-primary/8",
+                          )}
                           style={{ paddingLeft: `${8 + c.nivel * 20}px` }}
                         >
-                          <span
-                            className={`material-symbols-outlined text-[18px] ${sintetica ? "text-secondary" : "text-outline"}`}
-                            style={sintetica ? { fontVariationSettings: '"FILL" 1' } : undefined}
-                          >
-                            {sintetica ? "folder" : "description"}
-                          </span>
-                          <span className="w-24 shrink-0 font-data-mono text-data-mono text-on-surface-variant">
+                          {sintetica ? (
+                            <FolderTree className="size-4 shrink-0 text-primary" />
+                          ) : (
+                            <FileText className="size-4 shrink-0 text-muted-foreground" />
+                          )}
+                          <span className="num w-24 shrink-0 text-xs text-muted-foreground">
                             {c.codigo}
                           </span>
-                          <span
-                            className={
-                              sintetica
-                                ? "font-label-md text-label-md text-primary"
-                                : "font-body-sm text-body-sm text-on-surface"
-                            }
-                          >
+                          <span className={cn("text-sm", sintetica && "font-semibold")}>
                             {c.descricao}
                           </span>
                           {doRegime ? (
-                            <span className="ml-auto shrink-0 rounded-full bg-secondary/10 px-2 py-0.5 font-label-md text-[10px] text-secondary">
+                            <StatusBadge tone="info" className="ml-auto shrink-0">
                               {empresa.regime}
-                            </span>
+                            </StatusBadge>
                           ) : null}
                         </div>
                       );
@@ -321,60 +306,49 @@ function OnboardingPage() {
           ) : null}
 
           {passo === 2 ? (
-            <div className="flex flex-1 flex-col gap-6 p-6 sm:p-8">
+            <div className="flex flex-1 flex-col gap-5 p-6 sm:p-8">
               <div>
-                <h2 className="font-headline-sm text-headline-sm text-primary">
-                  Primeira conta bancária
-                </h2>
-                <p className="mt-1 font-body-sm text-body-sm text-on-surface-variant">
+                <h2 className="text-lg font-bold">Primeira conta bancária</h2>
+                <p className="mt-1 text-sm text-muted-foreground">
                   Adicione a conta principal para iniciar a conciliação. O adaptador de arquivo
-                  configurado para este tenant é{" "}
-                  <strong className="font-data-mono">{config.adaptador}</strong> (PV2).
+                  configurado para este tenant é <strong className="num">{config.adaptador}</strong>{" "}
+                  (PV2).
                 </p>
               </div>
-              <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-                <div className="md:col-span-3">
-                  <label className={labelCls} htmlFor="inst">
-                    Instituição financeira
-                  </label>
-                  <div className="relative">
-                    <select
-                      id="inst"
-                      className={`${inputCls} appearance-none pr-10`}
-                      value={banco.instituicao}
-                      onChange={(e) => setBanco((s) => ({ ...s, instituicao: e.target.value }))}
-                    >
-                      <option value="">Selecione o banco</option>
+              <div className="grid gap-5 md:grid-cols-3">
+                <div className="space-y-1.5 md:col-span-3">
+                  <Label htmlFor="inst">Instituição financeira</Label>
+                  <Select
+                    value={banco.instituicao}
+                    onValueChange={(v) => setBanco((s) => ({ ...s, instituicao: v }))}
+                  >
+                    <SelectTrigger id="inst">
+                      <SelectValue placeholder="Selecione o banco" />
+                    </SelectTrigger>
+                    <SelectContent>
                       {BANCOS.map((b) => (
-                        <option key={b} value={b}>
+                        <SelectItem key={b} value={b}>
                           {b}
-                        </option>
+                        </SelectItem>
                       ))}
-                    </select>
-                    <span className="material-symbols-outlined pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant">
-                      account_balance
-                    </span>
-                  </div>
+                    </SelectContent>
+                  </Select>
                 </div>
-                <div>
-                  <label className={labelCls} htmlFor="ag">
-                    Agência
-                  </label>
-                  <input
+                <div className="space-y-1.5">
+                  <Label htmlFor="ag">Agência</Label>
+                  <Input
                     id="ag"
-                    className={monoCls}
+                    className="num"
                     placeholder="0000"
                     value={banco.agencia}
                     onChange={(e) => setBanco((s) => ({ ...s, agencia: e.target.value }))}
                   />
                 </div>
-                <div className="md:col-span-2">
-                  <label className={labelCls} htmlFor="cc">
-                    Conta com dígito
-                  </label>
-                  <input
+                <div className="space-y-1.5 md:col-span-2">
+                  <Label htmlFor="cc">Conta com dígito</Label>
+                  <Input
                     id="cc"
-                    className={monoCls}
+                    className="num"
                     placeholder="00000-0"
                     value={banco.conta}
                     onChange={(e) => setBanco((s) => ({ ...s, conta: e.target.value }))}
@@ -382,27 +356,25 @@ function OnboardingPage() {
                 </div>
               </div>
 
-              <div className="mt-auto grid gap-3 rounded-lg border border-outline-variant bg-surface p-4 sm:grid-cols-3">
+              <div className="mt-auto grid gap-3 rounded-lg border border-border bg-muted/40 p-4 sm:grid-cols-3">
                 <div>
-                  <p className="font-label-md text-label-md uppercase tracking-wider text-on-surface-variant">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                     Empresa
                   </p>
-                  <p className="font-body-md text-body-md text-on-surface">
-                    {empresa.razaoSocial || "—"}
-                  </p>
+                  <p className="text-sm">{empresa.razaoSocial || "—"}</p>
                 </div>
                 <div>
-                  <p className="font-label-md text-label-md uppercase tracking-wider text-on-surface-variant">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                     Regime
                   </p>
-                  <p className="font-body-md text-body-md text-on-surface">{empresa.regime}</p>
+                  <p className="text-sm">{empresa.regime}</p>
                 </div>
                 <div>
-                  <p className="font-label-md text-label-md uppercase tracking-wider text-on-surface-variant">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                     Contas no plano
                   </p>
-                  <p className="font-data-mono text-data-mono text-on-surface">
-                    {contasSugeridas.length} · saldo{" "}
+                  <p className="num text-sm">
+                    {contasSugeridas.length} ·{" "}
                     {brl(contasSugeridas.reduce((s, c) => s + c.saldo, 0))}
                   </p>
                 </div>
@@ -410,35 +382,26 @@ function OnboardingPage() {
             </div>
           ) : null}
 
-          {/* Rodapé do wizard */}
-          <div className="mt-auto flex items-center justify-between gap-3 border-t border-outline-variant bg-surface-container-low px-6 py-5 sm:px-8">
-            <button
-              type="button"
+          <div className="mt-auto flex items-center justify-between gap-3 border-t border-border bg-muted/30 px-6 py-4 sm:px-8">
+            <Button
+              variant="ghost"
               disabled={passo === 0}
               onClick={() => setPasso((p) => Math.max(0, p - 1))}
-              className="flex items-center gap-1 rounded-lg px-4 py-2 font-label-md text-label-md text-on-surface-variant transition-colors hover:bg-surface-variant hover:text-primary disabled:opacity-40"
+              className="gap-1.5"
             >
-              <span className="material-symbols-outlined text-[18px]">arrow_back</span>
-              Voltar
-            </button>
-            <button
-              type="button"
-              disabled={!podeAvancar}
-              onClick={avancar}
-              className="flex items-center gap-2 rounded-lg bg-primary px-6 py-2.5 font-label-md text-label-md text-on-primary shadow-sm transition-colors hover:bg-primary-container disabled:cursor-not-allowed disabled:opacity-40"
-            >
+              <ArrowLeft className="size-4" /> Voltar
+            </Button>
+            <Button disabled={!podeAvancar} onClick={avancar} className="gap-1.5">
               {passo === 2 ? "Concluir configuração" : "Próximo passo"}
-              <span className="material-symbols-outlined text-[18px]">
-                {passo === 2 ? "check" : "arrow_forward"}
-              </span>
-            </button>
+              {passo === 2 ? <Check className="size-4" /> : <ArrowRight className="size-4" />}
+            </Button>
           </div>
         </div>
 
-        <div className="mt-8 flex items-center gap-2 font-body-sm text-body-sm text-outline">
-          <span className="material-symbols-outlined text-[16px]">lock</span>
+        <p className="mt-6 flex items-center gap-1.5 text-xs text-muted-foreground">
+          <Lock className="size-3.5" />
           Seus dados estão seguros e criptografados.
-        </div>
+        </p>
       </main>
     </div>
   );

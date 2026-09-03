@@ -1,21 +1,25 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { toast } from "sonner";
+import { Check, Info, Settings, X } from "lucide-react";
 import { PageHeader } from "@/components/app/PageHeader";
 import { StatusBadge } from "@/components/app/StatusBadge";
 import { useFeatures, type AdaptadorBancario } from "@/components/app/FeaturesContext";
 import { usePerfil } from "@/components/app/PerfilContext";
 import { useAuditoria } from "@/components/app/AuditoriaContext";
 import { useEmpresa } from "@/components/app/EmpresaContext";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/integracoes/adaptador")({
   head: () => ({
     meta: [
-      { title: "Adaptador bancário — FinCore ERP" },
+      { title: "Adaptador bancário — FinCore" },
       {
         name: "description",
         content: "Escolha o formato de arquivo bancário usado na importação e remessa do tenant.",
       },
-      { property: "og:title", content: "Adaptador bancário — FinCore ERP" },
+      { property: "og:title", content: "Adaptador bancário — FinCore" },
       { property: "og:description", content: "OFX, CNAB 240 ou CNAB 400 — ponto de variação PV2." },
     ],
   }),
@@ -122,12 +126,11 @@ function Adaptador() {
       />
 
       {!has("conciliacao") ? (
-        <div className="mb-md flex items-start gap-3 rounded-lg border border-tertiary-fixed-dim bg-tertiary-fixed p-4">
-          <span className="material-symbols-outlined text-on-tertiary-fixed-variant">info</span>
-          <p className="font-body-md text-body-md text-on-tertiary-fixed-variant">
+        <div className="mb-4 flex items-start gap-3 rounded-lg border border-warning/40 bg-warning/15 p-4">
+          <Info className="mt-0.5 size-4 shrink-0 text-warning-foreground" />
+          <p className="text-sm text-warning-foreground">
             O módulo de conciliação não está contratado neste tenant, então o adaptador fica
-            registrado mas não é exercitado. Ative{" "}
-            <code className="font-data-mono">conciliacao</code> em{" "}
+            registrado mas não é exercitado. Ative <code className="num">conciliacao</code> em{" "}
             <Link to="/configuracoes" className="underline decoration-dotted">
               Features do tenant
             </Link>{" "}
@@ -136,87 +139,75 @@ function Adaptador() {
         </div>
       ) : null}
 
-      <div className="grid grid-cols-1 gap-md lg:grid-cols-3">
+      <div className="grid gap-4 lg:grid-cols-3">
         {OPCOES.map((o) => {
           const ativo = config.adaptador === o.id;
           return (
-            <div
+            <Card
               key={o.id}
-              className={`flex flex-col rounded-xl border p-md shadow-sm transition-all ${
-                ativo
-                  ? "border-2 border-secondary bg-secondary/5"
-                  : "border-outline-variant bg-surface-container-lowest"
-              }`}
-            >
-              <div className="mb-3 flex items-start justify-between gap-2">
-                <div>
-                  <h3 className="font-headline-sm text-headline-sm text-primary">{o.nome}</h3>
-                  <code className="font-data-mono text-body-sm text-on-surface-variant">
-                    {o.extensao}
-                  </code>
-                </div>
-                <span
-                  className={`material-symbols-outlined shrink-0 ${ativo ? "text-secondary" : "text-outline-variant"}`}
-                >
-                  {ativo ? "check_circle" : "radio_button_unchecked"}
-                </span>
-              </div>
-
-              <p className="mb-4 font-body-md text-body-md text-on-surface-variant">
-                {o.descricao}
-              </p>
-
-              <ul className="mb-4 flex flex-col gap-1.5">
-                {o.recursos.map((r) => (
-                  <li key={r.rotulo} className="flex items-center gap-2 font-body-sm text-body-sm">
-                    <span
-                      className={`material-symbols-outlined text-[16px] ${r.ok ? "text-secondary" : "text-outline"}`}
-                    >
-                      {r.ok ? "check" : "close"}
-                    </span>
-                    <span className={r.ok ? "text-on-surface" : "text-outline"}>{r.rotulo}</span>
-                  </li>
-                ))}
-              </ul>
-
-              <p className="mb-4 mt-auto font-body-sm text-body-sm text-on-surface-variant">
-                <strong className="text-on-surface">Bancos:</strong> {o.bancos}
-              </p>
-
-              {leitura ? null : (
-                <button
-                  type="button"
-                  disabled={ativo}
-                  onClick={() => escolher(o.id, o.nome)}
-                  className={`w-full rounded-lg py-2.5 font-label-md text-label-md transition-colors ${
-                    ativo
-                      ? "cursor-default bg-secondary-container text-on-secondary-container"
-                      : "bg-primary text-on-primary hover:bg-primary-container"
-                  }`}
-                >
-                  {ativo ? "Adaptador em uso" : `Usar ${o.id}`}
-                </button>
+              className={cn(
+                "flex flex-col shadow-card",
+                ativo && "border-primary ring-1 ring-primary",
               )}
-            </div>
+            >
+              <CardHeader className="flex flex-row items-start justify-between gap-2">
+                <div>
+                  <CardTitle className="text-base">{o.nome}</CardTitle>
+                  <code className="num text-xs text-muted-foreground">{o.extensao}</code>
+                </div>
+                {ativo ? <Check className="size-5 shrink-0 text-primary" /> : null}
+              </CardHeader>
+              <CardContent className="flex flex-1 flex-col">
+                <p className="mb-4 text-sm text-muted-foreground">{o.descricao}</p>
+
+                <ul className="mb-4 flex flex-col gap-1.5">
+                  {o.recursos.map((r) => (
+                    <li key={r.rotulo} className="flex items-center gap-2 text-xs">
+                      {r.ok ? (
+                        <Check className="size-3.5 shrink-0 text-success" />
+                      ) : (
+                        <X className="size-3.5 shrink-0 text-muted-foreground" />
+                      )}
+                      <span className={r.ok ? "" : "text-muted-foreground"}>{r.rotulo}</span>
+                    </li>
+                  ))}
+                </ul>
+
+                <p className="mb-4 mt-auto text-xs text-muted-foreground">
+                  <strong className="text-foreground">Bancos:</strong> {o.bancos}
+                </p>
+
+                {leitura ? null : (
+                  <Button
+                    className="w-full"
+                    variant={ativo ? "secondary" : "default"}
+                    disabled={ativo}
+                    onClick={() => escolher(o.id, o.nome)}
+                  >
+                    {ativo ? "Adaptador em uso" : `Usar ${o.id}`}
+                  </Button>
+                )}
+              </CardContent>
+            </Card>
           );
         })}
       </div>
 
-      <div className="mt-lg flex flex-wrap items-center gap-3 rounded-xl border border-outline-variant bg-surface-container-lowest p-md shadow-sm">
-        <span className="material-symbols-outlined text-on-surface-variant">sync_alt</span>
-        <p className="flex-1 font-body-md text-body-md text-on-surface-variant">
-          Este é o <strong>mesmo dado</strong> exibido no card “Adaptador bancário” da tela de
-          features do tenant — as duas telas leem e gravam o{" "}
-          <code className="font-data-mono">FeaturesContext</code>.
-        </p>
-        <Link
-          to="/configuracoes"
-          className="flex items-center gap-1.5 rounded-lg border border-outline-variant px-3 py-1.5 font-label-md text-label-md text-primary transition-colors hover:bg-surface-container"
-        >
-          <span className="material-symbols-outlined text-[16px]">settings</span>
-          Abrir features do tenant
-        </Link>
-      </div>
+      <Card className="mt-6 shadow-card">
+        <CardContent className="flex flex-wrap items-center gap-3 pt-6">
+          <Settings className="size-4 shrink-0 text-muted-foreground" />
+          <p className="flex-1 text-sm text-muted-foreground">
+            Este é o <strong>mesmo dado</strong> exibido no card “Adaptador bancário” da tela de
+            features do tenant — as duas telas leem e gravam o{" "}
+            <code className="num">FeaturesContext</code>.
+          </p>
+          <Button asChild variant="outline" size="sm" className="gap-1.5">
+            <Link to="/configuracoes">
+              <Settings className="size-3.5" /> Abrir features do tenant
+            </Link>
+          </Button>
+        </CardContent>
+      </Card>
     </>
   );
 }

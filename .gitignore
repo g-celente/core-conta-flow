@@ -37,3 +37,4 @@ _p1_tmp/
 
 # npm nao e o gerenciador do projeto (usa bun.lock)
 package-lock.json
+core-conta-flow-main.zip

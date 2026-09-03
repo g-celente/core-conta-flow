@@ -1,20 +1,42 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import {
+  BadgeCheck,
+  Building2,
+  Circle,
+  CircleCheck,
+  Settings,
+  ToggleRight,
+  UserCheck,
+  UserX,
+  Workflow,
+} from "lucide-react";
 import { PageHeader } from "@/components/app/PageHeader";
 import { StatusBadge } from "@/components/app/StatusBadge";
 import { TODAS_FEATURES, useFeatures } from "@/components/app/FeaturesContext";
-import { usePerfil, PERFIS } from "@/components/app/PerfilContext";
+import { PERFIS, usePerfil } from "@/components/app/PerfilContext";
 import { useEmpresa } from "@/components/app/EmpresaContext";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { empresas } from "@/lib/mock-data";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/instanciacao/resumo")({
   head: () => ({
     meta: [
-      { title: "Ficha de configuração do tenant — FinCore ERP" },
+      { title: "Ficha de configuração do tenant — FinCore" },
       {
         name: "description",
         content: "Resumo dos pontos de variação PV1–PV7 com o valor configurado para o tenant.",
       },
-      { property: "og:title", content: "Ficha de configuração do tenant — FinCore ERP" },
+      { property: "og:title", content: "Ficha de configuração do tenant — FinCore" },
       {
         property: "og:description",
         content: "Perfil de produto, features ativas e decisões de variabilidade.",
@@ -109,11 +131,32 @@ function Resumo() {
     },
   ];
 
-  const corTipo: Record<string, string> = {
-    Parâmetro: "bg-primary-fixed text-on-primary-fixed-variant",
-    Feature: "bg-secondary/10 text-secondary",
-    Composto: "bg-tertiary-fixed text-on-tertiary-fixed-variant",
+  const tomTipo: Record<string, "info" | "success" | "warning"> = {
+    Parâmetro: "info",
+    Feature: "success",
+    Composto: "warning",
   };
+
+  const cards = [
+    {
+      rotulo: "Tenant",
+      valor: consolidado ? "Visão consolidada" : (empresa?.nome ?? nomeAtual),
+      icone: Building2,
+    },
+    {
+      rotulo: "CNPJ",
+      valor: consolidado ? "múltiplos" : (empresa?.cnpj ?? "—"),
+      icone: BadgeCheck,
+      mono: true,
+    },
+    { rotulo: "Perfil de produto", valor: config.perfilProduto, icone: Workflow },
+    {
+      rotulo: "Features ativas",
+      valor: `${ativas.length} de ${TODAS_FEATURES.length}`,
+      icone: ToggleRight,
+      mono: true,
+    },
+  ];
 
   return (
     <>
@@ -137,224 +180,172 @@ function Resumo() {
         acoes={
           <>
             <StatusBadge tone="info">{config.perfilProduto}</StatusBadge>
-            <Link
-              to="/configuracoes"
-              className="flex items-center gap-2 rounded-lg border border-outline-variant px-4 py-2 font-label-md text-label-md text-primary transition-colors hover:bg-surface-container"
-            >
-              <span className="material-symbols-outlined text-[18px]">settings</span>
-              Editar features
-            </Link>
+            <Button asChild variant="outline" className="gap-1.5">
+              <Link to="/configuracoes">
+                <Settings className="size-4" /> Editar features
+              </Link>
+            </Button>
           </>
         }
       />
 
-      {/* Identificação */}
-      <div className="mb-lg grid grid-cols-1 gap-md sm:grid-cols-2 xl:grid-cols-4">
-        {[
-          {
-            rotulo: "Tenant",
-            valor: consolidado ? "Visão consolidada" : (empresa?.nome ?? nomeAtual),
-            icone: "domain",
-          },
-          {
-            rotulo: "CNPJ",
-            valor: consolidado ? "múltiplos" : (empresa?.cnpj ?? "—"),
-            icone: "badge",
-            mono: true,
-          },
-          { rotulo: "Perfil de produto", valor: config.perfilProduto, icone: "workspaces" },
-          {
-            rotulo: "Features ativas",
-            valor: `${ativas.length} de ${TODAS_FEATURES.length}`,
-            icone: "toggle_on",
-            mono: true,
-          },
-        ].map((c) => (
-          <div
-            key={c.rotulo}
-            className="rounded-xl border border-outline-variant bg-surface-container-lowest p-md shadow-sm"
-          >
-            <p className="mb-1 flex items-center gap-2 font-label-md text-label-md uppercase tracking-wider text-on-surface-variant">
-              <span className="material-symbols-outlined text-[18px]">{c.icone}</span>
-              {c.rotulo}
-            </p>
-            <p
-              className={`text-body-lg text-primary ${c.mono ? "font-data-mono" : "font-body-lg font-semibold"}`}
-            >
-              {c.valor}
-            </p>
-          </div>
-        ))}
+      <div className="mb-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        {cards.map((c) => {
+          const Icone = c.icone;
+          return (
+            <Card key={c.rotulo} className="shadow-card">
+              <CardContent className="pt-6">
+                <p className="mb-1 flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-muted-foreground">
+                  <Icone className="size-4 shrink-0" />
+                  {c.rotulo}
+                </p>
+                <p className={cn("text-base font-semibold", c.mono && "num")}>{c.valor}</p>
+              </CardContent>
+            </Card>
+          );
+        })}
       </div>
 
-      {/* Tabela PV1–PV7 */}
-      <div className="mb-lg overflow-hidden rounded-xl border border-outline-variant bg-surface-container-lowest shadow-sm">
-        <div className="border-b border-outline-variant bg-surface px-md py-3">
-          <h3 className="font-headline-sm text-headline-sm text-primary">
-            Pontos de variação PV1–PV7
-          </h3>
-          <p className="mt-1 font-body-sm text-body-sm text-on-surface-variant">
+      <Card className="mb-6 shadow-card">
+        <CardHeader>
+          <CardTitle className="text-base">Pontos de variação PV1–PV7</CardTitle>
+          <p className="text-sm text-muted-foreground">
             Valor configurado e efeito prático na instância deste tenant.
           </p>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[52rem] border-collapse text-left">
-            <thead className="border-b border-outline-variant bg-surface-container-low">
-              <tr>
-                <th className="w-16 p-3 font-label-md text-label-md text-on-surface-variant">PV</th>
-                <th className="w-44 p-3 font-label-md text-label-md text-on-surface-variant">
-                  Ponto de variação
-                </th>
-                <th className="w-28 p-3 font-label-md text-label-md text-on-surface-variant">
-                  Tipo
-                </th>
-                <th className="w-44 p-3 font-label-md text-label-md text-on-surface-variant">
-                  Valor configurado
-                </th>
-                <th className="p-3 font-label-md text-label-md text-on-surface-variant">
-                  Efeito na instância
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-outline-variant">
+        </CardHeader>
+        <CardContent className="overflow-x-auto">
+          <Table className="min-w-[52rem]">
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-16">PV</TableHead>
+                <TableHead className="w-44">Ponto de variação</TableHead>
+                <TableHead className="w-28">Tipo</TableHead>
+                <TableHead className="w-44">Valor configurado</TableHead>
+                <TableHead>Efeito na instância</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {PVS.map((p) => (
-                <tr key={p.pv} className="hover:bg-surface-container-low">
-                  <td className="p-3 font-data-mono text-data-mono font-bold text-secondary">
-                    {p.pv}
-                  </td>
-                  <td className="p-3 font-label-md text-label-md text-primary">{p.nome}</td>
-                  <td className="p-3">
-                    <span
-                      className={`inline-flex rounded px-2 py-0.5 font-label-md text-[10px] ${corTipo[p.tipo]}`}
-                    >
-                      {p.tipo}
-                    </span>
-                  </td>
-                  <td className="p-3">
-                    <span className="block font-data-mono text-body-sm text-on-surface">
-                      {p.valor}
-                    </span>
-                  </td>
-                  <td className="p-3">
-                    <span className="block font-body-sm text-body-sm text-on-surface-variant">
-                      {p.efeito}
-                    </span>
-                    <span className="mt-1 block font-data-mono text-[11px] text-outline">
+                <TableRow key={p.pv}>
+                  <TableCell className="num font-bold text-primary">{p.pv}</TableCell>
+                  <TableCell className="text-sm font-medium">{p.nome}</TableCell>
+                  <TableCell>
+                    <StatusBadge tone={tomTipo[p.tipo] ?? "neutral"}>{p.tipo}</StatusBadge>
+                  </TableCell>
+                  <TableCell className="num text-sm">{p.valor}</TableCell>
+                  <TableCell>
+                    <span className="block text-xs text-muted-foreground">{p.efeito}</span>
+                    <span className="num mt-1 block text-[0.7rem] text-muted-foreground/70">
                       {p.telas}
                     </span>
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
 
-      <div className="grid grid-cols-1 gap-lg lg:grid-cols-2">
-        {/* Features ativas */}
-        <div className="overflow-hidden rounded-xl border border-outline-variant bg-surface-container-lowest shadow-sm">
-          <h3 className="border-b border-outline-variant bg-surface px-md py-3 font-headline-sm text-headline-sm text-primary">
-            Features contratadas
-          </h3>
-          <ul className="flex flex-col divide-y divide-outline-variant">
+      <div className="grid items-start gap-4 lg:grid-cols-2">
+        <Card className="shadow-card">
+          <CardHeader>
+            <CardTitle className="text-base">Features contratadas</CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-col divide-y divide-border p-0">
             {TODAS_FEATURES.map((f) => {
               const ativo = has(f.id);
               return (
-                <li key={f.id} className="flex items-center gap-3 px-md py-2.5">
-                  <span
-                    className={`material-symbols-outlined text-[20px] ${ativo ? "text-secondary" : "text-outline"}`}
-                  >
-                    {ativo ? "check_circle" : "radio_button_unchecked"}
-                  </span>
+                <div key={f.id} className="flex items-center gap-3 px-6 py-2.5">
+                  {ativo ? (
+                    <CircleCheck className="size-4 shrink-0 text-success" />
+                  ) : (
+                    <Circle className="size-4 shrink-0 text-muted-foreground" />
+                  )}
                   <span className="min-w-0 flex-1">
                     <span
-                      className={`block font-label-md text-label-md ${ativo ? "text-on-surface" : "text-outline"}`}
+                      className={cn("block text-sm font-medium", !ativo && "text-muted-foreground")}
                     >
                       {f.nome}
                     </span>
-                    <code className="block font-data-mono text-[11px] text-on-surface-variant">
-                      {f.id}
-                    </code>
+                    <code className="num block text-[0.7rem] text-muted-foreground">{f.id}</code>
                   </span>
-                  <span className="shrink-0 rounded-full bg-secondary/10 px-2 py-0.5 font-label-md text-[10px] text-secondary">
-                    {f.pv}
-                  </span>
-                </li>
+                  <StatusBadge tone="info">{f.pv}</StatusBadge>
+                </div>
               );
             })}
-          </ul>
-        </div>
+          </CardContent>
+        </Card>
 
-        {/* Perfis de acesso */}
-        <div className="flex flex-col gap-lg">
-          <div className="overflow-hidden rounded-xl border border-outline-variant bg-surface-container-lowest shadow-sm">
-            <h3 className="border-b border-outline-variant bg-surface px-md py-3 font-headline-sm text-headline-sm text-primary">
-              Perfis de acesso habilitados
-            </h3>
-            <ul className="flex flex-col divide-y divide-outline-variant">
+        <div className="flex flex-col gap-4">
+          <Card className="shadow-card">
+            <CardHeader>
+              <CardTitle className="text-base">Perfis de acesso habilitados</CardTitle>
+            </CardHeader>
+            <CardContent className="flex flex-col divide-y divide-border p-0">
               {PERFIS.map((p) => {
                 const habilitado = p.id !== "contador" || has("portal_contador");
                 return (
-                  <li key={p.id} className="flex items-start gap-3 px-md py-2.5">
-                    <span
-                      className={`material-symbols-outlined mt-0.5 text-[20px] ${habilitado ? "text-secondary" : "text-outline"}`}
-                    >
-                      {habilitado ? "person_check" : "person_off"}
-                    </span>
+                  <div key={p.id} className="flex items-start gap-3 px-6 py-2.5">
+                    {habilitado ? (
+                      <UserCheck className="mt-0.5 size-4 shrink-0 text-success" />
+                    ) : (
+                      <UserX className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+                    )}
                     <span className="min-w-0 flex-1">
                       <span
-                        className={`block font-label-md text-label-md ${habilitado ? "text-on-surface" : "text-outline"}`}
+                        className={cn(
+                          "flex flex-wrap items-center gap-2 text-sm font-medium",
+                          !habilitado && "text-muted-foreground",
+                        )}
                       >
                         {p.nome}
                         {p.id === perfil.id ? (
-                          <span className="ml-2 rounded-full bg-primary-fixed px-2 py-0.5 font-label-md text-[10px] text-on-primary-fixed-variant">
-                            sessão atual
-                          </span>
+                          <StatusBadge tone="info">sessão atual</StatusBadge>
                         ) : null}
                       </span>
-                      <span className="block font-body-sm text-body-sm text-on-surface-variant">
+                      <span className="block text-xs text-muted-foreground">
                         {habilitado
                           ? `${p.usuario} · ${p.rotas === null ? "acesso total" : `${p.rotas.length} rotas`}${p.somenteLeitura ? " · somente leitura" : ""}`
                           : "Indisponível — requer portal_contador (PV4)"}
                       </span>
                     </span>
-                  </li>
+                  </div>
                 );
               })}
-            </ul>
-          </div>
+            </CardContent>
+          </Card>
 
-          {/* Comparativo com os outros tenants */}
-          <div className="overflow-hidden rounded-xl border border-outline-variant bg-surface-container-lowest shadow-sm">
-            <h3 className="border-b border-outline-variant bg-surface px-md py-3 font-headline-sm text-headline-sm text-primary">
-              Perfis de produto do grupo
-            </h3>
-            <ul className="flex flex-col divide-y divide-outline-variant">
+          <Card className="shadow-card">
+            <CardHeader>
+              <CardTitle className="text-base">Perfis de produto do grupo</CardTitle>
+            </CardHeader>
+            <CardContent className="flex flex-col divide-y divide-border p-0">
               {empresas.map((e) => {
                 const c = todas[e.id];
                 const atual = e.id === empresaId;
                 return (
-                  <li
+                  <div
                     key={e.id}
-                    className={`flex flex-wrap items-center justify-between gap-2 px-md py-2.5 ${atual ? "bg-secondary/5" : ""}`}
+                    className={cn(
+                      "flex flex-wrap items-center justify-between gap-2 px-6 py-2.5",
+                      atual && "bg-primary/5",
+                    )}
                   >
                     <span className="min-w-0">
-                      <span className="block truncate font-body-md text-body-md text-on-surface">
-                        {e.nome}
-                      </span>
-                      <span className="block font-data-mono text-[11px] text-on-surface-variant">
+                      <span className="block truncate text-sm">{e.nome}</span>
+                      <span className="num block text-[0.7rem] text-muted-foreground">
                         {c ? Object.values(c.features).filter(Boolean).length : 0} features ·{" "}
                         {c?.adaptador} · {c?.regime}
                       </span>
                     </span>
-                    <StatusBadge tone={atual ? "ok" : "neutro"}>
+                    <StatusBadge tone={atual ? "success" : "neutral"}>
                       {c?.perfilProduto ?? "—"}
                     </StatusBadge>
-                  </li>
+                  </div>
                 );
               })}
-            </ul>
-          </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </>

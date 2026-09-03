@@ -1,21 +1,43 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
+import {
+  BellRing,
+  CalendarClock,
+  CheckCircle2,
+  History,
+  OctagonAlert,
+  Search,
+  TriangleAlert,
+  X,
+} from "lucide-react";
 import { PageHeader } from "@/components/app/PageHeader";
 import { StatusBadge, tomDoStatus, type Tone } from "@/components/app/StatusBadge";
 import { usePerfil } from "@/components/app/PerfilContext";
 import { useFeatures } from "@/components/app/FeaturesContext";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { brl, faixasAging, titulosReceber } from "@/lib/mock-data";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/contas-a-receber")({
   head: () => ({
     meta: [
-      { title: "Contas a receber — FinCore ERP" },
+      { title: "Contas a receber — FinCore" },
       {
         name: "description",
         content: "Análise de inadimplência com aging de carteira e detalhamento por cliente.",
       },
-      { property: "og:title", content: "Contas a receber — FinCore ERP" },
+      { property: "og:title", content: "Contas a receber — FinCore" },
       {
         property: "og:description",
         content: "Contas a receber detalhadas por período de atraso.",
@@ -26,17 +48,17 @@ export const Route = createFileRoute("/contas-a-receber")({
 });
 
 const tomFaixa: Record<string, Tone> = {
-  ok: "ok",
-  atencao: "atencao",
-  erro: "erro",
-  critico: "critico",
+  ok: "success",
+  atencao: "warning",
+  erro: "danger",
+  critico: "danger",
 };
 
-const corIconeFaixa: Record<string, string> = {
-  ok: "text-secondary",
-  atencao: "text-on-tertiary-container",
-  erro: "text-error",
-  critico: "text-error",
+const iconeFaixa: Record<string, typeof CalendarClock> = {
+  ok: CalendarClock,
+  atencao: TriangleAlert,
+  erro: History,
+  critico: OctagonAlert,
 };
 
 function ContasAReceber() {
@@ -59,11 +81,7 @@ function ContasAReceber() {
         const itens = titulosReceber.filter(
           (t) => t.status !== "Recebido" && t.atraso >= f.min && t.atraso <= f.max,
         );
-        return {
-          ...f,
-          total: itens.reduce((s, t) => s + t.valor, 0),
-          qtd: itens.length,
-        };
+        return { ...f, total: itens.reduce((s, t) => s + t.valor, 0), qtd: itens.length };
       }),
     [],
   );
@@ -88,18 +106,6 @@ function ContasAReceber() {
     .filter((t) => t.status === "Em atraso")
     .reduce((s, t) => s + t.valor, 0);
 
-  const filtros = [
-    status ? { id: "st", rotulo: "Status", valor: status, limpar: () => setStatus(null) } : null,
-    faixa
-      ? {
-          id: "fx",
-          rotulo: "Aging",
-          valor: faixasAging.find((f) => f.id === faixa)?.rotulo ?? "",
-          limpar: () => setFaixa(null),
-        }
-      : null,
-  ].filter((f): f is NonNullable<typeof f> => f !== null);
-
   return (
     <>
       <PageHeader
@@ -108,18 +114,17 @@ function ContasAReceber() {
         variabilidade={[
           {
             o_que:
-              "Clicar num bloco de aging filtra a tabela; os blocos são o mesmo dado do KPI de inadimplência do dashboard.",
+              "Clicar num bloco de aging filtra a tabela; é o mesmo dado do KPI de inadimplência do dashboard.",
             por: "núcleo",
             pv: "núcleo",
           },
           {
-            o_que: "A ação Cobrar/registrar recebimento fica oculta no perfil somente leitura.",
+            o_que: "A ação de registrar recebimento fica oculta no perfil somente leitura.",
             por: "perfil Contador externo",
             pv: "PV4",
           },
           {
-            o_que:
-              "Notificações de cobrança por push só são oferecidas quando a feature está ativa.",
+            o_que: "A cobrança por push só é oferecida quando a feature está ativa.",
             por: "feature notificacoes_push",
             pv: "PV5",
           },
@@ -127,226 +132,223 @@ function ContasAReceber() {
         acoes={leitura ? <StatusBadge tone="info">Somente leitura</StatusBadge> : null}
       />
 
-      {/* Blocos de aging */}
-      <div className="mb-lg grid grid-cols-2 gap-md md:grid-cols-3 xl:grid-cols-5">
+      {/* Aging */}
+      <div className="mb-6 grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-5">
         {agregado.map((f) => {
           const ativo = faixa === f.id;
           const critico = f.tom === "critico";
+          const Icone = iconeFaixa[f.tom] ?? CalendarClock;
           return (
-            <button
-              key={f.id}
-              type="button"
-              onClick={() => setFaixa(ativo ? null : f.id)}
-              className={`rounded-xl border p-md text-left shadow-sm transition-all ${
-                critico
-                  ? "border-error-container bg-error-container/20"
-                  : "border-outline-variant bg-surface-container-lowest"
-              } ${ativo ? "ring-2 ring-secondary" : "hover:border-secondary/50"}`}
-            >
-              <div className="mb-2 flex items-center justify-between gap-2">
-                <h3
-                  className={`font-label-md text-label-md ${critico ? "text-error" : "text-on-surface-variant"}`}
-                >
-                  {f.rotulo}
-                </h3>
-                <span
-                  className={`material-symbols-outlined opacity-80 ${corIconeFaixa[f.tom] ?? ""}`}
-                >
-                  {f.icone}
-                </span>
-              </div>
-              <div
-                className={`mb-1 font-data-mono text-[clamp(1.2rem,3.5vw,1.75rem)] leading-tight ${critico ? "text-error" : "text-primary"}`}
+            <button key={f.id} type="button" onClick={() => setFaixa(ativo ? null : f.id)}>
+              <Card
+                className={cn(
+                  "h-full text-left shadow-card transition-all",
+                  ativo && "ring-2 ring-primary",
+                  critico && "border-destructive/40 bg-destructive/5",
+                )}
               >
-                {brl(f.total)}
-              </div>
-              <div
-                className={`font-body-sm text-body-sm ${critico ? "text-error" : "text-on-surface-variant"}`}
-              >
-                {f.qtd} título{f.qtd === 1 ? "" : "s"}
-                {critico && f.qtd > 0 ? " críticos" : ""}
-              </div>
+                <CardContent className="pt-6">
+                  <div className="mb-2 flex items-center justify-between gap-2">
+                    <p
+                      className={cn(
+                        "text-xs font-semibold uppercase tracking-wide",
+                        critico ? "text-destructive" : "text-muted-foreground",
+                      )}
+                    >
+                      {f.rotulo}
+                    </p>
+                    <Icone
+                      className={cn(
+                        "size-4 shrink-0",
+                        critico ? "text-destructive" : "text-muted-foreground",
+                      )}
+                    />
+                  </div>
+                  <p className={cn("num text-xl font-bold", critico && "text-destructive")}>
+                    {brl(f.total)}
+                  </p>
+                  <p
+                    className={cn(
+                      "mt-1 text-xs",
+                      critico ? "text-destructive" : "text-muted-foreground",
+                    )}
+                  >
+                    {f.qtd} título{f.qtd === 1 ? "" : "s"}
+                    {critico && f.qtd > 0 ? " críticos" : ""}
+                  </p>
+                </CardContent>
+              </Card>
             </button>
           );
         })}
       </div>
 
-      {/* Tabela */}
-      <div className="flex flex-col overflow-hidden rounded-xl border border-outline-variant bg-surface-container-lowest shadow-sm">
-        <div className="flex flex-wrap items-center justify-between gap-md border-b border-outline-variant bg-surface-container-low p-md">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="mr-1 self-center font-label-md text-label-md text-on-surface-variant">
-              Filtros:
-            </span>
-            {filtros.map((f) => (
-              <button
-                key={f.id}
-                type="button"
-                onClick={f.limpar}
-                className="flex items-center gap-1 rounded-full border border-secondary/20 bg-secondary/10 px-3 py-1 font-label-md text-label-md text-secondary transition-colors hover:bg-secondary/20"
-              >
-                {f.rotulo}: {f.valor}
-                <span className="material-symbols-outlined text-[14px]">close</span>
-              </button>
-            ))}
-            {(["A vencer", "Em atraso", "Recebido"] as const).map((s) => (
-              <button
-                key={s}
-                type="button"
-                onClick={() => setStatus(status === s ? null : s)}
-                className={`rounded-full border px-3 py-1 font-label-md text-label-md transition-colors ${
-                  status === s
-                    ? "border-secondary bg-secondary text-on-secondary"
-                    : "border-outline-variant bg-surface-variant text-on-surface-variant hover:bg-surface-container-high"
-                }`}
-              >
-                {s}
-              </button>
-            ))}
+      <Card className="shadow-card">
+        <CardContent className="pt-6">
+          {/* Filtros */}
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-xs font-semibold text-muted-foreground">Filtros:</span>
+              {faixa ? (
+                <button
+                  type="button"
+                  onClick={() => setFaixa(null)}
+                  className="flex items-center gap-1 rounded-full border border-primary/25 bg-primary/10 px-3 py-1 text-xs font-semibold text-primary"
+                >
+                  Aging: {faixasAging.find((f) => f.id === faixa)?.rotulo}
+                  <X className="size-3" />
+                </button>
+              ) : null}
+              {(["A vencer", "Em atraso", "Recebido"] as const).map((s) => (
+                <button
+                  key={s}
+                  type="button"
+                  onClick={() => setStatus(status === s ? null : s)}
+                  className={cn(
+                    "rounded-full border px-3 py-1 text-xs font-semibold transition-colors",
+                    status === s
+                      ? "border-primary bg-primary text-primary-foreground"
+                      : "border-border bg-muted text-muted-foreground hover:text-foreground",
+                  )}
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
+            <div className="relative w-full sm:w-64">
+              <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                className="pl-9"
+                placeholder="Buscar documento ou cliente..."
+                value={busca}
+                onChange={(e) => setBusca(e.target.value)}
+              />
+            </div>
           </div>
-          <div className="relative w-full sm:w-64">
-            <span className="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-[18px] text-on-surface-variant">
-              search
-            </span>
-            <input
-              className="w-full rounded-lg border border-outline-variant bg-surface-container-lowest py-1.5 pl-8 pr-3 font-body-sm text-body-sm transition-all focus:border-secondary focus:outline-none focus:ring-1 focus:ring-secondary"
-              placeholder="Buscar documento ou cliente..."
-              value={busca}
-              onChange={(e) => setBusca(e.target.value)}
-            />
-          </div>
-        </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[46rem] border-collapse text-left">
-            <thead className="border-b border-outline-variant bg-surface-container-low font-label-md text-label-md text-on-surface-variant">
-              <tr>
-                <th className="w-28 whitespace-nowrap p-3 font-semibold">Vencimento</th>
-                <th className="p-3 font-semibold">Cliente</th>
-                <th className="w-32 p-3 font-semibold">Documento</th>
-                <th className="hidden w-40 p-3 font-semibold lg:table-cell">Categoria</th>
-                <th className="w-32 p-3 text-right font-semibold">Valor</th>
-                <th className="w-36 p-3 text-center font-semibold">Aging</th>
-                {leitura ? null : <th className="w-24 p-3 text-right font-semibold">Ações</th>}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-outline-variant font-body-md text-body-md text-on-surface">
-              {lista.map((t) => {
-                const critico = t.atraso > 90;
-                const atrasado = t.status === "Em atraso";
-                return (
-                  <tr
-                    key={t.id}
-                    className={`group transition-colors hover:bg-surface-container ${critico ? "bg-error-container/10" : ""}`}
-                  >
-                    <td
-                      className={`whitespace-nowrap p-3 font-data-mono ${
-                        atrasado
-                          ? critico
-                            ? "font-bold text-error"
-                            : "font-medium text-error"
-                          : ""
-                      }`}
-                    >
-                      {t.vencimento}
-                    </td>
-                    <td
-                      className={`p-3 font-medium ${critico ? "font-bold text-error" : "text-primary"}`}
-                    >
-                      {t.cliente}
-                    </td>
-                    <td className="p-3 font-data-mono text-on-surface-variant">{t.documento}</td>
-                    <td className="hidden p-3 text-on-surface-variant lg:table-cell">
-                      {t.categoria}
-                    </td>
-                    <td
-                      className={`p-3 text-right font-data-mono font-medium ${critico ? "font-bold text-error" : ""}`}
-                    >
-                      {brl(t.valor)}
-                    </td>
-                    <td className="p-3 text-center">
-                      <StatusBadge tone={critico ? "critico" : tomDoStatus(t.status)}>
-                        {t.status === "Recebido"
-                          ? "Recebido"
-                          : t.atraso > 0
-                            ? `${t.atraso} dias atraso`
-                            : "A vencer"}
-                      </StatusBadge>
-                    </td>
-                    {leitura ? null : (
-                      <td className="p-3 text-right">
-                        <div className="flex justify-end gap-1">
-                          <button
-                            type="button"
-                            title="Registrar recebimento"
-                            disabled={t.status === "Recebido"}
-                            onClick={() =>
-                              toast.success(`Recebimento de ${t.documento} registrado`, {
-                                description: `${brl(t.valor)} baixados na conta corrente principal.`,
-                              })
-                            }
-                            className="rounded p-1 text-on-surface-variant transition-colors hover:bg-secondary/10 hover:text-secondary disabled:opacity-30"
-                          >
-                            <span className="material-symbols-outlined text-[20px]">
-                              check_circle
-                            </span>
-                          </button>
-                          {has("notificacoes_push") ? (
-                            <button
-                              type="button"
-                              title="Enviar cobrança por push"
-                              disabled={t.status !== "Em atraso"}
+          <div className="overflow-x-auto">
+            <Table className="min-w-[46rem]">
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-28">Vencimento</TableHead>
+                  <TableHead>Cliente</TableHead>
+                  <TableHead className="w-32">Documento</TableHead>
+                  <TableHead className="hidden w-40 lg:table-cell">Categoria</TableHead>
+                  <TableHead className="w-32 text-right">Valor</TableHead>
+                  <TableHead className="w-36 text-center">Aging</TableHead>
+                  {leitura ? null : <TableHead className="w-24 text-right">Ações</TableHead>}
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {lista.map((t) => {
+                  const critico = t.atraso > 90;
+                  const atrasado = t.status === "Em atraso";
+                  return (
+                    <TableRow key={t.id} className={cn(critico && "bg-destructive/5")}>
+                      <TableCell
+                        className={cn(
+                          "num whitespace-nowrap",
+                          atrasado && "font-medium text-destructive",
+                        )}
+                      >
+                        {t.vencimento}
+                      </TableCell>
+                      <TableCell className={cn("font-medium", critico && "text-destructive")}>
+                        {t.cliente}
+                      </TableCell>
+                      <TableCell className="num text-sm text-muted-foreground">
+                        {t.documento}
+                      </TableCell>
+                      <TableCell className="hidden text-sm text-muted-foreground lg:table-cell">
+                        {t.categoria}
+                      </TableCell>
+                      <TableCell
+                        className={cn("num text-right font-medium", critico && "text-destructive")}
+                      >
+                        {brl(t.valor)}
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <StatusBadge tone={critico ? "danger" : tomDoStatus(t.status)}>
+                          {t.status === "Recebido"
+                            ? "Recebido"
+                            : t.atraso > 0
+                              ? `${t.atraso} dias atraso`
+                              : "A vencer"}
+                        </StatusBadge>
+                      </TableCell>
+                      {leitura ? null : (
+                        <TableCell className="text-right">
+                          <div className="flex justify-end gap-1">
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              title="Registrar recebimento"
+                              disabled={t.status === "Recebido"}
+                              className="hover:text-success"
                               onClick={() =>
-                                toast.info(`Cobrança enviada a ${t.cliente}`, {
-                                  description: "Notificação push + e-mail disparados (PV5).",
+                                toast.success(`Recebimento de ${t.documento} registrado`, {
+                                  description: `${brl(t.valor)} baixados na conta corrente principal.`,
                                 })
                               }
-                              className="rounded p-1 text-on-surface-variant transition-colors hover:bg-primary-fixed hover:text-primary disabled:opacity-30"
                             >
-                              <span className="material-symbols-outlined text-[20px]">
-                                notifications_active
-                              </span>
-                            </button>
-                          ) : null}
-                        </div>
-                      </td>
-                    )}
-                  </tr>
-                );
-              })}
-              {lista.length === 0 ? (
-                <tr>
-                  <td
-                    colSpan={leitura ? 6 : 7}
-                    className="p-8 text-center font-body-md text-body-md text-on-surface-variant"
-                  >
-                    Nenhum título encontrado com os filtros aplicados.
-                  </td>
-                </tr>
-              ) : null}
-            </tbody>
-          </table>
-        </div>
-
-        <div className="flex flex-wrap items-center justify-between gap-4 border-t border-outline-variant bg-surface-container-low p-3 font-body-sm text-body-sm text-on-surface-variant">
-          <span>
-            Mostrando {lista.length} de {titulosReceber.length} títulos
-          </span>
-          <div className="flex items-center gap-6">
-            <span className="flex flex-col text-right">
-              <span className="text-[11px] uppercase tracking-wider">Em atraso</span>
-              <span className="font-data-mono font-bold text-error">{brl(totalAtraso)}</span>
-            </span>
-            <span className="hidden h-8 w-px bg-outline-variant sm:block" />
-            <span className="flex flex-col text-right">
-              <span className="text-[11px] uppercase tracking-wider">Total da visão</span>
-              <span className="font-data-mono text-body-lg font-bold text-primary">
-                {brl(totalCarteira)}
-              </span>
-            </span>
+                              <CheckCircle2 className="size-4" />
+                            </Button>
+                            {has("notificacoes_push") ? (
+                              <Button
+                                size="icon"
+                                variant="ghost"
+                                title="Enviar cobrança por push"
+                                disabled={t.status !== "Em atraso"}
+                                onClick={() =>
+                                  toast.info(`Cobrança enviada a ${t.cliente}`, {
+                                    description: "Notificação push + e-mail disparados (PV5).",
+                                  })
+                                }
+                              >
+                                <BellRing className="size-4" />
+                              </Button>
+                            ) : null}
+                          </div>
+                        </TableCell>
+                      )}
+                    </TableRow>
+                  );
+                })}
+                {lista.length === 0 ? (
+                  <TableRow>
+                    <TableCell
+                      colSpan={leitura ? 6 : 7}
+                      className="py-10 text-center text-sm text-muted-foreground"
+                    >
+                      Nenhum título encontrado com os filtros aplicados.
+                    </TableCell>
+                  </TableRow>
+                ) : null}
+              </TableBody>
+            </Table>
           </div>
-        </div>
-      </div>
+
+          <div className="mt-4 flex flex-wrap items-center justify-between gap-4 border-t border-border pt-4">
+            <span className="text-xs text-muted-foreground">
+              Mostrando {lista.length} de {titulosReceber.length} títulos
+            </span>
+            <div className="flex items-center gap-5">
+              <span className="flex flex-col text-right">
+                <span className="text-[0.68rem] font-bold uppercase tracking-wide text-muted-foreground">
+                  Em atraso
+                </span>
+                <span className="num font-bold text-destructive">{brl(totalAtraso)}</span>
+              </span>
+              <span className="flex flex-col text-right">
+                <span className="text-[0.68rem] font-bold uppercase tracking-wide text-muted-foreground">
+                  Total da visão
+                </span>
+                <span className="num text-lg font-bold">{brl(totalCarteira)}</span>
+              </span>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     </>
   );
 }

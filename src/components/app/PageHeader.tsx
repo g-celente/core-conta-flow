@@ -16,20 +16,18 @@ export function PageHeader({
   selo?: ReactNode;
 }) {
   return (
-    <header className="mb-lg flex flex-col justify-between gap-4 md:flex-row md:items-end">
+    <header className="mb-6 flex flex-col gap-3 border-b border-border pb-5 sm:flex-row sm:items-end sm:justify-between">
       <div className="min-w-0">
-        <div className="flex items-center gap-2">
-          <h1 className="font-headline-md text-headline-md text-primary">{titulo}</h1>
+        <div className="flex flex-wrap items-center gap-2">
+          <h1 className="text-2xl font-bold text-foreground sm:text-[1.7rem]">{titulo}</h1>
           {variabilidade ? <VariabilidadeInfo linhas={variabilidade} tela={titulo} /> : null}
           {selo}
         </div>
         {descricao ? (
-          <p className="mt-1 max-w-3xl font-body-md text-body-md text-on-surface-variant">
-            {descricao}
-          </p>
+          <p className="mt-1 max-w-2xl text-sm text-muted-foreground">{descricao}</p>
         ) : null}
       </div>
-      {acoes ? <div className="flex flex-wrap items-center gap-3">{acoes}</div> : null}
+      {acoes ? <div className="flex flex-wrap items-center gap-2">{acoes}</div> : null}
     </header>
   );
 }

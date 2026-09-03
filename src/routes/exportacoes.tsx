@@ -1,23 +1,44 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
+import {
+  Building2,
+  Download,
+  History,
+  Landmark,
+  Loader2,
+  Lock,
+  Receipt,
+  Split,
+  BookOpen,
+} from "lucide-react";
 import { PageHeader } from "@/components/app/PageHeader";
 import { StatusBadge } from "@/components/app/StatusBadge";
 import { useFeatures } from "@/components/app/FeaturesContext";
 import { usePerfil } from "@/components/app/PerfilContext";
 import { useAuditoria } from "@/components/app/AuditoriaContext";
 import { useEmpresa } from "@/components/app/EmpresaContext";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 export const Route = createFileRoute("/exportacoes")({
   head: () => ({
     meta: [
-      { title: "Exportar dados — FinCore ERP" },
+      { title: "Exportar dados — FinCore" },
       {
         name: "description",
         content:
           "Gere arquivos de títulos, extratos e balancetes nos formatos aceitos pela contabilidade.",
       },
-      { property: "og:title", content: "Exportar dados — FinCore ERP" },
+      { property: "og:title", content: "Exportar dados — FinCore" },
       { property: "og:description", content: "Fila de exportações com histórico da sessão." },
     ],
   }),
@@ -28,7 +49,7 @@ type Pacote = {
   id: string;
   nome: string;
   descricao: string;
-  icone: string;
+  icone: typeof Receipt;
   formatos: string[];
   requer?: "conciliacao" | "centro_custo" | "portal_contador" | "multiempresa";
 };
@@ -38,14 +59,14 @@ const PACOTES: Pacote[] = [
     id: "titulos",
     nome: "Títulos a pagar e a receber",
     descricao: "Todos os títulos do período com status, parceiro, categoria e valores.",
-    icone: "receipt_long",
+    icone: Receipt,
     formatos: ["CSV", "XLSX"],
   },
   {
     id: "extrato",
     nome: "Extrato conciliado",
     descricao: "Linhas do extrato com o título conciliado correspondente.",
-    icone: "account_balance",
+    icone: Landmark,
     formatos: ["CSV", "OFX"],
     requer: "conciliacao",
   },
@@ -53,7 +74,7 @@ const PACOTES: Pacote[] = [
     id: "rateio",
     nome: "Rateio por centro de custo",
     descricao: "Distribuição do valor de cada título entre os centros de custo.",
-    icone: "call_split",
+    icone: Split,
     formatos: ["CSV", "XLSX"],
     requer: "centro_custo",
   },
@@ -61,7 +82,7 @@ const PACOTES: Pacote[] = [
     id: "balancete",
     nome: "Balancete contábil",
     descricao: "Saldos por conta do plano de contas no padrão exigido pela contabilidade.",
-    icone: "menu_book",
+    icone: BookOpen,
     formatos: ["TXT", "XLSX"],
     requer: "portal_contador",
   },
@@ -69,7 +90,7 @@ const PACOTES: Pacote[] = [
     id: "consolidado",
     nome: "Consolidado do grupo",
     descricao: "Somatório de todas as empresas sob a mesma conta raiz.",
-    icone: "domain",
+    icone: Building2,
     formatos: ["XLSX"],
     requer: "multiempresa",
   },
@@ -77,7 +98,7 @@ const PACOTES: Pacote[] = [
     id: "auditoria",
     nome: "Trilha de auditoria",
     descricao: "Log de operações da sessão com usuário, data e detalhe.",
-    icone: "history_edu",
+    icone: History,
     formatos: ["CSV"],
   },
 ];
@@ -159,98 +180,97 @@ function Exportacoes() {
         }
       />
 
-      <div className="grid grid-cols-1 gap-md lg:grid-cols-2 xl:grid-cols-3">
-        {disponiveis.map((p) => (
-          <div
-            key={p.id}
-            className="flex flex-col gap-sm rounded-xl border border-outline-variant bg-surface-container-lowest p-md shadow-sm"
-          >
-            <span className="flex size-10 items-center justify-center rounded-lg bg-primary-container text-on-primary-container">
-              <span className="material-symbols-outlined">{p.icone}</span>
-            </span>
-            <h3 className="font-label-md text-label-md text-primary">{p.nome}</h3>
-            <p className="font-body-sm text-body-sm text-on-surface-variant">{p.descricao}</p>
-            <div className="mt-auto flex flex-wrap gap-2 pt-2">
-              {p.formatos.map((f) => (
-                <button
-                  key={f}
-                  type="button"
-                  disabled={processando === p.id}
-                  onClick={() => exportar(p, f)}
-                  className="flex items-center gap-1.5 rounded-lg border border-outline-variant px-3 py-1.5 font-label-md text-label-md text-primary transition-colors hover:bg-surface-container disabled:opacity-50"
-                >
-                  <span className="material-symbols-outlined text-[16px]">
-                    {processando === p.id ? "progress_activity" : "download"}
-                  </span>
-                  {f}
-                </button>
-              ))}
-            </div>
-            {p.requer ? (
-              <span className="inline-flex w-fit rounded-full bg-secondary/10 px-2 py-0.5 font-label-md text-[10px] text-secondary">
-                requer {p.requer}
-              </span>
-            ) : null}
-          </div>
-        ))}
+      <div className="grid gap-4 lg:grid-cols-2 xl:grid-cols-3">
+        {disponiveis.map((p) => {
+          const Icone = p.icone;
+          return (
+            <Card key={p.id} className="shadow-card">
+              <CardContent className="flex h-full flex-col gap-2 pt-6">
+                <span className="grid size-10 place-items-center rounded-lg bg-accent text-accent-foreground">
+                  <Icone className="size-5" />
+                </span>
+                <h3 className="text-sm font-semibold">{p.nome}</h3>
+                <p className="text-xs text-muted-foreground">{p.descricao}</p>
+                <div className="mt-auto flex flex-wrap gap-2 pt-3">
+                  {p.formatos.map((f) => (
+                    <Button
+                      key={f}
+                      size="sm"
+                      variant="outline"
+                      className="gap-1.5"
+                      disabled={processando === p.id}
+                      onClick={() => exportar(p, f)}
+                    >
+                      {processando === p.id ? (
+                        <Loader2 className="size-3.5 animate-spin" />
+                      ) : (
+                        <Download className="size-3.5" />
+                      )}
+                      {f}
+                    </Button>
+                  ))}
+                </div>
+                {p.requer ? (
+                  <StatusBadge tone="info" className="mt-2 w-fit">
+                    requer {p.requer}
+                  </StatusBadge>
+                ) : null}
+              </CardContent>
+            </Card>
+          );
+        })}
 
         {bloqueados.map((p) => (
-          <div
-            key={p.id}
-            className="flex flex-col gap-sm rounded-xl border border-dashed border-outline-variant p-md opacity-60"
-          >
-            <span className="flex size-10 items-center justify-center rounded-lg bg-surface-container text-outline">
-              <span className="material-symbols-outlined">lock</span>
-            </span>
-            <h3 className="font-label-md text-label-md text-on-surface-variant">{p.nome}</h3>
-            <p className="font-body-sm text-body-sm text-on-surface-variant">
-              Não contratado neste tenant — depende da feature{" "}
-              <code className="font-data-mono">{p.requer}</code>.
-            </p>
-          </div>
+          <Card key={p.id} className="border-dashed opacity-60">
+            <CardContent className="flex h-full flex-col gap-2 pt-6">
+              <span className="grid size-10 place-items-center rounded-lg bg-muted text-muted-foreground">
+                <Lock className="size-5" />
+              </span>
+              <h3 className="text-sm font-semibold text-muted-foreground">{p.nome}</h3>
+              <p className="text-xs text-muted-foreground">
+                Não contratado neste tenant — depende da feature{" "}
+                <code className="num">{p.requer}</code>.
+              </p>
+            </CardContent>
+          </Card>
         ))}
       </div>
 
-      {/* Histórico */}
-      <div className="mt-lg overflow-hidden rounded-xl border border-outline-variant bg-surface-container-lowest shadow-sm">
-        <h3 className="border-b border-outline-variant bg-surface px-md py-3 font-headline-sm text-headline-sm text-primary">
-          Exportações desta sessão
-        </h3>
-        {jobs.length === 0 ? (
-          <p className="p-md font-body-md text-body-md text-on-surface-variant">
-            Nenhuma exportação gerada ainda. Escolha um pacote acima.
-          </p>
-        ) : (
-          <table className="w-full border-collapse text-left">
-            <thead className="border-b border-outline-variant bg-surface-container-low">
-              <tr>
-                <th className="w-24 p-3 font-label-md text-label-md text-on-surface-variant">
-                  Hora
-                </th>
-                <th className="p-3 font-label-md text-label-md text-on-surface-variant">Pacote</th>
-                <th className="w-28 p-3 font-label-md text-label-md text-on-surface-variant">
-                  Formato
-                </th>
-                <th className="w-32 p-3 text-right font-label-md text-label-md text-on-surface-variant">
-                  Status
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-outline-variant font-body-sm text-body-sm">
-              {jobs.map((j) => (
-                <tr key={j.id} className="hover:bg-surface-container-low">
-                  <td className="p-3 font-data-mono text-on-surface-variant">{j.hora}</td>
-                  <td className="p-3 text-on-surface">{j.pacote}</td>
-                  <td className="p-3 font-data-mono text-on-surface-variant">{j.formato}</td>
-                  <td className="p-3 text-right">
-                    <StatusBadge tone="ok">{j.status}</StatusBadge>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>
+      <Card className="mt-6 shadow-card">
+        <CardHeader>
+          <CardTitle className="text-base">Exportações desta sessão</CardTitle>
+        </CardHeader>
+        <CardContent className="overflow-x-auto">
+          {jobs.length === 0 ? (
+            <p className="text-sm text-muted-foreground">
+              Nenhuma exportação gerada ainda. Escolha um pacote acima.
+            </p>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-24">Hora</TableHead>
+                  <TableHead>Pacote</TableHead>
+                  <TableHead className="w-28">Formato</TableHead>
+                  <TableHead className="w-32 text-right">Status</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {jobs.map((j) => (
+                  <TableRow key={j.id}>
+                    <TableCell className="num text-sm text-muted-foreground">{j.hora}</TableCell>
+                    <TableCell className="text-sm">{j.pacote}</TableCell>
+                    <TableCell className="num text-sm text-muted-foreground">{j.formato}</TableCell>
+                    <TableCell className="text-right">
+                      <StatusBadge tone="success">{j.status}</StatusBadge>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
     </>
   );
 }
