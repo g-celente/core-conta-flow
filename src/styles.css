@@ -2,150 +2,246 @@
 @source "../src";
 @import "tw-animate-css";
 
-@custom-variant dark (&:is(.dark *));
+/*
+ * FinCore ERP design system (Material 3 derived tokens).
+ * All colors, spacing, radii and type scale live here as theme tokens.
+ */
 
-@theme inline {
-  --font-sans: "Manrope", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
-  --radius-2xl: calc(var(--radius) + 8px);
-  --radius-3xl: calc(var(--radius) + 12px);
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-card: var(--card);
-  --color-card-foreground: var(--card-foreground);
-  --color-popover: var(--popover);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-secondary: var(--secondary);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-accent: var(--accent);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-destructive: var(--destructive);
-  --color-destructive-foreground: var(--destructive-foreground);
-  --color-success: var(--success);
-  --color-success-foreground: var(--success-foreground);
-  --color-warning: var(--warning);
-  --color-warning-foreground: var(--warning-foreground);
-  --color-border: var(--border);
-  --color-input: var(--input);
-  --color-ring: var(--ring);
-  --color-ring-offset-background: var(--background);
-  --color-chart-1: var(--chart-1);
-  --color-chart-2: var(--chart-2);
-  --color-chart-3: var(--chart-3);
-  --color-chart-4: var(--chart-4);
-  --color-chart-5: var(--chart-5);
-  --color-sidebar: var(--sidebar);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-ring: var(--sidebar-ring);
-  --shadow-card: 0 1px 2px oklch(0.2 0.03 250 / 0.06), 0 8px 24px oklch(0.2 0.03 250 / 0.06);
-}
+@theme {
+  /* Colors */
+  --color-surface-container-lowest: #ffffff;
+  --color-inverse-primary: #b7c7e8;
+  --color-inverse-surface: #303032;
+  --color-on-primary-fixed-variant: #384762;
+  --color-secondary-fixed-dim: #5fdac1;
+  --color-surface-tint: #4f5f7b;
+  --color-error: #ba1a1a;
+  --color-on-primary-container: #7787a5;
+  --color-surface-container-low: #f5f3f5;
+  --color-on-surface-variant: #44474d;
+  --color-on-tertiary: #ffffff;
+  --color-on-error: #ffffff;
+  --color-surface-container: #efedf0;
+  --color-on-error-container: #93000a;
+  --color-on-secondary-container: #00705f;
+  --color-surface: #fbf9fb;
+  --color-outline: #75777e;
+  --color-secondary-fixed: #7ef7dd;
+  --color-surface-dim: #dbd9dc;
+  --color-on-primary-fixed: #0a1c34;
+  --color-on-primary: #ffffff;
+  --color-tertiary-container: #301a00;
+  --color-primary: #000615;
+  --color-tertiary-fixed: #ffddba;
+  --color-primary-fixed-dim: #b7c7e8;
+  --color-primary-container: #0e1f38;
+  --color-on-tertiary-fixed-variant: #5d4120;
+  --color-inverse-on-surface: #f2f0f2;
+  --color-on-secondary-fixed: #00201a;
+  --color-background: #fbf9fb;
+  --color-error-container: #ffdad6;
+  --color-outline-variant: #c5c6ce;
+  --color-surface-bright: #fbf9fb;
+  --color-surface-container-high: #eae7ea;
+  --color-on-secondary-fixed-variant: #005144;
+  --color-on-secondary: #ffffff;
+  --color-tertiary: #0d0500;
+  --color-surface-variant: #e4e2e4;
+  --color-on-surface: #1b1b1d;
+  --color-on-tertiary-container: #a48059;
+  --color-on-tertiary-fixed: #2b1700;
+  --color-tertiary-fixed-dim: #e9bf94;
+  --color-on-background: #1b1b1d;
+  --color-secondary: #006b5b;
+  --color-secondary-container: #7bf4da;
+  --color-surface-container-highest: #e4e2e4;
+  --color-primary-fixed: #d6e3ff;
 
-:root {
-  --radius: 0.7rem;
-  --background: oklch(0.982 0.004 240);
-  --foreground: oklch(0.24 0.03 253);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.24 0.03 253);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.24 0.03 253);
-  --primary: oklch(0.52 0.13 200);
-  --primary-foreground: oklch(0.99 0.01 200);
-  --secondary: oklch(0.955 0.012 235);
-  --secondary-foreground: oklch(0.3 0.035 250);
-  --muted: oklch(0.958 0.008 240);
-  --muted-foreground: oklch(0.53 0.026 250);
-  --accent: oklch(0.94 0.035 195);
-  --accent-foreground: oklch(0.32 0.07 210);
-  --destructive: oklch(0.577 0.222 22);
-  --destructive-foreground: oklch(0.99 0.01 20);
-  --success: oklch(0.62 0.14 155);
-  --success-foreground: oklch(0.99 0.01 155);
-  --warning: oklch(0.76 0.15 75);
-  --warning-foreground: oklch(0.28 0.06 75);
-  --border: oklch(0.906 0.012 240);
-  --input: oklch(0.906 0.012 240);
-  --ring: oklch(0.52 0.13 200);
-  --chart-1: oklch(0.52 0.13 200);
-  --chart-2: oklch(0.62 0.14 155);
-  --chart-3: oklch(0.76 0.15 75);
-  --chart-4: oklch(0.45 0.09 255);
-  --chart-5: oklch(0.6 0.16 25);
-  --sidebar: oklch(0.26 0.045 252);
-  --sidebar-foreground: oklch(0.88 0.015 240);
-  --sidebar-primary: oklch(0.62 0.13 197);
-  --sidebar-primary-foreground: oklch(0.14 0.03 252);
-  --sidebar-accent: oklch(0.32 0.05 252);
-  --sidebar-accent-foreground: oklch(0.97 0.01 240);
-  --sidebar-border: oklch(0.34 0.045 252);
-  --sidebar-ring: oklch(0.62 0.13 197);
-}
+  /* Radii */
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
+  --radius-full: 9999px;
 
-.dark {
-  --background: oklch(0.19 0.03 253);
-  --foreground: oklch(0.95 0.01 240);
-  --card: oklch(0.24 0.035 253);
-  --card-foreground: oklch(0.95 0.01 240);
-  --popover: oklch(0.24 0.035 253);
-  --popover-foreground: oklch(0.95 0.01 240);
-  --primary: oklch(0.68 0.13 197);
-  --primary-foreground: oklch(0.16 0.03 250);
-  --secondary: oklch(0.3 0.035 252);
-  --secondary-foreground: oklch(0.95 0.01 240);
-  --muted: oklch(0.3 0.035 252);
-  --muted-foreground: oklch(0.72 0.02 245);
-  --accent: oklch(0.34 0.05 210);
-  --accent-foreground: oklch(0.95 0.01 240);
-  --destructive: oklch(0.65 0.19 22);
-  --destructive-foreground: oklch(0.98 0.01 20);
-  --success: oklch(0.68 0.14 155);
-  --success-foreground: oklch(0.16 0.03 155);
-  --warning: oklch(0.8 0.14 75);
-  --warning-foreground: oklch(0.22 0.05 75);
-  --border: oklch(1 0 0 / 12%);
-  --input: oklch(1 0 0 / 16%);
-  --ring: oklch(0.68 0.13 197);
-  --sidebar: oklch(0.17 0.03 253);
-  --sidebar-foreground: oklch(0.88 0.015 240);
-  --sidebar-primary: oklch(0.68 0.13 197);
-  --sidebar-primary-foreground: oklch(0.14 0.03 252);
-  --sidebar-accent: oklch(0.26 0.04 252);
-  --sidebar-accent-foreground: oklch(0.97 0.01 240);
-  --sidebar-border: oklch(0.3 0.04 252);
-  --sidebar-ring: oklch(0.68 0.13 197);
+  /* Spacing */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-gutter: 16px;
+  --spacing-lg: 24px;
+  --spacing-margin: 24px;
+  --spacing-xl: 32px;
+
+  /* Container scale (kept explicit so max-w-* is not shadowed by spacing tokens) */
+  --container-3xs: 16rem;
+  --container-2xs: 18rem;
+  --container-xs: 20rem;
+  --container-sm: 24rem;
+  --container-md: 28rem;
+  --container-lg: 32rem;
+  --container-xl: 36rem;
+  --container-2xl: 42rem;
+  --container-3xl: 48rem;
+  --container-4xl: 56rem;
+  --container-5xl: 64rem;
+  --container-6xl: 72rem;
+  --container-7xl: 80rem;
+
+  /* Fonts */
+  --font-label-md: "Inter", sans-serif;
+  --font-body-sm: "Inter", sans-serif;
+  --font-body-md: "Inter", sans-serif;
+  --font-body-lg: "Inter", sans-serif;
+  --font-headline-sm: "Inter", sans-serif;
+  --font-headline-md: "Inter", sans-serif;
+  --font-display-lg: "Inter", sans-serif;
+  --font-data-mono: "JetBrains Mono", monospace;
+
+  /* Type scale */
+  --text-label-md: 13px;
+  --text-label-md--line-height: 18px;
+  --text-label-md--letter-spacing: 0.05em;
+  --text-label-md--font-weight: 600;
+
+  --text-body-sm: 12px;
+  --text-body-sm--line-height: 16px;
+  --text-body-sm--font-weight: 400;
+
+  --text-body-md: 14px;
+  --text-body-md--line-height: 20px;
+  --text-body-md--font-weight: 400;
+
+  --text-body-lg: 16px;
+  --text-body-lg--line-height: 24px;
+  --text-body-lg--font-weight: 400;
+
+  --text-data-mono: 14px;
+  --text-data-mono--line-height: 20px;
+  --text-data-mono--font-weight: 500;
+
+  --text-headline-sm: 20px;
+  --text-headline-sm--line-height: 28px;
+  --text-headline-sm--font-weight: 600;
+
+  --text-headline-md: 24px;
+  --text-headline-md--line-height: 32px;
+  --text-headline-md--letter-spacing: -0.01em;
+  --text-headline-md--font-weight: 600;
+
+  --text-display-lg: 32px;
+  --text-display-lg--line-height: 40px;
+  --text-display-lg--letter-spacing: -0.02em;
+  --text-display-lg--font-weight: 700;
 }
 
 @layer base {
   * {
-    border-color: var(--color-border);
+    border-color: var(--color-outline-variant);
   }
 
   body {
     background-color: var(--color-background);
-    color: var(--color-foreground);
-    font-family: var(--font-sans);
+    color: var(--color-on-background);
+    font-family: var(--font-body-md);
   }
 
-  h1,
-  h2,
-  h3 {
-    letter-spacing: -0.015em;
+  .material-symbols-outlined {
+    font-family: "Material Symbols Outlined";
+    font-weight: normal;
+    font-style: normal;
+    line-height: 1;
+    letter-spacing: normal;
+    text-transform: none;
+    display: inline-block;
+    white-space: nowrap;
+    word-wrap: normal;
+    direction: ltr;
+    -webkit-font-feature-settings: "liga";
+    -webkit-font-smoothing: antialiased;
   }
 }
 
+/*
+ * Camada de compatibilidade shadcn/ui.
+ * Os primitivos (Dialog, Sheet, Popover, Select, Switch, Button, Table…) usam os nomes
+ * de token do shadcn. Aqui eles são remapeados para a MESMA paleta Material 3 acima,
+ * de modo que nenhum componente introduz cores fora do design system do FinCore.
+ */
+@theme {
+  --color-foreground: #1b1b1d;
+  --color-primary-foreground: #ffffff;
+  --color-secondary-foreground: #ffffff;
+  --color-card: #ffffff;
+  --color-card-foreground: #1b1b1d;
+  --color-popover: #ffffff;
+  --color-popover-foreground: #1b1b1d;
+  --color-muted: #efedf0;
+  --color-muted-foreground: #44474d;
+  --color-accent: #eae7ea;
+  --color-accent-foreground: #000615;
+  --color-destructive: #ba1a1a;
+  --color-destructive-foreground: #ffffff;
+  --color-border: #c5c6ce;
+  --color-input: #c5c6ce;
+  --color-ring: #006b5b;
+  --color-ring-offset-background: #fbf9fb;
+
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+  /* Ícone Material Symbols preenchido */
+  .icon-fill,
+  .material-symbols-outlined.filled {
+    font-variation-settings: "FILL" 1;
+  }
+}
+
+/* Números tabulares em tabelas financeiras */
 @utility num {
-  font-family: var(--font-mono);
+  font-family: var(--font-data-mono);
   font-variant-numeric: tabular-nums;
+}
+
+/*
+ * Os tokens de espaçamento nomeados do FinCore (--spacing-xs/sm/md/lg/xl, usados
+ * por p-md, gap-lg, px-margin) sombreiam o namespace de container do Tailwind:
+ * sem isto, max-w-md resolve para 16px em vez de 28rem, e os primitivos do
+ * shadcn (Dialog, Sheet) colapsam. Estas regras vêm depois das utilities do
+ * Tailwind na mesma layer, então restauram a escala de container nesses nomes.
+ */
+@layer utilities {
+  .max-w-xs {
+    max-width: var(--container-xs);
+  }
+  .max-w-sm {
+    max-width: var(--container-sm);
+  }
+  .max-w-md {
+    max-width: var(--container-md);
+  }
+  .max-w-lg {
+    max-width: var(--container-lg);
+  }
+  .max-w-xl {
+    max-width: var(--container-xl);
+  }
+  .min-w-xs {
+    min-width: var(--container-xs);
+  }
+  .min-w-sm {
+    min-width: var(--container-sm);
+  }
+  .min-w-md {
+    min-width: var(--container-md);
+  }
+  .min-w-lg {
+    min-width: var(--container-lg);
+  }
+  .min-w-xl {
+    min-width: var(--container-xl);
+  }
 }
