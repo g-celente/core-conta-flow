@@ -75,8 +75,8 @@ export const consolidado = () => {
     inadimplencia: +(vals.reduce((s, v) => s + v.inadimplencia, 0) / vals.length).toFixed(1),
     fluxo: ["Abr", "Mai", "Jun"].map((mes, i) => ({
       mes,
-      entradas: vals.reduce((s, v) => s + v.fluxo[i].entradas, 0),
-      saidas: vals.reduce((s, v) => s + v.fluxo[i].saidas, 0),
+      entradas: vals.reduce((s, v) => s + (v.fluxo[i]?.entradas ?? 0), 0),
+      saidas: vals.reduce((s, v) => s + (v.fluxo[i]?.saidas ?? 0), 0),
     })),
   };
 };
