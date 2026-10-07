@@ -1,0 +1,13 @@
+# Postgres do FinCore. Sem volume: os dados são recriados a cada subida do backend.
+# O nome evita conflito com outros projetos Compose numa pasta chamada "backend".
+name: fincore
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: fincore-postgres
+    environment:
+      POSTGRES_DB: fincore
+      POSTGRES_USER: fincore
+      POSTGRES_PASSWORD: fincore
+    ports:
+      - "5434:5432"
