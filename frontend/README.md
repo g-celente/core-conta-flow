@@ -9,7 +9,6 @@ Este repositório é um **protótipo navegável de linha de produtos**: o mesmo 
 tabela, os blocos de formulário e os itens de menu **mudam em tempo de execução**
 conforme as _features_ contratadas pelo tenant e o perfil de acesso do usuário.
 
-- **Publicado em:** https://core-conta-flow.lovable.app
 - **Stack:** TanStack Start 1.168 + TanStack Router 1.170, React 19, Tailwind CSS 4,
   shadcn/ui (Radix), lucide-react, sonner.
 
@@ -153,7 +152,19 @@ A ficha consolidada, gerada em tempo real a partir do `FeaturesContext`, está e
 | `/instanciacao/resumo`   | Ficha de configuração PV1–PV7                                              | todo o `FeaturesContext`                                                  |
 | `/auditoria`             | Trilha de auditoria da sessão                                              | `mod_comissoes` (categoria)                                               |
 
-Total: **24 rotas**, todas alcançáveis pelo menu. Nenhum item de menu sem rota e
+### Cadastros (4)
+
+Telas montadas pelo CRUD genérico (`TelaCadastro` + `FormularioCadastro` + `useCadastro`),
+gravando no Postgres pelo backend.
+
+| Rota                  | Tela                                       | Varia por                          |
+| --------------------- | ------------------------------------------ | ---------------------------------- |
+| `/contas-bancarias`   | Contas bancárias usadas na baixa           | perfil (somente leitura sem ações) |
+| `/categorias-despesa` | Categorias usadas no lançamento de títulos | perfil (somente leitura sem ações) |
+| `/usuarios`           | Usuários, responsáveis e titulares         | perfil (somente leitura sem ações) |
+| `/formas-pagamento`   | Formas de pagamento usadas na baixa        | perfil (somente leitura sem ações) |
+
+Total: **28 rotas**, todas alcançáveis pelo menu. Nenhum item de menu sem rota e
 nenhum `href="#"`.
 
 ---
@@ -231,16 +242,6 @@ As telas são montadas com os primitivos do shadcn (`Card`, `Table`, `Button`,
 **lucide-react**. O shell é a sidebar escura de 256 px com grupos de menu e
 barra de acento no item ativo, e a topbar com seletor de empresa, selo do perfil
 de produto e seletor de perfil de acesso.
-
----
-
-## Como publicar
-
-O repositório está conectado ao Lovable e **só a branch `main` é sincronizada**.
-
-1. Commite e envie para `main`.
-2. No Lovable, clique em **Publish → Update**.
-3. A URL https://core-conta-flow.lovable.app passa a refletir as mudanças.
 
 ---
 

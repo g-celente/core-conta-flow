@@ -30,6 +30,7 @@ domínio.
   - [Decorator](#decorator)
   - [Chain of Responsibility](#chain-of-responsibility)
 - [Cadastros (item 02)](#cadastros-item-02)
+- [Empacotamento (item 03)](#empacotamento-item-03)
 - [Testes](#testes)
 - [Roteiro de demonstração](#roteiro-de-demonstração)
 
@@ -66,12 +67,16 @@ flowchart LR
 ```
 core-conta-flow/
   frontend/                      app React (telas, dados de exemplo, variabilidade)
-    src/lib/api.ts               cliente da API: uma função por fluxo
+    src/lib/api.ts               cliente da API: uma função por fluxo + CRUD genérico
+    src/lib/use-cadastro.ts      hook do CRUD genérico (lista e grava um recurso)
+    src/components/app/          TelaCadastro e FormularioCadastro (telas de cadastro genéricas)
     src/routes/                  telas (importar-extrato, plano-de-contas, baixa-pagamento...)
   backend/
+    pom.xml                      versão, licença e empacotamento (JAR comum + JAR executável)
     docker-compose.yml           Postgres na porta 5434
-    src/main/resources/data.sql  plano de contas base + escada de alçadas
+    src/main/resources/data.sql  dados iniciais dos 10 cadastros
     src/main/java/com/fincore/
+      cadastro/                  CrudController genérico + entidades e controllers dos cadastros
       dominio/                   11 classes de domínio + 2 repositórios
       extrato/                   Factory Method 1
       planodecontas/             Factory Method 2
@@ -79,8 +84,8 @@ core-conta-flow/
       validacao/                 Decorator 2
       aprovacao/                 Chain of Responsibility 1
       notificacao/               Chain of Responsibility 2
-    src/test/java/com/fincore/   um teste JUnit por padrão
-  docs/                          specs e planos do trabalho
+    src/test/java/com/fincore/   um teste JUnit por padrão + CadastroTest
+  LICENSE                        licença MIT do artefato
 ```
 
 ## Como rodar
@@ -91,7 +96,7 @@ Requisitos: Docker, Java 21, Maven 3.9 e Node.js.
 cd backend
 docker compose up -d      # Postgres na porta 5434 (sem volume)
 mvn spring-boot:run       # API em http://localhost:8081/api
-mvn test                  # testes dos padrões (não precisam do Docker)
+mvn test                  # testes dos padrões e dos cadastros (não precisam do Docker)
 
 cd ../frontend
 npm install
@@ -526,6 +531,55 @@ um nível em /alcadas muda na hora quem decide cada título**.
 
 Os dados iniciais vêm do `backend/src/main/resources/data.sql` e são recarregados a cada subida
 do backend (o Postgres roda sem volume).
+
+## Empacotamento (item 03)
+
+O backend é empacotado pelo Maven como o artefato **`com.fincore:backend:1.0.0`**, licença MIT
+(arquivo `LICENSE` na raiz). Um comando gera e instala tudo:
+
+```bash
+cd backend
+mvn install
+```
+
+1. compila as classes;
+2. roda os 17 testes (se algum falha, para aqui);
+3. gera os dois JARs em `target/`;
+4. instala os JARs e o `pom.xml` no repositório Maven local
+   (`~/.m2/repository/com/fincore/backend/1.0.0/`).
+
+| Arquivo                  | Para que serve                                                                                  |
+| ------------------------ | ----------------------------------------------------------------------------------------------- |
+| `backend-1.0.0.jar`      | **reuso**: outro projeto declara a dependência abaixo e usa as classes dos padrões e do domínio |
+| `backend-1.0.0-exec.jar` | **execução**: roda a API inteira com `java -jar target/backend-1.0.0-exec.jar` (Postgres no ar) |
+
+O que o empacotamento formaliza:
+
+| Item           | Onde                                                                                                                                                     |
+| -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Contrato (API) | os tipos abstratos dos padrões: `ImportadorExtrato`, `MontadorPlanoDeContas`, `ValorAPagar`, `ValidadorTitulo`, `AprovadorDeTitulo` e `CanalNotificacao` |
+| Metadados      | `backend/pom.xml` (grupo, nome, descrição, versão 1.0.0, licença) e `MANIFEST.MF` com título e versão                                                    |
+| Dependências   | declaradas no `pom.xml` instalado: Spring Web MVC, Spring Data JPA e o driver do Postgres vêm junto para quem usar o JAR                                 |
+
+Exemplo de uso em outro projeto Maven:
+
+```xml
+<dependency>
+    <groupId>com.fincore</groupId>
+    <artifactId>backend</artifactId>
+    <version>1.0.0</version>
+</dependency>
+```
+
+```java
+ValorAPagar valor = new AbatimentoDesconto(
+        new AcrescimoJurosMulta(new ValorOriginal(new TituloPagar("NF-20491", 14502.33)), 435.07), 100);
+valor.valor();   // 14837.4
+```
+
+Limitação: o JAR é da aplicação inteira, não de um componente isolado. Quem o reutiliza leva
+junto o Spring, o JPA, o driver do Postgres, os cadastros, o `application.properties` e o
+`data.sql`.
 
 ## Testes
 

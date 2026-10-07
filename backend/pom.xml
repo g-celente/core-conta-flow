@@ -15,6 +15,17 @@
     <artifactId>backend</artifactId>
     <version>1.0.0</version>
     <name>FinCore backend</name>
+    <description>
+        API do FinCore com os padrões Factory Method, Decorator e Chain of Responsibility
+        e os 10 cadastros. Gera um JAR reutilizável e um JAR executável (classificador exec).
+    </description>
+
+    <licenses>
+        <license>
+            <name>MIT</name>
+            <url>https://opensource.org/license/mit</url>
+        </license>
+    </licenses>
 
     <properties>
         <java.version>21</java.version>
@@ -56,6 +67,10 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <!-- O JAR comum fica para reuso; o executável sai como backend-1.0.0-exec.jar. -->
+                    <classifier>exec</classifier>
+                </configuration>
             </plugin>
         </plugins>
     </build>

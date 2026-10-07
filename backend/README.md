@@ -10,6 +10,7 @@ cadastros. O Postgres guarda os cadastros; os dados iniciais são recarregados a
 docker compose up -d      # Postgres na porta 5434
 mvn spring-boot:run       # API em http://localhost:8081/api
 mvn test                  # testes dos padrões e dos cadastros (não precisam do Docker)
+mvn install               # empacota: backend-1.0.0.jar (reuso) e backend-1.0.0-exec.jar (java -jar)
 ```
 
 ## Classes de domínio (`com.fincore.dominio`)
