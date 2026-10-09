@@ -4,15 +4,16 @@ Este documento descreve os três padrões de projeto do GoF aplicados no backend
 com dois exemplos cada. Para cada exemplo: **o problema** que existia no sistema, **como o
 padrão resolve** e **o que se ganha** com isso.
 
-| Padrão                  | Categoria     | Exemplos                                       | Pacotes                    |
-| ----------------------- | ------------- | ---------------------------------------------- | -------------------------- |
-| Factory Method          | Criação       | Leitor de extrato · Plano de contas por regime | `extrato`, `planodecontas` |
-| Decorator               | Estrutura     | Valor da baixa · Validação do título           | `baixa`, `validacao`       |
-| Chain of Responsibility | Comportamento | Aprovação por alçada · Canal de notificação    | `aprovacao`, `notificacao` |
+| Padrão                  | Categoria     | Exemplos                                       | Pacotes                                    |
+| ----------------------- | ------------- | ---------------------------------------------- | ------------------------------------------ |
+| Factory Method          | Criação       | Leitor de extrato · Plano de contas por regime | `pattern/extrato`, `pattern/planodecontas` |
+| Decorator               | Estrutura     | Valor da baixa · Validação do título           | `pattern/baixa`, `pattern/validacao`       |
+| Chain of Responsibility | Comportamento | Aprovação por alçada · Canal de notificação    | `pattern/aprovacao`, `pattern/notificacao` |
 
-O código fica em `backend/src/main/java/com/fincore/`. Em todos os exemplos, o **controller**
-do pacote é o cliente do padrão: monta os objetos com `new` e devolve o resultado para o
-frontend. Os fluxos completos, com diagramas de sequência, estão no [README](README.md).
+O código fica em `backend/src/main/java/com/fincore/`, com as classes dos padrões em
+`pattern/`. Em todos os exemplos, o **service** do fluxo é o cliente do padrão: monta os
+objetos com `new` e devolve o resultado ao controller, que responde ao frontend. Os fluxos
+completos, com diagramas de sequência, estão no [README](README.md).
 
 ---
 
@@ -84,7 +85,7 @@ public class ImportadorCnab240 extends ImportadorExtrato {
 }
 ```
 
-O `ExtratoController` escolhe o criador pelo adaptador do tenant e chama `importar()`, sem
+O `ExtratoService` escolhe o criador pelo adaptador do tenant e chama `importar()`, sem
 saber qual leitor está por trás.
 
 **Ganho.**
@@ -117,7 +118,7 @@ alterar as duas.
 
 O criador monta o plano sempre do mesmo jeito: junta a base às contas do enquadramento e
 ordena por código. O enquadramento vem do método fábrica `criarEnquadramento()`, que cada
-montador concreto implementa. O `PlanoDeContasController` lê a base no banco, escolhe o
+montador concreto implementa. O `PlanoDeContasService` lê a base no banco, escolhe o
 montador pelo regime e devolve o plano às duas telas.
 
 **Ganho.**
@@ -157,7 +158,7 @@ tipo de ajuste (por exemplo, correção monetária) entraria no meio dela.
 | Decorator         | `AjusteDeValor` (abstrata: guarda o componente e repassa) |
 | ConcreteDecorator | `AcrescimoJurosMulta`, `AbatimentoDesconto`               |
 
-O controller envolve o valor original com uma camada por ajuste informado:
+O `BaixaService` envolve o valor original com uma camada por ajuste informado:
 
 ```java
 ValorAPagar valor = new ValorOriginal(titulo);
@@ -167,7 +168,7 @@ if (baixa.temJuros()) {
 if (baixa.temDesconto()) {
     valor = new AbatimentoDesconto(valor, baixa.getDesconto());
 }
-return new ValorDevido(valor.valor(), valor.composicao());
+return valor;
 ```
 
 Cada decorador chama a camada de dentro (`super.valor()`), aplica o seu ajuste e acrescenta
@@ -202,21 +203,22 @@ não conseguiria reaproveitar essa regra isoladamente.
 | Decorator         | `ValidacaoDecorator` (abstrata)                  |
 | ConcreteDecorator | `ValidacaoRateio`, `AvisoAlcada`                 |
 
-O controller monta a pilha de acordo com as features contratadas pelo tenant:
+O `ValidacaoService` monta a pilha de acordo com as features contratadas pelo tenant:
 
 ```java
 ValidadorTitulo validador = new ValidacaoCamposObrigatorios();
 if (tenant.possui("centro_custo")) {
     validador = new ValidacaoRateio(validador);
 }
-if (tenant.possui("alcada")) {
-    validador = new AvisoAlcada(validador, alcadas.findAllByOrderByLimiteAsc().getFirst());
+List<Alcada> escada = alcadas.findAllByOrderByLimiteAsc();
+if (tenant.possui("alcada") && !escada.isEmpty()) {
+    validador = new AvisoAlcada(validador, escada.getFirst());
 }
-ResultadoValidacao resultado = validador.validar(titulo);
+return validador.validar(titulo);
 ```
 
 Cada camada chama a de dentro e acrescenta o seu erro ou aviso ao mesmo
-`ResultadoValidacao`. Ligar ou desligar uma feature em Configurações muda a pilha na
+`ResultadoValidacao`. Ligar ou desligar uma feature em Features do tenant muda a pilha na
 próxima validação, sem mudar código.
 
 **Ganho.**
@@ -276,17 +278,19 @@ public DecisaoAprovacao analisar(PedidoAprovacao pedido) {
 }
 ```
 
-O controller monta a corrente com as alçadas lidas do banco, em ordem de limite, e põe o
-comitê no fim:
+O `AprovacaoService` monta a corrente com as alçadas lidas do banco, em ordem de limite, e
+põe o comitê no fim:
 
 ```java
-List<Alcada> escada = alcadas.findAllByOrderByLimiteAsc();
-AprovadorDeTitulo inicio = new AprovadorPorAlcada(escada.getFirst());
-AprovadorDeTitulo ultimo = inicio;
-for (Alcada alcada : escada.subList(1, escada.size())) {
-    ultimo = ultimo.encadear(new AprovadorPorAlcada(alcada));
+List<AprovadorDeTitulo> elos = new ArrayList<>();
+for (Alcada alcada : alcadas.findAllByOrderByLimiteAsc()) {
+    elos.add(new AprovadorPorAlcada(alcada));
 }
-ultimo.encadear(new ComiteFinanceiro(List.of("Carlos Eduardo Menezes", "Paula Nunes")));
+elos.add(new ComiteFinanceiro(List.of("Carlos Eduardo Menezes", "Paula Nunes")));
+for (int i = 0; i < elos.size() - 1; i++) {
+    elos.get(i).encadear(elos.get(i + 1));
+}
+return elos.getFirst();
 ```
 
 Um título de R$ 42.980,90 lançado pela Marina passa pelo Operador e pelo Analista, que não
@@ -320,7 +324,7 @@ formatar a mensagem para cada canal.
 | ConcreteHandler | `CanalPush`, `CanalEmail` (elo final)                                                 |
 | Request         | `Notificacao` (destinatário, mensagem, evento)                                        |
 
-O controller encadeia Push → E-mail. O `CanalPush` verifica se o tenant possui
+O `NotificacaoService` encadeia Push → E-mail. O `CanalPush` verifica se o tenant possui
 `notificacoes_push`: se sim, entrega e encerra; se não, repassa. O `CanalEmail` está sempre
 disponível e garante a entrega. A resposta informa por qual canal o aviso saiu.
 

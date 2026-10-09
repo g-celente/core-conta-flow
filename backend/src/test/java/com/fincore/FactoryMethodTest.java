@@ -1,22 +1,21 @@
 package com.fincore;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-
-import com.fincore.dominio.ArquivoExtrato;
-import com.fincore.dominio.ContaPlano;
-import com.fincore.dominio.LinhaExtrato;
-import com.fincore.extrato.AmostrasExtrato;
-import com.fincore.extrato.ImportadorCnab240;
-import com.fincore.extrato.ImportadorCnab400;
-import com.fincore.extrato.ImportadorExtrato;
-import com.fincore.extrato.ImportadorOfx;
-import com.fincore.extrato.LeitorOfx;
-import com.fincore.planodecontas.EnquadramentoLucroReal;
-import com.fincore.planodecontas.MontadorPlanoDeContas;
-import com.fincore.planodecontas.MontadorPlanoLucroReal;
+import com.fincore.domain.ArquivoExtrato;
+import com.fincore.domain.ContaPlano;
+import com.fincore.domain.LinhaExtrato;
+import com.fincore.pattern.extrato.AmostrasExtrato;
+import com.fincore.pattern.extrato.ImportadorCnab240;
+import com.fincore.pattern.extrato.ImportadorCnab400;
+import com.fincore.pattern.extrato.ImportadorExtrato;
+import com.fincore.pattern.extrato.ImportadorOfx;
+import com.fincore.pattern.extrato.LeitorOfx;
+import com.fincore.pattern.planodecontas.EnquadramentoLucroReal;
+import com.fincore.pattern.planodecontas.MontadorPlanoDeContas;
+import com.fincore.pattern.planodecontas.MontadorPlanoLucroReal;
 import java.util.List;
 import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class FactoryMethodTest {
 

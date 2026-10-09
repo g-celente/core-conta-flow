@@ -1,21 +1,20 @@
 package com.fincore;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import com.fincore.aprovacao.AprovadorDeTitulo;
-import com.fincore.aprovacao.AprovadorPorAlcada;
-import com.fincore.aprovacao.ComiteFinanceiro;
-import com.fincore.aprovacao.DecisaoAprovacao;
-import com.fincore.dominio.Alcada;
-import com.fincore.dominio.ConfiguracaoTenant;
-import com.fincore.dominio.Notificacao;
-import com.fincore.dominio.PedidoAprovacao;
-import com.fincore.notificacao.CanalEmail;
-import com.fincore.notificacao.CanalNotificacao;
-import com.fincore.notificacao.CanalPush;
-import com.fincore.notificacao.EnvioNotificacao;
+import com.fincore.domain.Alcada;
+import com.fincore.domain.ConfiguracaoTenant;
+import com.fincore.domain.Notificacao;
+import com.fincore.domain.PedidoAprovacao;
+import com.fincore.pattern.aprovacao.AprovadorDeTitulo;
+import com.fincore.pattern.aprovacao.AprovadorPorAlcada;
+import com.fincore.pattern.aprovacao.ComiteFinanceiro;
+import com.fincore.pattern.aprovacao.DecisaoAprovacao;
+import com.fincore.pattern.notificacao.CanalEmail;
+import com.fincore.pattern.notificacao.CanalNotificacao;
+import com.fincore.pattern.notificacao.CanalPush;
+import com.fincore.pattern.notificacao.EnvioNotificacao;
 import java.util.List;
 import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class ChainOfResponsibilityTest {
 

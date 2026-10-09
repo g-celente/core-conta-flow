@@ -9,16 +9,16 @@ Este repositório é um **protótipo navegável de linha de produtos**: o mesmo 
 tabela, os blocos de formulário e os itens de menu **mudam em tempo de execução**
 conforme as _features_ contratadas pelo tenant e o perfil de acesso do usuário.
 
-- **Stack:** TanStack Start 1.168 + TanStack Router 1.170, React 19, Tailwind CSS 4,
-  shadcn/ui (Radix), lucide-react, sonner.
+- **Stack:** TanStack Start 1.168 + TanStack Router 1.170, TanStack Query 5, React 19,
+  Tailwind CSS 4, shadcn/ui (Radix), lucide-react, sonner.
 
 ---
 
 ## Como rodar
 
-Os fluxos que usam padrões de projeto (importar extrato, plano de contas, baixa, validação do
-título, aprovação e notificações) chamam o backend em `http://localhost:8081`; suba-o antes,
-como descrito em [../backend/README.md](../backend/README.md).
+Os 10 cadastros e os fluxos que usam padrões de projeto (importar extrato, plano de contas,
+baixa, validação do título, aprovação e notificações) chamam o backend em
+`http://localhost:8081/api`; suba-o antes, como descrito em [../backend/README.md](../backend/README.md).
 
 ```bash
 npm install
@@ -53,12 +53,12 @@ sem passar pelo login.
 
 ### O que cada perfil vê
 
-| Perfil                  | Escopo                                                                                                                  | Escrita                                                                             |
-| ----------------------- | ----------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
-| **Operador financeiro** | Todas as telas contratadas                                                                                              | Sim                                                                                 |
-| **Aprovador**           | Dashboard, fila de aprovação, alçadas, relatórios, auditoria                                                            | Sim (aprovar/devolver)                                                              |
-| **Contador externo**    | Dashboard, listagens, plano de contas, conciliação, importação, relatórios, exportações, auditoria                      | **Não** — banner "Acesso somente leitura" e botões de criar/editar/inativar ocultos |
-| **Implantador**         | Administração: features do tenant, instanciação, ficha, auditoria, integrações, notificações, alçadas, centros de custo | Sim                                                                                 |
+| Perfil                  | Escopo                                                                                                                             | Escrita                                                                             |
+| ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| **Operador financeiro** | Todas as telas contratadas                                                                                                         | Sim                                                                                 |
+| **Aprovador**           | Dashboard, fila de aprovação, alçadas, relatórios, auditoria                                                                       | Sim (aprovar/devolver)                                                              |
+| **Contador externo**    | Dashboard, listagens, plano de contas, conciliação, importação, relatórios, exportações, auditoria                                 | **Não** — banner "Acesso somente leitura" e botões de criar/editar/inativar ocultos |
+| **Implantador**         | Administração: features do tenant, instanciação, ficha, auditoria, integrações, notificações, alçadas, centros de custo, cadastros | Sim                                                                                 |
 
 > O perfil **Contador externo** só aparece no seletor quando a feature
 > `portal_contador` está ativa no tenant (PV4).
@@ -127,9 +127,9 @@ A ficha consolidada, gerada em tempo real a partir do `FeaturesContext`, está e
 | `/onboarding`       | Assistente: empresa → plano de contas por regime → banco | **PV1** (plano sugerido) · **PV2** (adaptador)                                                                           |
 | `/contas-a-pagar`   | Listagem + CRUD completo, filtros removíveis, totais     | `centro_custo` (coluna, filtro, rateio) · `alcada` (fila) · perfil                                                       |
 | `/baixa-pagamento`  | Baixa com juros, desconto e conta de saída               | `centro_custo` (rateio no resumo) · perfil (indisponível em leitura)                                                     |
-| `/contas-a-receber` | Aging de inadimplência em 5 faixas                       | `notificacoes_push` (cobrança) · perfil                                                                                  |
+| `/contas-a-receber` | CRUD de títulos e aging de inadimplência em 5 faixas     | `notificacoes_push` (cobrança) · perfil                                                                                  |
 | `/parceiros`        | CRUD completo de clientes e fornecedores                 | perfil · regra de títulos em aberto                                                                                      |
-| `/plano-de-contas`  | Árvore sintética/analítica                               | **PV1** (contas do regime) · perfil                                                                                      |
+| `/plano-de-contas`  | Árvore sintética/analítica com CRUD                      | **PV1** (contas do regime) · perfil                                                                                      |
 | `/relatorios`       | Catálogo, fluxo projetado, DRE gerencial, exportação     | `centro_custo`, `multiempresa`, `conciliacao`, `portal_contador`                                                         |
 | `/importar-extrato` | Upload OFX/CNAB com prévia e validação                   | **PV2** (extensão e parser) · `conciliacao`                                                                              |
 | `/conciliacao`      | Pares extrato × sistema com sugestões                    | `conciliacao` · **PV2** · perfil                                                                                         |
@@ -148,7 +148,7 @@ A ficha consolidada, gerada em tempo real a partir do `FeaturesContext`, está e
 | `/notificacoes`          | Canais por evento e antecedência                                           | **PV5** (coluna Push) · `alcada`, `conciliacao`, `centro_custo` (eventos) |
 | `/integracoes`           | Central de integrações: tokens e endpoints                                 | `api_publica` · `centro_custo` (escopo de rateio)                         |
 | `/integracoes/adaptador` | Escolha do adaptador bancário                                              | **PV2** · `conciliacao`                                                   |
-| `/instanciacao`          | Assistente de instanciação em 7 etapas                                     | features do tenant (etapas 2, 3 e 6)                                      |
+| `/instanciacao`          | Assistente de instanciação em 7 etapas                                     | features do tenant (etapas 1 a 6)                                         |
 | `/instanciacao/resumo`   | Ficha de configuração PV1–PV7                                              | todo o `FeaturesContext`                                                  |
 | `/auditoria`             | Trilha de auditoria da sessão                                              | `mod_comissoes` (categoria)                                               |
 
@@ -172,7 +172,7 @@ nenhum `href="#"`.
 ## Demonstrar a variabilidade em 60 segundos
 
 1. **Trocar empresa → o menu muda.** Comece na _Padaria Estrela do Sul_ (Essencial):
-   o menu tem só Operação, Configurações e Administração. Troque para _TransLog
+   o menu tem só Operação, Cadastros, Configurações e Administração. Troque para _TransLog
    Cargas_ no seletor do topo — aparecem os grupos **Conciliação**, **Aprovações**,
    **Custos** e **Extensões**, o selo muda para `PROFISSIONAL`, o 4º KPI vira
    "Aguardando aprovação" e surge o bloco de inadimplência por centro de custo.
@@ -188,8 +188,9 @@ nenhum `href="#"`.
    externo_ (disponível na _Clínica Vida Plena_, que tem `portal_contador`). Aparece
    o banner "Acesso somente leitura", o menu encolhe para as telas permitidas e
    todos os botões de criar, editar e inativar desaparecem.
-5. **Ver o rastro.** Abra `/auditoria`: cada troca de feature, CRUD, aprovação e
-   geração de título de comissão gravou uma linha com usuário, tenant e detalhe.
+5. **Ver o rastro.** Abra `/auditoria`: cada troca de feature, aprovação, geração de
+   título de comissão e CRUD de parceiros, contas a pagar, centros de custo e alçadas
+   gravou uma linha com usuário, tenant e detalhe.
 
 O ícone **ⓘ** ao lado do título de cada tela abre um popover explicando **o que
 varia ali, por qual feature ou perfil, e qual o ponto de variação**.
@@ -247,7 +248,11 @@ de produto e seletor de perfil de acesso.
 
 ## Limites do protótipo
 
-- Os 10 cadastros são gravados no Postgres pelo backend; o restante do estado (tenant ativo,
-  features, trilha de auditoria) vive em memória e volta ao padrão ao recarregar a página.
+- Os 10 cadastros (parceiros, usuários, contas a pagar, formas de pagamento, contas a receber,
+  contas bancárias, centros de custo, categorias de despesa, plano de contas e alçadas) são
+  gravados no Postgres pelo backend. Parceiros e contas a pagar passam pelo `DadosContext`; os
+  demais usam `useCadastro` direto. O restante do estado (tenant ativo, features, trilha de
+  auditoria, indicadores do dashboard e relatórios) vive em memória e volta ao padrão ao
+  recarregar a página.
 - Não há autenticação real. O login apenas reconhece o e-mail e define o perfil da sessão.
 - Datas, saldos e recebimentos são fixos (competência junho/2026).

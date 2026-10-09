@@ -1,22 +1,21 @@
 package com.fincore;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import com.fincore.baixa.AbatimentoDesconto;
-import com.fincore.baixa.AcrescimoJurosMulta;
-import com.fincore.baixa.ValorAPagar;
-import com.fincore.baixa.ValorOriginal;
-import com.fincore.dominio.Alcada;
-import com.fincore.dominio.LinhaRateio;
-import com.fincore.dominio.Rateio;
-import com.fincore.dominio.TituloPagar;
-import com.fincore.validacao.AvisoAlcada;
-import com.fincore.validacao.ResultadoValidacao;
-import com.fincore.validacao.ValidacaoCamposObrigatorios;
-import com.fincore.validacao.ValidacaoRateio;
-import com.fincore.validacao.ValidadorTitulo;
+import com.fincore.domain.Alcada;
+import com.fincore.domain.LinhaRateio;
+import com.fincore.domain.Rateio;
+import com.fincore.domain.TituloPagar;
+import com.fincore.pattern.baixa.AbatimentoDesconto;
+import com.fincore.pattern.baixa.AcrescimoJurosMulta;
+import com.fincore.pattern.baixa.ValorAPagar;
+import com.fincore.pattern.baixa.ValorOriginal;
+import com.fincore.pattern.validacao.AvisoAlcada;
+import com.fincore.pattern.validacao.ResultadoValidacao;
+import com.fincore.pattern.validacao.ValidacaoCamposObrigatorios;
+import com.fincore.pattern.validacao.ValidacaoRateio;
+import com.fincore.pattern.validacao.ValidadorTitulo;
 import java.util.List;
 import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class DecoratorTest {
 
