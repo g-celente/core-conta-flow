@@ -1,0 +1,54 @@
+# FinCore: banco, API e telas com um único `docker compose up`.
+#   Telas: http://localhost:8080   API: http://localhost:8081/api   Postgres: localhost:5434
+name: fincore
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: fincore-postgres
+    environment:
+      POSTGRES_DB: fincore
+      POSTGRES_USER: fincore
+      POSTGRES_PASSWORD: fincore
+    ports:
+      - "5434:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U fincore -d fincore"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build: ./backend
+    container_name: fincore-backend
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/fincore
+      SPRING_DATASOURCE_USERNAME: fincore
+      SPRING_DATASOURCE_PASSWORD: fincore
+    ports:
+      - "8081:8081"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      # A imagem do JRE não tem curl; o bash abre a porta direto.
+      test: ["CMD-SHELL", "bash -c 'exec 3<>/dev/tcp/localhost/8081'"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+      start_period: 20s
+
+  frontend:
+    build: ./frontend
+    container_name: fincore-frontend
+    # O navegador chama a API em localhost:8081 (fixo em src/lib/api.ts), por isso a porta
+    # do backend fica publicada no host.
+    ports:
+      - "8080:8080"
+    depends_on:
+      backend:
+        condition: service_healthy
+
+volumes:
+  postgres-data:
