@@ -13,17 +13,14 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AlcadasRouteImport } from './routes/alcadas'
 import { Route as AprovacoesRouteImport } from './routes/aprovacoes'
 import { Route as AuditoriaRouteImport } from './routes/auditoria'
-import { Route as AuthRouteImport } from './routes/auth'
 import { Route as BaixaPagamentoRouteImport } from './routes/baixa-pagamento'
 import { Route as CategoriasDespesaRouteImport } from './routes/categorias-despesa'
 import { Route as CentrosDeCustoRouteImport } from './routes/centros-de-custo'
 import { Route as ComissoesRouteImport } from './routes/comissoes'
-import { Route as ConciliacaoRouteImport } from './routes/conciliacao'
 import { Route as ConfiguracoesRouteImport } from './routes/configuracoes'
 import { Route as ContasAPagarRouteImport } from './routes/contas-a-pagar'
 import { Route as ContasAReceberRouteImport } from './routes/contas-a-receber'
 import { Route as ContasBancariasRouteImport } from './routes/contas-bancarias'
-import { Route as ExportacoesRouteImport } from './routes/exportacoes'
 import { Route as FormasPagamentoRouteImport } from './routes/formas-pagamento'
 import { Route as ImportarExtratoRouteImport } from './routes/importar-extrato'
 import { Route as NotificacoesRouteImport } from './routes/notificacoes'
@@ -31,12 +28,8 @@ import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as ParceirosRouteImport } from './routes/parceiros'
 import { Route as PlanoDeContasRouteImport } from './routes/plano-de-contas'
 import { Route as RateioRouteImport } from './routes/rateio'
-import { Route as RelatoriosRouteImport } from './routes/relatorios'
 import { Route as UsuariosRouteImport } from './routes/usuarios'
-import { Route as InstanciacaoIndexRouteImport } from './routes/instanciacao/index'
 import { Route as InstanciacaoResumoRouteImport } from './routes/instanciacao/resumo'
-import { Route as IntegracoesIndexRouteImport } from './routes/integracoes/index'
-import { Route as IntegracoesAdaptadorRouteImport } from './routes/integracoes/adaptador'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -56,11 +49,6 @@ const AprovacoesRoute = AprovacoesRouteImport.update({
 const AuditoriaRoute = AuditoriaRouteImport.update({
   id: '/auditoria',
   path: '/auditoria',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthRoute = AuthRouteImport.update({
-  id: '/auth',
-  path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BaixaPagamentoRoute = BaixaPagamentoRouteImport.update({
@@ -83,11 +71,6 @@ const ComissoesRoute = ComissoesRouteImport.update({
   path: '/comissoes',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ConciliacaoRoute = ConciliacaoRouteImport.update({
-  id: '/conciliacao',
-  path: '/conciliacao',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ConfiguracoesRoute = ConfiguracoesRouteImport.update({
   id: '/configuracoes',
   path: '/configuracoes',
@@ -106,11 +89,6 @@ const ContasAReceberRoute = ContasAReceberRouteImport.update({
 const ContasBancariasRoute = ContasBancariasRouteImport.update({
   id: '/contas-bancarias',
   path: '/contas-bancarias',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ExportacoesRoute = ExportacoesRouteImport.update({
-  id: '/exportacoes',
-  path: '/exportacoes',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FormasPagamentoRoute = FormasPagamentoRouteImport.update({
@@ -148,34 +126,14 @@ const RateioRoute = RateioRouteImport.update({
   path: '/rateio',
   getParentRoute: () => rootRouteImport,
 } as any)
-const RelatoriosRoute = RelatoriosRouteImport.update({
-  id: '/relatorios',
-  path: '/relatorios',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const UsuariosRoute = UsuariosRouteImport.update({
   id: '/usuarios',
   path: '/usuarios',
   getParentRoute: () => rootRouteImport,
 } as any)
-const InstanciacaoIndexRoute = InstanciacaoIndexRouteImport.update({
-  id: '/instanciacao/',
-  path: '/instanciacao/',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const InstanciacaoResumoRoute = InstanciacaoResumoRouteImport.update({
   id: '/instanciacao/resumo',
   path: '/instanciacao/resumo',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const IntegracoesIndexRoute = IntegracoesIndexRouteImport.update({
-  id: '/integracoes/',
-  path: '/integracoes/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const IntegracoesAdaptadorRoute = IntegracoesAdaptadorRouteImport.update({
-  id: '/integracoes/adaptador',
-  path: '/integracoes/adaptador',
   getParentRoute: () => rootRouteImport,
 } as any)
 
@@ -184,17 +142,14 @@ export interface FileRoutesByFullPath {
   '/alcadas': typeof AlcadasRoute
   '/aprovacoes': typeof AprovacoesRoute
   '/auditoria': typeof AuditoriaRoute
-  '/auth': typeof AuthRoute
   '/baixa-pagamento': typeof BaixaPagamentoRoute
   '/categorias-despesa': typeof CategoriasDespesaRoute
   '/centros-de-custo': typeof CentrosDeCustoRoute
   '/comissoes': typeof ComissoesRoute
-  '/conciliacao': typeof ConciliacaoRoute
   '/configuracoes': typeof ConfiguracoesRoute
   '/contas-a-pagar': typeof ContasAPagarRoute
   '/contas-a-receber': typeof ContasAReceberRoute
   '/contas-bancarias': typeof ContasBancariasRoute
-  '/exportacoes': typeof ExportacoesRoute
   '/formas-pagamento': typeof FormasPagamentoRoute
   '/importar-extrato': typeof ImportarExtratoRoute
   '/notificacoes': typeof NotificacoesRoute
@@ -202,29 +157,22 @@ export interface FileRoutesByFullPath {
   '/parceiros': typeof ParceirosRoute
   '/plano-de-contas': typeof PlanoDeContasRoute
   '/rateio': typeof RateioRoute
-  '/relatorios': typeof RelatoriosRoute
   '/usuarios': typeof UsuariosRoute
   '/instanciacao/resumo': typeof InstanciacaoResumoRoute
-  '/integracoes/adaptador': typeof IntegracoesAdaptadorRoute
-  '/instanciacao/': typeof InstanciacaoIndexRoute
-  '/integracoes/': typeof IntegracoesIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/alcadas': typeof AlcadasRoute
   '/aprovacoes': typeof AprovacoesRoute
   '/auditoria': typeof AuditoriaRoute
-  '/auth': typeof AuthRoute
   '/baixa-pagamento': typeof BaixaPagamentoRoute
   '/categorias-despesa': typeof CategoriasDespesaRoute
   '/centros-de-custo': typeof CentrosDeCustoRoute
   '/comissoes': typeof ComissoesRoute
-  '/conciliacao': typeof ConciliacaoRoute
   '/configuracoes': typeof ConfiguracoesRoute
   '/contas-a-pagar': typeof ContasAPagarRoute
   '/contas-a-receber': typeof ContasAReceberRoute
   '/contas-bancarias': typeof ContasBancariasRoute
-  '/exportacoes': typeof ExportacoesRoute
   '/formas-pagamento': typeof FormasPagamentoRoute
   '/importar-extrato': typeof ImportarExtratoRoute
   '/notificacoes': typeof NotificacoesRoute
@@ -232,12 +180,8 @@ export interface FileRoutesByTo {
   '/parceiros': typeof ParceirosRoute
   '/plano-de-contas': typeof PlanoDeContasRoute
   '/rateio': typeof RateioRoute
-  '/relatorios': typeof RelatoriosRoute
   '/usuarios': typeof UsuariosRoute
   '/instanciacao/resumo': typeof InstanciacaoResumoRoute
-  '/integracoes/adaptador': typeof IntegracoesAdaptadorRoute
-  '/instanciacao': typeof InstanciacaoIndexRoute
-  '/integracoes': typeof IntegracoesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -245,17 +189,14 @@ export interface FileRoutesById {
   '/alcadas': typeof AlcadasRoute
   '/aprovacoes': typeof AprovacoesRoute
   '/auditoria': typeof AuditoriaRoute
-  '/auth': typeof AuthRoute
   '/baixa-pagamento': typeof BaixaPagamentoRoute
   '/categorias-despesa': typeof CategoriasDespesaRoute
   '/centros-de-custo': typeof CentrosDeCustoRoute
   '/comissoes': typeof ComissoesRoute
-  '/conciliacao': typeof ConciliacaoRoute
   '/configuracoes': typeof ConfiguracoesRoute
   '/contas-a-pagar': typeof ContasAPagarRoute
   '/contas-a-receber': typeof ContasAReceberRoute
   '/contas-bancarias': typeof ContasBancariasRoute
-  '/exportacoes': typeof ExportacoesRoute
   '/formas-pagamento': typeof FormasPagamentoRoute
   '/importar-extrato': typeof ImportarExtratoRoute
   '/notificacoes': typeof NotificacoesRoute
@@ -263,12 +204,8 @@ export interface FileRoutesById {
   '/parceiros': typeof ParceirosRoute
   '/plano-de-contas': typeof PlanoDeContasRoute
   '/rateio': typeof RateioRoute
-  '/relatorios': typeof RelatoriosRoute
   '/usuarios': typeof UsuariosRoute
   '/instanciacao/resumo': typeof InstanciacaoResumoRoute
-  '/integracoes/adaptador': typeof IntegracoesAdaptadorRoute
-  '/instanciacao/': typeof InstanciacaoIndexRoute
-  '/integracoes/': typeof IntegracoesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -277,17 +214,14 @@ export interface FileRouteTypes {
     | '/alcadas'
     | '/aprovacoes'
     | '/auditoria'
-    | '/auth'
     | '/baixa-pagamento'
     | '/categorias-despesa'
     | '/centros-de-custo'
     | '/comissoes'
-    | '/conciliacao'
     | '/configuracoes'
     | '/contas-a-pagar'
     | '/contas-a-receber'
     | '/contas-bancarias'
-    | '/exportacoes'
     | '/formas-pagamento'
     | '/importar-extrato'
     | '/notificacoes'
@@ -295,29 +229,22 @@ export interface FileRouteTypes {
     | '/parceiros'
     | '/plano-de-contas'
     | '/rateio'
-    | '/relatorios'
     | '/usuarios'
     | '/instanciacao/resumo'
-    | '/integracoes/adaptador'
-    | '/instanciacao/'
-    | '/integracoes/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/alcadas'
     | '/aprovacoes'
     | '/auditoria'
-    | '/auth'
     | '/baixa-pagamento'
     | '/categorias-despesa'
     | '/centros-de-custo'
     | '/comissoes'
-    | '/conciliacao'
     | '/configuracoes'
     | '/contas-a-pagar'
     | '/contas-a-receber'
     | '/contas-bancarias'
-    | '/exportacoes'
     | '/formas-pagamento'
     | '/importar-extrato'
     | '/notificacoes'
@@ -325,29 +252,22 @@ export interface FileRouteTypes {
     | '/parceiros'
     | '/plano-de-contas'
     | '/rateio'
-    | '/relatorios'
     | '/usuarios'
     | '/instanciacao/resumo'
-    | '/integracoes/adaptador'
-    | '/instanciacao'
-    | '/integracoes'
   id:
     | '__root__'
     | '/'
     | '/alcadas'
     | '/aprovacoes'
     | '/auditoria'
-    | '/auth'
     | '/baixa-pagamento'
     | '/categorias-despesa'
     | '/centros-de-custo'
     | '/comissoes'
-    | '/conciliacao'
     | '/configuracoes'
     | '/contas-a-pagar'
     | '/contas-a-receber'
     | '/contas-bancarias'
-    | '/exportacoes'
     | '/formas-pagamento'
     | '/importar-extrato'
     | '/notificacoes'
@@ -355,12 +275,8 @@ export interface FileRouteTypes {
     | '/parceiros'
     | '/plano-de-contas'
     | '/rateio'
-    | '/relatorios'
     | '/usuarios'
     | '/instanciacao/resumo'
-    | '/integracoes/adaptador'
-    | '/instanciacao/'
-    | '/integracoes/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -368,17 +284,14 @@ export interface RootRouteChildren {
   AlcadasRoute: typeof AlcadasRoute
   AprovacoesRoute: typeof AprovacoesRoute
   AuditoriaRoute: typeof AuditoriaRoute
-  AuthRoute: typeof AuthRoute
   BaixaPagamentoRoute: typeof BaixaPagamentoRoute
   CategoriasDespesaRoute: typeof CategoriasDespesaRoute
   CentrosDeCustoRoute: typeof CentrosDeCustoRoute
   ComissoesRoute: typeof ComissoesRoute
-  ConciliacaoRoute: typeof ConciliacaoRoute
   ConfiguracoesRoute: typeof ConfiguracoesRoute
   ContasAPagarRoute: typeof ContasAPagarRoute
   ContasAReceberRoute: typeof ContasAReceberRoute
   ContasBancariasRoute: typeof ContasBancariasRoute
-  ExportacoesRoute: typeof ExportacoesRoute
   FormasPagamentoRoute: typeof FormasPagamentoRoute
   ImportarExtratoRoute: typeof ImportarExtratoRoute
   NotificacoesRoute: typeof NotificacoesRoute
@@ -386,12 +299,8 @@ export interface RootRouteChildren {
   ParceirosRoute: typeof ParceirosRoute
   PlanoDeContasRoute: typeof PlanoDeContasRoute
   RateioRoute: typeof RateioRoute
-  RelatoriosRoute: typeof RelatoriosRoute
   UsuariosRoute: typeof UsuariosRoute
   InstanciacaoResumoRoute: typeof InstanciacaoResumoRoute
-  IntegracoesAdaptadorRoute: typeof IntegracoesAdaptadorRoute
-  InstanciacaoIndexRoute: typeof InstanciacaoIndexRoute
-  IntegracoesIndexRoute: typeof IntegracoesIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -424,13 +333,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuditoriaRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/auth': {
-      id: '/auth'
-      path: '/auth'
-      fullPath: '/auth'
-      preLoaderRoute: typeof AuthRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/baixa-pagamento': {
       id: '/baixa-pagamento'
       path: '/baixa-pagamento'
@@ -459,13 +361,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ComissoesRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/conciliacao': {
-      id: '/conciliacao'
-      path: '/conciliacao'
-      fullPath: '/conciliacao'
-      preLoaderRoute: typeof ConciliacaoRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/configuracoes': {
       id: '/configuracoes'
       path: '/configuracoes'
@@ -492,13 +387,6 @@ declare module '@tanstack/react-router' {
       path: '/contas-bancarias'
       fullPath: '/contas-bancarias'
       preLoaderRoute: typeof ContasBancariasRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/exportacoes': {
-      id: '/exportacoes'
-      path: '/exportacoes'
-      fullPath: '/exportacoes'
-      preLoaderRoute: typeof ExportacoesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/formas-pagamento': {
@@ -550,13 +438,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RateioRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/relatorios': {
-      id: '/relatorios'
-      path: '/relatorios'
-      fullPath: '/relatorios'
-      preLoaderRoute: typeof RelatoriosRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/usuarios': {
       id: '/usuarios'
       path: '/usuarios'
@@ -564,32 +445,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof UsuariosRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/instanciacao/': {
-      id: '/instanciacao/'
-      path: '/instanciacao'
-      fullPath: '/instanciacao/'
-      preLoaderRoute: typeof InstanciacaoIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/instanciacao/resumo': {
       id: '/instanciacao/resumo'
       path: '/instanciacao/resumo'
       fullPath: '/instanciacao/resumo'
       preLoaderRoute: typeof InstanciacaoResumoRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/integracoes/': {
-      id: '/integracoes/'
-      path: '/integracoes'
-      fullPath: '/integracoes/'
-      preLoaderRoute: typeof IntegracoesIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/integracoes/adaptador': {
-      id: '/integracoes/adaptador'
-      path: '/integracoes/adaptador'
-      fullPath: '/integracoes/adaptador'
-      preLoaderRoute: typeof IntegracoesAdaptadorRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -600,17 +460,14 @@ const rootRouteChildren: RootRouteChildren = {
   AlcadasRoute: AlcadasRoute,
   AprovacoesRoute: AprovacoesRoute,
   AuditoriaRoute: AuditoriaRoute,
-  AuthRoute: AuthRoute,
   BaixaPagamentoRoute: BaixaPagamentoRoute,
   CategoriasDespesaRoute: CategoriasDespesaRoute,
   CentrosDeCustoRoute: CentrosDeCustoRoute,
   ComissoesRoute: ComissoesRoute,
-  ConciliacaoRoute: ConciliacaoRoute,
   ConfiguracoesRoute: ConfiguracoesRoute,
   ContasAPagarRoute: ContasAPagarRoute,
   ContasAReceberRoute: ContasAReceberRoute,
   ContasBancariasRoute: ContasBancariasRoute,
-  ExportacoesRoute: ExportacoesRoute,
   FormasPagamentoRoute: FormasPagamentoRoute,
   ImportarExtratoRoute: ImportarExtratoRoute,
   NotificacoesRoute: NotificacoesRoute,
@@ -618,12 +475,8 @@ const rootRouteChildren: RootRouteChildren = {
   ParceirosRoute: ParceirosRoute,
   PlanoDeContasRoute: PlanoDeContasRoute,
   RateioRoute: RateioRoute,
-  RelatoriosRoute: RelatoriosRoute,
   UsuariosRoute: UsuariosRoute,
   InstanciacaoResumoRoute: InstanciacaoResumoRoute,
-  IntegracoesAdaptadorRoute: IntegracoesAdaptadorRoute,
-  InstanciacaoIndexRoute: InstanciacaoIndexRoute,
-  IntegracoesIndexRoute: IntegracoesIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -5,7 +5,6 @@ import { toast } from "sonner";
 import {
   Ban,
   CheckCircle2,
-  Download,
   EyeOff,
   Filter,
   Pencil,
@@ -404,16 +403,9 @@ function ContasAPagar() {
           leitura ? (
             <StatusBadge tone="info">Somente leitura</StatusBadge>
           ) : (
-            <>
-              <Button asChild variant="outline" className="gap-1.5">
-                <Link to="/exportacoes">
-                  <Download className="size-4" /> Exportar
-                </Link>
-              </Button>
-              <Button onClick={abrirNovo} className="gap-1.5">
-                <Plus className="size-4" /> Nova conta
-              </Button>
-            </>
+            <Button onClick={abrirNovo} className="gap-1.5">
+              <Plus className="size-4" /> Nova conta
+            </Button>
           )
         }
       />

@@ -61,8 +61,8 @@ function Resumo() {
       nome: "Regime tributário",
       tipo: "Parâmetro",
       valor: config.regime,
-      efeito: "Define as contas tributárias sugeridas no plano de contas e a estrutura da DRE.",
-      telas: "/onboarding, /plano-de-contas, /relatorios",
+      efeito: "Define as contas tributárias somadas ao plano de contas base.",
+      telas: "/onboarding, /plano-de-contas",
     },
     {
       pv: "PV2",
@@ -70,7 +70,7 @@ function Resumo() {
       tipo: "Parâmetro",
       valor: config.adaptador,
       efeito: "Define a extensão aceita e o parser usado na leitura do arquivo bancário.",
-      telas: "/importar-extrato, /integracoes/adaptador",
+      telas: "/importar-extrato, /configuracoes",
     },
     {
       pv: "PV3",
@@ -88,9 +88,9 @@ function Resumo() {
       tipo: "Feature",
       valor: has("portal_contador") ? "Ativa" : "Inativa",
       efeito: has("portal_contador")
-        ? "Perfil Contador externo disponível no seletor e layout de exportação contábil habilitado."
+        ? "Perfil Contador externo (somente leitura) disponível no seletor."
         : "Perfil Contador externo oculto no seletor de perfil.",
-      telas: "/relatorios, /exportacoes, seletor de perfil",
+      telas: "seletor de perfil",
     },
     {
       pv: "PV5",
@@ -108,9 +108,9 @@ function Resumo() {
       tipo: "Feature",
       valor: has("conciliacao") ? "Ativa" : "Inativa",
       efeito: has("conciliacao")
-        ? "Importação de extrato e conciliação disponíveis; relatório Extrato conciliado habilitado."
+        ? "Importação de extrato disponível."
         : "Grupo Conciliação oculto no menu; adaptador registrado mas inativo.",
-      telas: "/importar-extrato, /conciliacao, /relatorios",
+      telas: "/importar-extrato",
     },
     {
       pv: "PV7",
@@ -120,14 +120,13 @@ function Resumo() {
         [
           has("centro_custo") ? "centro_custo" : null,
           has("multiempresa") ? "multiempresa" : null,
-          has("api_publica") ? "api_publica" : null,
           has("mod_comissoes") ? "mod_comissoes" : null,
         ]
           .filter(Boolean)
           .join(", ") || "nenhuma",
       efeito:
-        "Centro de custo adiciona coluna, filtro e rateio; multiempresa habilita o seletor e a visão consolidada; API pública abre a central de integrações; mod_comissoes registra o módulo exclusivo.",
-      telas: "/centros-de-custo, /rateio, /integracoes, /comissoes, dashboard",
+        "Centro de custo adiciona coluna, filtro e rateio; multiempresa habilita o seletor e a visão consolidada; mod_comissoes registra o módulo exclusivo.",
+      telas: "/centros-de-custo, /rateio, /comissoes, dashboard",
     },
   ];
 

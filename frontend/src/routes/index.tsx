@@ -108,16 +108,11 @@ function Dashboard() {
         ]}
         acoes={
           leitura ? null : (
-            <>
-              <Button asChild className="gap-1.5">
-                <Link to="/contas-a-pagar">
-                  <Plus className="size-4" /> Novo lançamento
-                </Link>
-              </Button>
-              <Button asChild variant="outline">
-                <Link to="/relatorios">Exportar</Link>
-              </Button>
-            </>
+            <Button asChild className="gap-1.5">
+              <Link to="/contas-a-pagar">
+                <Plus className="size-4" /> Novo lançamento
+              </Link>
+            </Button>
           )
         }
         selo={

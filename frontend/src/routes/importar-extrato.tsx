@@ -169,7 +169,7 @@ function ImportarExtrato() {
             </Button>
           ) : (
             <Button asChild variant="outline" className="gap-1.5">
-              <Link to="/integracoes/adaptador">
+              <Link to="/configuracoes">
                 <Sliders className="size-4" /> Trocar adaptador
               </Link>
             </Button>
