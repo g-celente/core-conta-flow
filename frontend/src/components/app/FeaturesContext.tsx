@@ -13,7 +13,6 @@ export type Feature =
   | "centro_custo"
   | "multiempresa"
   | "portal_contador"
-  | "api_publica"
   | "notificacoes_push"
   | "mod_comissoes";
 
@@ -65,12 +64,6 @@ export const TODAS_FEATURES: { id: Feature; nome: string; descricao: string; pv:
     pv: "PV4",
   },
   {
-    id: "api_publica",
-    nome: "API Pública",
-    descricao: "Habilita a central de integrações com tokens de acesso REST e ambiente de sandbox.",
-    pv: "PV7",
-  },
-  {
     id: "notificacoes_push",
     nome: "Notificações Push",
     descricao: "Envia alertas de vencimento e aprovação por push além de e-mail e in-app.",
@@ -91,7 +84,6 @@ const nenhuma: Record<Feature, boolean> = {
   centro_custo: false,
   multiempresa: false,
   portal_contador: false,
-  api_publica: false,
   notificacoes_push: false,
   mod_comissoes: false,
 };
@@ -143,7 +135,6 @@ const configIniciais: Record<string, ConfigTenant> = {
       centro_custo: true,
       notificacoes_push: true,
       multiempresa: true,
-      api_publica: true,
     },
     adaptador: "CNAB400",
     regime: "Lucro Real",

@@ -1,8 +1,7 @@
 # FinCore ERP — protótipo de linha de produtos de software
 
 FinCore é um **ERP financeiro para PMEs brasileiras**: contas a pagar e a receber,
-conciliação bancária, aprovação por alçada, centros de custo, plano de contas e
-relatórios gerenciais.
+importação de extrato, aprovação por alçada, centros de custo e plano de contas.
 
 Este repositório é um **protótipo navegável de linha de produtos**: o mesmo núcleo
 é instanciado para quatro clientes com escopos diferentes. As telas, as colunas de
@@ -35,30 +34,26 @@ npm run lint         # eslint
 
 ---
 
-## Acessos mock
+## Perfis de acesso
 
-A senha é a mesma para todos. **O e-mail é o que define o perfil de acesso**
-carregado na sessão — a tela `/auth` reconhece o e-mail e ativa o perfil
-correspondente. O MFA é opcional (qualquer código de 6 dígitos é aceito).
+Não há tela de login: o perfil ativo é trocado a qualquer momento pelo **avatar no topo
+direito**.
 
-| Usuário        | E-mail                 | Senha        | Perfil              |
-| -------------- | ---------------------- | ------------ | ------------------- |
-| Marina Duarte  | `marina@fincore.app`   | `fincore123` | Operador financeiro |
-| Roberto Tanaka | `roberto@fincore.app`  | `fincore123` | Aprovador           |
-| Cláudia Bastos | `claudia@contabil.app` | `fincore123` | Contador externo    |
-| Paula Nunes    | `paula@fincore.app`    | `fincore123` | Implantador         |
-
-O perfil também pode ser trocado a qualquer momento pelo **avatar no topo direito**,
-sem passar pelo login.
+| Usuário        | Perfil              |
+| -------------- | ------------------- |
+| Marina Duarte  | Operador financeiro |
+| Roberto Tanaka | Aprovador           |
+| Cláudia Bastos | Contador externo    |
+| Paula Nunes    | Implantador         |
 
 ### O que cada perfil vê
 
-| Perfil                  | Escopo                                                                                                                             | Escrita                                                                             |
-| ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
-| **Operador financeiro** | Todas as telas contratadas                                                                                                         | Sim                                                                                 |
-| **Aprovador**           | Dashboard, fila de aprovação, alçadas, relatórios, auditoria                                                                       | Sim (aprovar/devolver)                                                              |
-| **Contador externo**    | Dashboard, listagens, plano de contas, conciliação, importação, relatórios, exportações, auditoria                                 | **Não** — banner "Acesso somente leitura" e botões de criar/editar/inativar ocultos |
-| **Implantador**         | Administração: features do tenant, instanciação, ficha, auditoria, integrações, notificações, alçadas, centros de custo, cadastros | Sim                                                                                 |
+| Perfil                  | Escopo                                                                                                                  | Escrita                                                                             |
+| ----------------------- | ----------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| **Operador financeiro** | Todas as telas contratadas                                                                                              | Sim                                                                                 |
+| **Aprovador**           | Dashboard, fila de aprovação, alçadas, auditoria                                                                        | Sim (aprovar/devolver)                                                              |
+| **Contador externo**    | Dashboard, listagens, plano de contas, importação de extrato, auditoria                                                 | **Não** — banner "Acesso somente leitura" e botões de criar/editar/inativar ocultos |
+| **Implantador**         | Administração: features do tenant, ficha de configuração, auditoria, notificações, alçadas, centros de custo, cadastros | Sim                                                                                 |
 
 > O perfil **Contador externo** só aparece no seletor quando a feature
 > `portal_contador` está ativa no tenant (PV4).
@@ -70,12 +65,12 @@ sem passar pelo login.
 Cada tenant nasce com um conjunto próprio de _features_. Trocar de empresa no topo
 troca todo o conjunto — e a interface reage na hora.
 
-| Empresa                           | CNPJ               | Perfil de produto | Features ativas                                                                             | Adaptador | Regime           |
-| --------------------------------- | ------------------ | ----------------- | ------------------------------------------------------------------------------------------- | --------- | ---------------- |
-| **Padaria Estrela do Sul Ltda**   | 12.345.678/0001-90 | **Essencial**     | _nenhuma_ (só o núcleo)                                                                     | OFX       | Simples Nacional |
-| **TransLog Cargas ME**            | 23.456.789/0001-12 | **Profissional**  | `conciliacao`, `alcada`, `centro_custo`, `notificacoes_push`, **`mod_comissoes`**           | CNAB 240  | Lucro Presumido  |
-| **Clínica Vida Plena S/S**        | 34.567.890/0001-45 | **Contábil**      | `conciliacao`, `alcada`, `centro_custo`, `notificacoes_push`, `portal_contador`             | OFX       | Simples Nacional |
-| **Metalúrgica Bandeirantes Ltda** | 45.678.901/0001-78 | **Corporativo**   | `conciliacao`, `alcada`, `centro_custo`, `notificacoes_push`, `multiempresa`, `api_publica` | CNAB 400  | Lucro Real       |
+| Empresa                           | CNPJ               | Perfil de produto | Features ativas                                                                   | Adaptador | Regime           |
+| --------------------------------- | ------------------ | ----------------- | --------------------------------------------------------------------------------- | --------- | ---------------- |
+| **Padaria Estrela do Sul Ltda**   | 12.345.678/0001-90 | **Essencial**     | _nenhuma_ (só o núcleo)                                                           | OFX       | Simples Nacional |
+| **TransLog Cargas ME**            | 23.456.789/0001-12 | **Profissional**  | `conciliacao`, `alcada`, `centro_custo`, `notificacoes_push`, **`mod_comissoes`** | CNAB 240  | Lucro Presumido  |
+| **Clínica Vida Plena S/S**        | 34.567.890/0001-45 | **Contábil**      | `conciliacao`, `alcada`, `centro_custo`, `notificacoes_push`, `portal_contador`   | OFX       | Simples Nacional |
+| **Metalúrgica Bandeirantes Ltda** | 45.678.901/0001-78 | **Corporativo**   | `conciliacao`, `alcada`, `centro_custo`, `notificacoes_push`, `multiempresa`      | CNAB 400  | Lucro Real       |
 
 **Nota sobre o seletor de empresas.** Com `multiempresa` ativa (Metalúrgica) ele é o
 controle de produto: alterna entre os CNPJs do grupo e abre a **visão consolidada**.
@@ -90,26 +85,25 @@ tracejada + selo `demo`), para não se confundir com a feature.
 
 | Feature             | PV      | O que muda quando está ativa                                                                                                                      |
 | ------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `conciliacao`       | PV2/PV6 | Grupo "Conciliação" no menu (importar extrato + conciliação) e o relatório _Extrato conciliado_                                                   |
+| `conciliacao`       | PV2/PV6 | Grupo "Conciliação" no menu, com a importação de extrato                                                                                          |
 | `alcada`            | PV3     | Grupo "Aprovações"; títulos acima de R$ 10.000 vão à fila. Sem ela, salvam direto em aberto                                                       |
 | `centro_custo`      | PV7     | Grupo "Custos", coluna e filtro _Centro de custo_ em contas a pagar, bloco de rateio no formulário, card de inadimplência por centro no dashboard |
 | `multiempresa`      | PV7     | Seletor de empresas do produto e visão consolidada do grupo                                                                                       |
-| `portal_contador`   | PV4     | Perfil _Contador externo_ no seletor e layout de exportação contábil                                                                              |
-| `api_publica`       | PV7     | Item "Central de integrações" com tokens REST e sandbox                                                                                           |
+| `portal_contador`   | PV4     | Perfil _Contador externo_ (somente leitura) no seletor                                                                                            |
 | `notificacoes_push` | PV5     | Canal _Push_ nas notificações e cobrança por push em contas a receber                                                                             |
 | `mod_comissoes`     | PV7     | Item "Comissões" — **módulo exclusivo de um único cliente**                                                                                       |
 
 ### Pontos de variação (PV1–PV7)
 
-| PV      | Ponto de variação    | Tipo      | Onde é configurado                         | Onde tem efeito                                                 |
-| ------- | -------------------- | --------- | ------------------------------------------ | --------------------------------------------------------------- |
-| **PV1** | Regime tributário    | Parâmetro | `/configuracoes`, `/onboarding`            | Contas tributárias do plano de contas, estrutura da DRE         |
-| **PV2** | Adaptador bancário   | Parâmetro | `/configuracoes`, `/integracoes/adaptador` | Extensão aceita e parser em `/importar-extrato`                 |
-| **PV3** | Aprovação por alçada | Feature   | `/configuracoes`                           | `/aprovacoes`, `/alcadas`, salvamento em `/contas-a-pagar`      |
-| **PV4** | Portal do contador   | Feature   | `/configuracoes`                           | Seletor de perfil, layout de exportação                         |
-| **PV5** | Notificações         | Feature   | `/configuracoes`                           | `/notificacoes`, cobrança em `/contas-a-receber`                |
-| **PV6** | Conciliação bancária | Feature   | `/configuracoes`                           | `/importar-extrato`, `/conciliacao`, relatórios                 |
-| **PV7** | Escala e extensões   | Composto  | `/configuracoes`                           | Centro de custo, multiempresa, API pública, módulo de comissões |
+| PV      | Ponto de variação    | Tipo      | Onde é configurado              | Onde tem efeito                                            |
+| ------- | -------------------- | --------- | ------------------------------- | ---------------------------------------------------------- |
+| **PV1** | Regime tributário    | Parâmetro | `/configuracoes`, `/onboarding` | Contas tributárias somadas ao plano de contas              |
+| **PV2** | Adaptador bancário   | Parâmetro | `/configuracoes`                | Extensão aceita e parser em `/importar-extrato`            |
+| **PV3** | Aprovação por alçada | Feature   | `/configuracoes`                | `/aprovacoes`, `/alcadas`, salvamento em `/contas-a-pagar` |
+| **PV4** | Portal do contador   | Feature   | `/configuracoes`                | Seletor de perfil                                          |
+| **PV5** | Notificações         | Feature   | `/configuracoes`                | `/notificacoes`, cobrança em `/contas-a-receber`           |
+| **PV6** | Conciliação bancária | Feature   | `/configuracoes`                | `/importar-extrato`                                        |
+| **PV7** | Escala e extensões   | Composto  | `/configuracoes`                | Centro de custo, multiempresa, módulo de comissões         |
 
 A ficha consolidada, gerada em tempo real a partir do `FeaturesContext`, está em
 **`/instanciacao/resumo`**.
@@ -118,39 +112,32 @@ A ficha consolidada, gerada em tempo real a partir do `FeaturesContext`, está e
 
 ## Mapa de rotas
 
-### Telas de negócio (15)
+### Telas de negócio (12)
 
 | Rota                | Tela                                                     | Varia por                                                                                                                |
 | ------------------- | -------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
 | `/`                 | Dashboard financeiro                                     | `multiempresa` (consolidado) · `centro_custo` (inadimplência por centro) · `alcada` (KPI de aprovações) · perfil (ações) |
-| `/auth`             | Login com MFA opcional e recuperação de senha            | — (define o perfil pelo e-mail)                                                                                          |
 | `/onboarding`       | Assistente: empresa → plano de contas por regime → banco | **PV1** (plano sugerido) · **PV2** (adaptador)                                                                           |
 | `/contas-a-pagar`   | Listagem + CRUD completo, filtros removíveis, totais     | `centro_custo` (coluna, filtro, rateio) · `alcada` (fila) · perfil                                                       |
 | `/baixa-pagamento`  | Baixa com juros, desconto e conta de saída               | `centro_custo` (rateio no resumo) · perfil (indisponível em leitura)                                                     |
 | `/contas-a-receber` | CRUD de títulos e aging de inadimplência em 5 faixas     | `notificacoes_push` (cobrança) · perfil                                                                                  |
 | `/parceiros`        | CRUD completo de clientes e fornecedores                 | perfil · regra de títulos em aberto                                                                                      |
 | `/plano-de-contas`  | Árvore sintética/analítica com CRUD                      | **PV1** (contas do regime) · perfil                                                                                      |
-| `/relatorios`       | Catálogo, fluxo projetado, DRE gerencial, exportação     | `centro_custo`, `multiempresa`, `conciliacao`, `portal_contador`                                                         |
 | `/importar-extrato` | Upload OFX/CNAB com prévia e validação                   | **PV2** (extensão e parser) · `conciliacao`                                                                              |
-| `/conciliacao`      | Pares extrato × sistema com sugestões                    | `conciliacao` · **PV2** · perfil                                                                                         |
 | `/aprovacoes`       | Fila de aprovação com fluxo e devolução                  | `alcada` · `centro_custo` (detalhe) · perfil                                                                             |
 | `/centros-de-custo` | Cadastro com rateio padrão e valor rateado               | `centro_custo` · perfil                                                                                                  |
 | `/rateio`           | Rateio de um título validando 100%                       | `centro_custo` · perfil                                                                                                  |
 | `/comissoes`        | **Módulo exclusivo** — comissões sobre recebimentos      | `mod_comissoes` (só TransLog Cargas)                                                                                     |
 
-### Telas administrativas (9)
+### Telas administrativas (5)
 
-| Rota                     | Tela                                                                       | Varia por                                                                 |
-| ------------------------ | -------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
-| `/configuracoes`         | **Tela 13** — features do tenant, adaptador, regime, matriz Telas × Perfis | tenant selecionado                                                        |
-| `/alcadas`               | Limites de aprovação por perfil e substitutos                              | `alcada` · perfil                                                         |
-| `/exportacoes`           | Pacotes de exportação                                                      | `conciliacao`, `centro_custo`, `portal_contador`, `multiempresa`          |
-| `/notificacoes`          | Canais por evento e antecedência                                           | **PV5** (coluna Push) · `alcada`, `conciliacao`, `centro_custo` (eventos) |
-| `/integracoes`           | Central de integrações: tokens e endpoints                                 | `api_publica` · `centro_custo` (escopo de rateio)                         |
-| `/integracoes/adaptador` | Escolha do adaptador bancário                                              | **PV2** · `conciliacao`                                                   |
-| `/instanciacao`          | Assistente de instanciação em 7 etapas                                     | features do tenant (etapas 1 a 6)                                         |
-| `/instanciacao/resumo`   | Ficha de configuração PV1–PV7                                              | todo o `FeaturesContext`                                                  |
-| `/auditoria`             | Trilha de auditoria da sessão                                              | `mod_comissoes` (categoria)                                               |
+| Rota                   | Tela                                                                       | Varia por                                                                 |
+| ---------------------- | -------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| `/configuracoes`       | **Tela 13** — features do tenant, adaptador, regime, matriz Telas × Perfis | tenant selecionado                                                        |
+| `/alcadas`             | Limites de aprovação por perfil e substitutos                              | `alcada` · perfil                                                         |
+| `/notificacoes`        | Canais por evento e antecedência                                           | **PV5** (coluna Push) · `alcada`, `conciliacao`, `centro_custo` (eventos) |
+| `/instanciacao/resumo` | Ficha de configuração PV1–PV7                                              | todo o `FeaturesContext`                                                  |
+| `/auditoria`           | Trilha de auditoria da sessão                                              | `mod_comissoes` (categoria)                                               |
 
 ### Cadastros (4)
 
@@ -164,7 +151,7 @@ gravando no Postgres pelo backend.
 | `/usuarios`           | Usuários, responsáveis e titulares         | perfil (somente leitura sem ações) |
 | `/formas-pagamento`   | Formas de pagamento usadas na baixa        | perfil (somente leitura sem ações) |
 
-Total: **28 rotas**, todas alcançáveis pelo menu. Nenhum item de menu sem rota e
+Total: **21 rotas**, todas alcançáveis pelo menu. Nenhum item de menu sem rota e
 nenhum `href="#"`.
 
 ---
@@ -252,7 +239,7 @@ de produto e seletor de perfil de acesso.
   contas bancárias, centros de custo, categorias de despesa, plano de contas e alçadas) são
   gravados no Postgres pelo backend. Parceiros e contas a pagar passam pelo `DadosContext`; os
   demais usam `useCadastro` direto. O restante do estado (tenant ativo, features, trilha de
-  auditoria, indicadores do dashboard e relatórios) vive em memória e volta ao padrão ao
+  auditoria e indicadores do dashboard) vive em memória e volta ao padrão ao
   recarregar a página.
-- Não há autenticação real. O login apenas reconhece o e-mail e define o perfil da sessão.
+- Não há autenticação: o perfil da sessão é escolhido no avatar do topo.
 - Datas, saldos e recebimentos são fixos (competência junho/2026).

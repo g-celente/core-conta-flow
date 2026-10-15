@@ -111,25 +111,7 @@ const MATRIZ: { tela: string; graus: Record<PerfilProduto, Grau> }[] = [
     graus: { Essencial: "Comum", Profissional: "Comum", Corporativo: "Comum", Contábil: "Ausente" },
   },
   {
-    tela: "Relatórios",
-    graus: {
-      Essencial: "Comum",
-      Profissional: "Comum+",
-      Corporativo: "Comum+",
-      Contábil: "Comum+",
-    },
-  },
-  {
     tela: "Importar extrato",
-    graus: {
-      Essencial: "Ausente",
-      Profissional: "Comum",
-      Corporativo: "Comum",
-      Contábil: "Somente leitura",
-    },
-  },
-  {
-    tela: "Conciliação bancária",
     graus: {
       Essencial: "Ausente",
       Profissional: "Comum",
@@ -174,25 +156,12 @@ const MATRIZ: { tela: string; graus: Record<PerfilProduto, Grau> }[] = [
     },
   },
   {
-    tela: "Exportar dados",
-    graus: { Essencial: "Comum", Profissional: "Comum", Corporativo: "Comum+", Contábil: "Comum+" },
-  },
-  {
     tela: "Notificações",
     graus: {
       Essencial: "Comum",
       Profissional: "Comum+",
       Corporativo: "Comum+",
       Contábil: "Opcional",
-    },
-  },
-  {
-    tela: "Central de integrações",
-    graus: {
-      Essencial: "Ausente",
-      Profissional: "Ausente",
-      Corporativo: "Comum",
-      Contábil: "Ausente",
     },
   },
   {
@@ -203,10 +172,6 @@ const MATRIZ: { tela: string; graus: Record<PerfilProduto, Grau> }[] = [
       Corporativo: "Ausente",
       Contábil: "Ausente",
     },
-  },
-  {
-    tela: "Assistente de instanciação",
-    graus: { Essencial: "Comum", Profissional: "Comum", Corporativo: "Comum", Contábil: "Comum" },
   },
 ];
 
@@ -263,8 +228,7 @@ function Configuracoes() {
   const efeitos = [
     {
       on: has("conciliacao"),
-      texto:
-        "Grupo “Conciliação” no menu (Importar extrato + Conciliação bancária) e o relatório Extrato conciliado",
+      texto: "Grupo “Conciliação” no menu, com a importação de extrato",
     },
     {
       on: has("alcada"),
@@ -281,11 +245,7 @@ function Configuracoes() {
     },
     {
       on: has("portal_contador"),
-      texto: "Perfil “Contador externo” no seletor de perfil e o layout de exportação contábil",
-    },
-    {
-      on: has("api_publica"),
-      texto: "Item “Central de integrações” no menu com tokens de API e sandbox",
+      texto: "Perfil “Contador externo” (somente leitura) no seletor de perfil",
     },
     {
       on: has("notificacoes_push"),
@@ -373,9 +333,9 @@ function Configuracoes() {
               <h4 className="text-sm font-semibold">Personalização Dinâmica de Interface</h4>
               <p className="mt-1 text-sm text-muted-foreground">
                 Ao desligar uma funcionalidade abaixo, a interface do FinCore ERP reage
-                instantaneamente ocultando os menus laterais, colunas de tabela, relatórios
-                específicos e blocos de formulário relacionados. Isso mantém sua área de trabalho
-                limpa e focada apenas nas operações que sua empresa utiliza.
+                instantaneamente ocultando os menus laterais, colunas de tabela e blocos de
+                formulário relacionados. Isso mantém sua área de trabalho limpa e focada apenas nas
+                operações que sua empresa utiliza.
               </p>
             </div>
           </div>
@@ -505,7 +465,7 @@ function Configuracoes() {
                 </CardHeader>
                 <CardContent className="space-y-2">
                   <p className="text-sm text-muted-foreground">
-                    Define as contas tributárias sugeridas no plano de contas e a estrutura da DRE.
+                    Define as contas tributárias somadas ao plano de contas base.
                   </p>
                   {REGIMES.map((r) => {
                     const ativo = config.regime === r;

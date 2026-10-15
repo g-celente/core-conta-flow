@@ -54,7 +54,7 @@ flowchart LR
 
 - **Frontend** (`frontend/`): TanStack Start + React. Lê e grava os 10 cadastros pela API e
   chama a API sempre que uma tela precisa de uma regra dos padrões; a configuração dos tenants
-  (features, adaptador, regime) e os dados de dashboard e relatórios continuam em memória.
+  (features, adaptador, regime) e os indicadores do dashboard continuam em memória.
 - **Backend** (`backend/`): Spring Boot 4.1 com Java 21. Os fluxos dos padrões não guardam
   estado: cada requisição traz o que precisa (features do tenant, regime, adaptador, valores do
   formulário). Em cada

@@ -1,7 +1,6 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { useState, type ComponentType, type ReactNode } from "react";
 import {
-  ArrowLeftRight,
   Bell,
   BellRing,
   Building2,
@@ -9,21 +8,16 @@ import {
   ChevronDown,
   CreditCard,
   Eye,
-  FileDown,
-  FileSpreadsheet,
   Gauge,
   Landmark,
   Layers,
   LayoutDashboard,
-  LogOut,
   Menu,
-  PlugZap,
   Receipt,
   Rocket,
   ScrollText,
   Settings,
   ShieldCheck,
-  Sliders,
   Split,
   Tags,
   Upload,
@@ -73,16 +67,12 @@ const GRUPOS: GrupoMenu[] = [
       { to: "/contas-a-pagar", label: "Contas a pagar", icon: Wallet },
       { to: "/parceiros", label: "Clientes e fornecedores", icon: Users },
       { to: "/plano-de-contas", label: "Plano de contas", icon: Workflow },
-      { to: "/relatorios", label: "Relatórios", icon: FileSpreadsheet },
     ],
   },
   {
     titulo: "Conciliação",
     requer: "conciliacao",
-    itens: [
-      { to: "/importar-extrato", label: "Importar extrato", icon: Upload },
-      { to: "/conciliacao", label: "Conciliação bancária", icon: ArrowLeftRight },
-    ],
+    itens: [{ to: "/importar-extrato", label: "Importar extrato", icon: Upload }],
   },
   {
     titulo: "Aprovações",
@@ -115,23 +105,12 @@ const GRUPOS: GrupoMenu[] = [
   },
   {
     titulo: "Configurações",
-    itens: [
-      { to: "/exportacoes", label: "Exportar dados", icon: FileDown },
-      { to: "/notificacoes", label: "Notificações", icon: BellRing },
-      { to: "/integracoes", label: "Central de integrações", icon: PlugZap, requer: "api_publica" },
-      {
-        to: "/integracoes/adaptador",
-        label: "Adaptador bancário",
-        icon: Sliders,
-        requer: "conciliacao",
-      },
-    ],
+    itens: [{ to: "/notificacoes", label: "Notificações", icon: BellRing }],
   },
   {
     titulo: "Administração",
     itens: [
       { to: "/configuracoes", label: "Features do tenant", icon: Settings },
-      { to: "/instanciacao", label: "Assistente de instanciação", icon: Wand2 },
       { to: "/instanciacao/resumo", label: "Ficha de configuração", icon: ScrollText },
       { to: "/auditoria", label: "Trilha de auditoria", icon: ScrollText },
     ],
@@ -192,12 +171,6 @@ function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
             <Link to="/onboarding" onClick={onNavigate} className={linkCls}>
               <Rocket className="size-4 shrink-0 opacity-80" />
               <span className="truncate">Onboarding</span>
-            </Link>
-          </li>
-          <li>
-            <Link to="/auth" onClick={onNavigate} className={linkCls}>
-              <LogOut className="size-4 shrink-0 opacity-80" />
-              <span className="truncate">Sair</span>
             </Link>
           </li>
         </ul>
@@ -333,8 +306,8 @@ export function BannerSomenteLeitura() {
       <div>
         <p className="text-sm font-semibold text-foreground">Acesso somente leitura</p>
         <p className="mt-0.5 text-xs text-muted-foreground">
-          O perfil <strong>{perfil.nome}</strong> ({perfil.usuario}) visualiza listagens,
-          conciliação e exportações. Ações de criar, editar e inativar ficam ocultas.
+          O perfil <strong>{perfil.nome}</strong> ({perfil.usuario}) visualiza listagens e a
+          importação de extrato. Ações de criar, editar e inativar ficam ocultas.
         </p>
       </div>
     </div>
@@ -347,8 +320,8 @@ export function AppShell({ children }: { children: ReactNode }) {
   const { perfil } = usePerfil();
   const { config } = useFeatures();
 
-  // Telas de tela cheia, sem o shell administrativo.
-  if (pathname === "/auth" || pathname === "/onboarding") {
+  // Tela cheia, sem o shell administrativo.
+  if (pathname === "/onboarding") {
     return <>{children}</>;
   }
 
